@@ -1,0 +1,19 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Node
+node_modules/
+.wrangler/
+
+# Large Bio Data
+.depmap_cache/
+mcps/connectors/.depmap_cache/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
