@@ -4,14 +4,14 @@ MCP Runtime — calls MCP servers on behalf of the collector agent.
 Internal sources  (DEPMAP, LITERATURE)  → our own mcp_server/* modules (stdio)
 External sources  (OPENTARGETS, PHAROS)  → external MCP servers called DIRECTLY:
   • OPENTARGETS : external_mcps/open-targets-platform-mcp  (stdio, otp-mcp binary)
-  • PHAROS      : external_mcps/pharos-mcp-server          (SSE on :8787 via wrangler dev)
+  • PHAROS      : public PHAROS GraphQL API                (https://pharos-api.ncats.io/graphql)
 """
 from __future__ import annotations
 
 import json
 import os
-import re
 import time
+import asyncio
 from typing import Any
 
 from mcp import ClientSession
@@ -22,7 +22,6 @@ from .schema import (
     ErrorCode,
     ErrorRecord,
     EvidenceRecord,
-    Provenance,
     SourceName,
     SourceStatus,
     StatusName,
@@ -35,11 +34,13 @@ from .schema import (
 _INTERNAL_SOURCE_MAP: dict[SourceName, tuple[str, str]] = {
     # 2 MCPs we have built (Internal Connectors)
     SourceName.DEPMAP:      ("mcps.depmap_mcp",     "depmap_collect_target_evidence"),
+    SourceName.PHAROS:      ("mcps.pharos_mcp",     "pharos_collect_target_evidence"),
+    SourceName.OPENTARGETS: ("mcps.opentargets_mcp", "opentargets_collect_target_evidence"),
     SourceName.LITERATURE:  ("mcps.literature_mcp", "literature_collect_target_evidence"),
 
-    # 2 External MCPs (using our wrapper servers that proxy the official/community ones)
-    SourceName.OPENTARGETS: ("mcps.ext_opentargets_mcp", "ext_opentargets_collect_target_evidence"),
-    SourceName.PHAROS:      ("mcps.ext_pharos_mcp",      "ext_pharos_collect_target_evidence"),
+    # External MCP wrappers
+    SourceName.EXT_OPENTARGETS: ("mcps.ext_opentargets_mcp", "ext_opentargets_collect_target_evidence"),
+    SourceName.EXT_PHAROS:  ("mcps.ext_pharos_mcp",      "ext_pharos_collect_target_evidence"),
 }
 
 # External MCP paths (used for binary/SSE if called directly, but preferred via the wrappers above)
@@ -50,6 +51,9 @@ _PHAROS_SSE    = os.getenv("EXT_PHAROS_SSE_URL", "http://127.0.0.1:8787/sse")
 
 # For graph.py dynamic source discovery
 _SOURCE_TO_MODULE_TOOL = _INTERNAL_SOURCE_MAP
+MAX_RETRY_ATTEMPTS = 3
+BASE_RETRY_DELAY_SECONDS = 0.1
+MAX_RETRY_DELAY_SECONDS = 0.4
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -94,6 +98,34 @@ def _error_code_from_message(message: str) -> ErrorCode:
     if "validation" in lo:
         return ErrorCode.VALIDATION_ERROR
     return ErrorCode.UPSTREAM_ERROR
+
+
+def _is_retryable_error_code(code: ErrorCode) -> bool:
+    return code in {
+        ErrorCode.TIMEOUT,
+        ErrorCode.RATE_LIMIT,
+        ErrorCode.UPSTREAM_ERROR,
+    }
+
+
+def _retry_delay_seconds(attempt_index: int) -> float:
+    return min(BASE_RETRY_DELAY_SECONDS * (2 ** attempt_index), MAX_RETRY_DELAY_SECONDS)
+
+
+def _with_retry_telemetry(
+    payload: dict[str, Any],
+    request: CollectorRequest,
+    source: SourceName,
+    retry_events: list[dict[str, Any]],
+    attempt_count: int,
+) -> dict[str, Any]:
+    enriched = dict(payload)
+    enriched.setdefault("run_id", request.run_id)
+    enriched.setdefault("source", source.value)
+    enriched.setdefault("query", request.model_dump(mode="json"))
+    enriched["retry_attempts"] = attempt_count
+    enriched["retry_telemetry"] = retry_events
+    return enriched
 
 
 def _extract_payload(call_result: Any) -> dict[str, Any]:
@@ -172,11 +204,11 @@ async def collect_source_via_mcp(
     return items, status, errors
 
 
-async def collect_source_via_mcp_with_raw(
+async def _execute_mcp_call_once(
     source: SourceName,
     request: CollectorRequest,
 ) -> tuple[list[EvidenceRecord], SourceStatus, list[ErrorRecord], dict[str, Any]]:
-    """Route to designated MCP module based on source."""
+    """Execute a single MCP call attempt for a source."""
 
     if source not in _INTERNAL_SOURCE_MAP:
         msg = f"Unknown source: {source.value}"
@@ -220,7 +252,7 @@ async def collect_source_via_mcp_with_raw(
                 duration_ms=int((time.perf_counter() - started_at) * 1000),
                 record_count=0, error_code=code, error_message=message,
             )
-            errors = [ErrorRecord(source=source, error_code=code, message=message, retryable=False)]
+            errors = [ErrorRecord(source=source, error_code=code, message=message, retryable=_is_retryable_error_code(code))]
             raw_payload = {
                 "run_id": request.run_id,
                 "source": source.value,
@@ -257,7 +289,7 @@ async def collect_source_via_mcp_with_raw(
             duration_ms=int((time.perf_counter() - started_at) * 1000),
             record_count=0, error_code=code, error_message=message,
         )
-        errors = [ErrorRecord(source=source, error_code=code, message=message, retryable=False)]
+        errors = [ErrorRecord(source=source, error_code=code, message=message, retryable=_is_retryable_error_code(code))]
         raw_payload = {
             "run_id": request.run_id,
             "source": source.value,
@@ -267,3 +299,55 @@ async def collect_source_via_mcp_with_raw(
             "errors": [e.model_dump(mode="json") for e in errors],
         }
         return [], status, errors, raw_payload
+
+
+async def collect_source_via_mcp_with_raw(
+    source: SourceName,
+    request: CollectorRequest,
+) -> tuple[list[EvidenceRecord], SourceStatus, list[ErrorRecord], dict[str, Any]]:
+    """Route to designated MCP module based on source with bounded retry/backoff."""
+
+    retry_events: list[dict[str, Any]] = []
+    last_result: tuple[list[EvidenceRecord], SourceStatus, list[ErrorRecord], dict[str, Any]] | None = None
+
+    for attempt_index in range(MAX_RETRY_ATTEMPTS):
+        items, status, errors, raw_payload = await _execute_mcp_call_once(source, request)
+        last_result = (items, status, errors, raw_payload)
+
+        is_retryable_failure = (
+            status.status == StatusName.FAILED
+            and status.error_code is not None
+            and _is_retryable_error_code(status.error_code)
+            and attempt_index < MAX_RETRY_ATTEMPTS - 1
+        )
+        if not is_retryable_failure:
+            return items, status, errors, _with_retry_telemetry(
+                raw_payload,
+                request=request,
+                source=source,
+                retry_events=retry_events,
+                attempt_count=attempt_index + 1,
+            )
+
+        delay_seconds = _retry_delay_seconds(attempt_index)
+        error_code = status.error_code
+        assert error_code is not None
+        retry_events.append(
+            {
+                "attempt": attempt_index + 1,
+                "error_code": error_code.value if hasattr(error_code, "value") else str(error_code),
+                "message": status.error_message,
+                "delay_ms": int(delay_seconds * 1000),
+            }
+        )
+        await asyncio.sleep(delay_seconds)
+
+    assert last_result is not None
+    items, status, errors, raw_payload = last_result
+    return items, status, errors, _with_retry_telemetry(
+        raw_payload,
+        request=request,
+        source=source,
+        retry_events=retry_events,
+        attempt_count=MAX_RETRY_ATTEMPTS,
+    )

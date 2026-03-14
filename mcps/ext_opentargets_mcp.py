@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import os
 import time
+from typing import Any
+import shutil
 
 from mcp.server.fastmcp import FastMCP
 
@@ -25,21 +27,29 @@ from agents.schema import (
     SourceStatus,
     StatusName,
     CollectorResult,
-    SCHEMA_VERSION,
 )
 
 mcp = FastMCP("ext-opentargets-mcp")
 
-_OTP_MCP_BIN = os.path.abspath(os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "external_mcps",
-    "open-targets-platform-mcp",
-    ".venv",
-    "bin",
-    "otp-mcp",
-))
-_OTP_HOME = os.path.abspath(os.path.join(os.path.dirname(_OTP_MCP_BIN), "..", ".."))
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_LOCAL_OTP_HOME = os.path.abspath(os.path.join(_PROJECT_ROOT, "external_mcps", "open-targets-platform-mcp"))
+_LOCAL_OTP_BIN = os.path.abspath(os.path.join(_LOCAL_OTP_HOME, ".venv", "bin", "otp-mcp"))
+
+def _otp_bin() -> str:
+    override = os.getenv("A4T_OTP_MCP_BIN", "").strip()
+    if override:
+        return override
+    found = shutil.which("otp-mcp")
+    if found:
+        return found
+    return _LOCAL_OTP_BIN
+
+def _otp_home() -> str:
+    override = os.getenv("A4T_OTP_MCP_HOME", "").strip()
+    if override:
+        return override
+    return _LOCAL_OTP_HOME
+
 _BASE_URL = "https://api.platform.opentargets.org/api/v4/graphql"
 
 
@@ -52,10 +62,10 @@ async def _call_otp_tool(tool_name: str, arguments: dict) -> dict | list | str |
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
     params = StdioServerParameters(
-        command=_OTP_MCP_BIN,
+        command=_otp_bin(),
         args=["--transport", "stdio"],
-        env={**os.environ, "HOME": _OTP_HOME, "FASTMCP_LOG_LEVEL": "ERROR"},
-        cwd=os.getcwd(),
+        env={**os.environ, "HOME": _otp_home(), "FASTMCP_LOG_LEVEL": "ERROR"},
+        cwd=_otp_home() if os.path.isdir(_otp_home()) else os.getcwd(),
     )
     async with stdio_client(params) as (r, w):
         async with ClientSession(r, w) as s:
@@ -146,7 +156,7 @@ async def _fetch_evidence(request: CollectorRequest) -> tuple[list[EvidenceRecor
             "variables": {"ensemblId": ensembl_id},
         })
 
-        target_data = {}
+        target_data: dict[str, Any] = {}
         if isinstance(gql_result, dict):
             # Try multiple nesting patterns (some MCPs wrap in 'result', some don't)
             target_data = (

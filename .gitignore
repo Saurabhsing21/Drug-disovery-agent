@@ -3,9 +3,11 @@ venv/
 __pycache__/
 *.pyc
 .env
+deploy/.env
 
 # Node
 node_modules/
+.next/
 .wrangler/
 
 # Large Bio Data
@@ -17,3 +19,9 @@ mcps/connectors/.depmap_cache/
 
 # Logs
 *.log
+/.agent/
+/.vscode/
+
+# Runtime artifacts (generated)
+artifacts/*
+!artifacts/.gitkeep

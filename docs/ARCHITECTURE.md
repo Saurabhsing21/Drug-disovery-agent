@@ -1,65 +1,85 @@
-# Agent4Target Architecture: End-to-End Flow
+# Phase-1 Architecture (Canonical)
 
-This document describes how the evidence collection agent works from User Input to the Scored Result.
+This document defines the canonical architecture for the Phase-1 Evidence Collector.
 
----
+## Source of Truth
+- [WHAT_WE_ARE_BUILDING.md](/Users/apple/Desktop/Drugagent/docs/WHAT_WE_ARE_BUILDING.md)
+- [COMPLETE_FLOW_AND_RESPONSIBILITIES.md](/Users/apple/Desktop/Drugagent/docs/COMPLETE_FLOW_AND_RESPONSIBILITIES.md)
+- [PRD_PHASE1_EVIDENCE_COLLECTOR.md](/Users/apple/Desktop/Drugagent/docs/PRD_PHASE1_EVIDENCE_COLLECTOR.md)
 
-## 1. High-Level Overview
-The system is built on a **Multi-Agent Orchestration** pattern using **LangGraph** and the **Model Context Protocol (MCP)**. It aggregates biological evidence (genetic dependencies, disease associations, literature) and normalizes it into a unified score.
+If this file conflicts with the documents above, update this file.
 
-```mermaid
-graph TD
-    UI[CLI / collect.py] --> Graph[LangGraph Orchestrator]
-    Graph --> VN[Validate Node]
-    VN --> CN[Collection Node]
-    
-    subgraph "MCP Runtime (Parallel)"
-        CN --> DM[DepMap MCP]
-        CN --> PH[Pharos MCP]
-        CN --> OT[OpenTargets MCP]
-        CN --> LIT[Literature MCP]
-        CN --> EXT_OT[Official OT MCP Wrapper]
-        CN --> EXT_PH[Community Pharos MCP Wrapper]
-    end
-    
-    CN --> MN[Merge & Score Node]
-    MN --> Final[Final CollectorResult]
+## Runtime Flow
+
+```text
+validate_input
+  -> plan_collection
+  -> collect_sources_parallel
+  -> normalize_evidence
+  -> verify_evidence
+  -> analyze_conflicts
+  -> build_evidence_graph
+  -> generate_explanation
+  -> supervisor_decide
+  -> prepare_review_brief
+  -> human_review_gate
+  -> emit_dossier
 ```
 
----
+## System Topology
 
-## 2. The Step-by-Step Flow
+```mermaid
+flowchart TB
+    U["User / API Request"] --> O["LangGraph Orchestrator"]
 
-### Step A: Input & Request Validation
-When you run `python3 collect.py --gene EGFR`, the CLI creates a `CollectorRequest`.
-- **Validation Node**: LangGraph ensures the gene symbol is valid and the requested sources are available.
+    O --> P["Planning Agent"]
 
-### Step B: Parallel Evidence Collection
-The **Collection Node** identifies which MCP servers to call. It uses Python's `asyncio.gather` to trigger multiple requests simultaneously.
+    P --> C1["DepMap Collector"]
+    P --> C2["OpenTargets Collector"]
+    P --> C3["PHAROS Collector"]
+    P --> C4["Literature Collector"]
 
-The **MCP Runtime** (`agent/mcp_runtime.py`) acts as the dispatcher:
-1.  **Internal Connectors**: For sources like `depmap` or `literature`, it routes to `mcp_server/*.py` which uses our custom logic to fetch data from SQLite or External APIs.
-2.  **External MCP Wrappers**: 
-    - `ext_opentargets`: Spawns the official `otp-mcp` binary via **stdio**, calls its tools, and translates the raw GraphQL results into our schema.
-    - `ext_pharos`: Connects to a community Pharos MCP server via **SSE** (Server-Sent Events), queries the Pharos API, and normalizes the output.
+    C1 --> N["Normalization Agent"]
+    C2 --> N
+    C3 --> N
+    C4 --> N
 
-### Step C: Normalization & Scoring
-Raw evidence from different sources (association scores, CRISPR dependency ratios, publication counts) cannot be compared directly.
+    N --> V["Verification Agent"]
+    V --> X["Conflict Analyzer"]
+    X --> G["Evidence Graph Builder"]
+    G --> E["Explanation Agent"]
+    E --> S["Supervisor Agent"]
+    S --> R["Review-Support Agent"]
+    R --> H["Human Review Gateway"]
+    H --> D["Evidence Dossier Agent"]
 
-The **Normalization & Scoring Agent** (`agent/normalization_scoring_agent.py`):
-1.  **Normalization**: Maps raw values (e.g., a CRISPR effect of -1.5) to a standard `0.0 - 1.0` scale.
-2.  **Weighting**: Applies source-specific weights (e.g., Open Targets might be weighted `1.1` while Literature is `0.7`).
-3.  **Aggregation**: calculates a confidence-weighted mean to produce the **Final Aggregate Score**.
+    D --> F["Phase-2 Handoff"]
+```
 
-### Step D: Result Generation
-The system packages the mapped items, source statuses (success/fail/skip), and the scoring summary into a `CollectorResult`.
-- The CLI then formats this into a human-readable table or a raw JSON blob.
+## Code-Level Mapping (Current Repo)
 
----
+- Orchestration graph: `agents/graph.py`
+- Runtime state model: `agents/state.py`
+- Contracts and schema: `agents/schema.py`
+- Source runtime dispatcher: `agents/mcp_runtime.py`
+- Summary/explanation logic: `agents/summary_agent.py`
+- Source server lifecycle helper: `agents/server_manager.py`
+- MCP service entrypoint: `mcps/server.py`
+- CLI entrypoint: `cli/main.py`
 
-## 3. Technologies Used
-- **LangGraph**: Workflow orchestration and state management.
-- **MCP (Model Context Protocol)**: Standardized communication between the agent and data tools.
-- **Pydantic**: Strict schema validation for biological data.
-- **FastMCP**: Rapid implementation of internal MCP servers.
-- **Wrangler/SSE**: Host and connect to community-driven MCP servers.
+## Data Sources (Phase-1)
+
+- DepMap
+- OpenTargets
+- PHAROS
+- Literature (Europe PMC / PubMed style evidence retrieval path)
+
+No additional sources are in scope unless explicitly approved.
+
+## Reliability and Safety Constraints
+
+- Evidence claims must be grounded in verified evidence records.
+- Provenance is mandatory for evidence output.
+- Contradictions must be surfaced, not hidden.
+- Human review gate must remain in the pipeline.
+- Phase-1 must not claim Phase-2 completion.

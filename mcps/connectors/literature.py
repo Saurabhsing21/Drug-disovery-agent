@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import time
+import re
 
 import httpx
 
@@ -44,6 +45,14 @@ class LiteratureConnector(CollectorConnector):
         started_at = time.perf_counter()
 
         query_string = self._build_query(request.gene_symbol, request.disease_id)
+        fetch_n = min(
+            100,
+            max(
+                int(request.max_literature_articles),
+                int(request.per_source_top_k) * 5,
+                25,
+            ),
+        )
 
         try:
             payload = await self.http.get_json(
@@ -51,7 +60,7 @@ class LiteratureConnector(CollectorConnector):
                 params={
                     "query": query_string,
                     "format": "json",
-                    "pageSize": request.max_literature_articles,
+                    "pageSize": fetch_n,
                     "resultType": "core",
                     "sort": "CITED desc",
                 },
@@ -73,17 +82,44 @@ class LiteratureConnector(CollectorConnector):
             message = "No literature evidence found for query"
             return [], self.skipped_status(started_at, message), []
 
-        limit = min(len(results), request.max_literature_articles, request.per_source_top_k)
-        selected = results[:limit]
+        def _has_gene_in_title(paper: dict) -> bool:
+            title = str(paper.get("title") or "")
+            if not title:
+                return False
+            # Prefer a whole-word match for the symbol to de-emphasize generic method papers
+            # that only mention the target in the abstract/metadata.
+            return bool(re.search(rf"\\b{re.escape(request.gene_symbol)}\\b", title, flags=re.IGNORECASE))
+
+        # Europe PMC sorting by citations is useful but can over-select generic "toolkit" papers.
+        # Re-rank locally to boost papers where the target appears in the title (higher topicality),
+        # then break ties by citations (impact).
+        reranked = sorted(
+            enumerate(results, start=1),
+            key=lambda pair: (
+                1 if _has_gene_in_title(pair[1]) else 0,
+                int(pair[1].get("citedByCount") or 0),
+                int(pair[1].get("pubYear") or 0),
+                -pair[0],  # stable-ish tie-breaker, prefer earlier ranks from upstream
+            ),
+            reverse=True,
+        )
+
+        limit = min(
+            len(reranked),
+            int(request.per_source_top_k),
+            int(request.max_literature_articles),
+        )
+        selected = reranked[:limit]
         total_hits = int(payload.get("hitCount") or len(results))
         records: list[EvidenceRecord] = []
 
-        for idx, paper in enumerate(selected, start=1):
+        for idx, (orig_rank, paper) in enumerate(selected, start=1):
             citations = int(paper.get("citedByCount") or 0)
             confidence = min(0.95, 0.5 + min(citations / 200, 0.25) + min((limit - idx + 1) / 20, 0.1))
             normalized = min(1.0, 0.4 + min(citations / 150, 0.4) + min((limit - idx + 1) / 20, 0.2))
             pmid = paper.get("pmid")
             title = paper.get("title")
+            pub_year = paper.get("pubYear")
 
             records.append(
                 EvidenceRecord(
@@ -98,12 +134,15 @@ class LiteratureConnector(CollectorConnector):
                     support={
                         "rank": idx,
                         "article_count_returned": limit,
+                        "fetch_page_size": fetch_n,
                         "total_hit_count": total_hits,
                         "pmid": pmid,
                         "title": title,
                         "journal": paper.get("journalTitle"),
-                        "pub_year": paper.get("pubYear"),
+                        "pub_year": pub_year,
                         "cited_by_count": citations,
+                        "gene_in_title": _has_gene_in_title(paper),
+                        "original_rank_by_cited_sort": orig_rank,
                         "query": query_string,
                     },
                     summary=(

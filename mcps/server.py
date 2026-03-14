@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field
 
 from agents.collector_service import collect_evidence_bundle
-from agents.schema import CollectorRequest, ScoringConfig, SourceName
+from agents.request_builders import build_collector_request
+from agents.schema import CollectorRequest, SourceName
 
 
 class ResponseFormat(str, Enum):
@@ -20,15 +21,32 @@ class BundleCollectInput(BaseModel):
 
     gene_symbol: str = Field(..., min_length=1)
     disease_id: str | None = None
+    objective: str | None = None
     species: str = "Homo sapiens"
     sources: list[SourceName] | None = None
+    per_source_top_k: int = Field(default=5, ge=1, le=20)
     max_literature_articles: int = Field(default=5, ge=1, le=20)
-    scoring_config: ScoringConfig | None = None
+    model_override: str | None = None
     run_id: str | None = None
     response_format: ResponseFormat = ResponseFormat.JSON
 
 
 combined_mcp = FastMCP("agent4target_mcp")
+
+
+def _tool_annotations(title: str) -> Any:
+    # FastMCP's runtime accepts dicts, but the library type expects a ToolAnnotations object.
+    # Cast to keep mypy happy while preserving metadata used by MCP UIs.
+    return cast(
+        Any,
+        {
+            "title": title,
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+    )
 
 
 def _build_request(params: BundleCollectInput, force_source: SourceName | None = None) -> CollectorRequest:
@@ -41,18 +59,17 @@ def _build_request(params: BundleCollectInput, force_source: SourceName | None =
     if force_source is not None:
         selected_sources = [force_source]
 
-    payload: dict[str, Any] = {
-        "gene_symbol": params.gene_symbol,
-        "disease_id": params.disease_id,
-        "species": params.species,
-        "sources": selected_sources,
-        "max_literature_articles": params.max_literature_articles,
-        "scoring_config": params.scoring_config.model_dump() if params.scoring_config else None,
-    }
-    if params.run_id:
-        payload["run_id"] = params.run_id
-
-    return CollectorRequest.model_validate(payload)
+    return build_collector_request(
+        gene_symbol=params.gene_symbol,
+        disease_id=params.disease_id,
+        objective=params.objective,
+        species=params.species,
+        sources=selected_sources,
+        per_source_top_k=params.per_source_top_k,
+        max_literature_articles=params.max_literature_articles,
+        model_override=params.model_override,
+        run_id=params.run_id,
+    )
 
 
 def _as_markdown(result_dict: dict[str, Any]) -> str:
@@ -87,13 +104,7 @@ async def _collect(params: BundleCollectInput, force_source: SourceName | None =
 @combined_mcp.tool(
     name="collect_evidence_bundle",
     description="Collect evidence bundle across selected sources.",
-    annotations={
-        "title": "Collect Evidence Bundle",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=_tool_annotations("Collect Evidence Bundle"),
 )
 async def collect_evidence_bundle_tool(params: BundleCollectInput) -> str | dict[str, Any]:
     return await _collect(params)
@@ -102,13 +113,7 @@ async def collect_evidence_bundle_tool(params: BundleCollectInput) -> str | dict
 @combined_mcp.tool(
     name="collect_depmap_evidence",
     description="Collect DepMap evidence only.",
-    annotations={
-        "title": "Collect DepMap Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=_tool_annotations("Collect DepMap Evidence"),
 )
 async def collect_depmap_evidence_tool(params: BundleCollectInput) -> str | dict[str, Any]:
     return await _collect(params, force_source=SourceName.DEPMAP)
@@ -117,13 +122,7 @@ async def collect_depmap_evidence_tool(params: BundleCollectInput) -> str | dict
 @combined_mcp.tool(
     name="collect_pharos_evidence",
     description="Collect PHAROS evidence only.",
-    annotations={
-        "title": "Collect PHAROS Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=_tool_annotations("Collect PHAROS Evidence"),
 )
 async def collect_pharos_evidence_tool(params: BundleCollectInput) -> str | dict[str, Any]:
     return await _collect(params, force_source=SourceName.PHAROS)
@@ -132,13 +131,7 @@ async def collect_pharos_evidence_tool(params: BundleCollectInput) -> str | dict
 @combined_mcp.tool(
     name="collect_opentargets_evidence",
     description="Collect Open Targets evidence only.",
-    annotations={
-        "title": "Collect Open Targets Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=_tool_annotations("Collect Open Targets Evidence"),
 )
 async def collect_opentargets_evidence_tool(params: BundleCollectInput) -> str | dict[str, Any]:
     return await _collect(params, force_source=SourceName.OPENTARGETS)
@@ -147,13 +140,7 @@ async def collect_opentargets_evidence_tool(params: BundleCollectInput) -> str |
 @combined_mcp.tool(
     name="collect_literature_evidence",
     description="Collect literature evidence only.",
-    annotations={
-        "title": "Collect Literature Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=_tool_annotations("Collect Literature Evidence"),
 )
 async def collect_literature_evidence_tool(params: BundleCollectInput) -> str | dict[str, Any]:
     return await _collect(params, force_source=SourceName.LITERATURE)

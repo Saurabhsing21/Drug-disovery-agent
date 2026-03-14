@@ -3,8 +3,9 @@ from __future__ import annotations
 import os
 import re
 import time
+import sys
 
-from agents.schema import CollectorRequest, ErrorCode, EvidenceRecord, Provenance, SourceName
+from agents.schema import CollectorRequest, EvidenceRecord, Provenance, SourceName
 
 from .base import CollectorConnector
 
@@ -18,7 +19,7 @@ _CACHE_DIR = os.getenv(
 _CACHE_FILE = os.path.join(_CACHE_DIR, "CRISPRGeneEffect.csv")
 
 # Module-level singleton — loaded once, reused for every subsequent gene query
-_df = None          # pandas DataFrame, columns = gene symbols, rows = cell lines
+_df = None          # pandas DataFrame | None, columns = gene symbols, rows = cell lines
 _col_map: dict[str, str] = {}   # normalized symbol → original column name
 
 
@@ -30,7 +31,7 @@ def _load_dataframe():
         return  # Already loaded in this process
 
     import pandas as pd  # lazy import — only needed when cache exists
-    print(f"[DepMap] Loading CRISPRGeneEffect.csv into memory… (one-time per session)")
+    print("[DepMap] Loading CRISPRGeneEffect.csv into memory… (one-time per session)", file=sys.stderr)
     _df = pd.read_csv(_CACHE_FILE, index_col=0)
 
     # Build symbol→column map: "BRAF (673)" → "BRAF"
@@ -40,7 +41,10 @@ def _load_dataframe():
         sym = m.group(1).upper() if m else col.strip().upper()
         _col_map[sym] = col
 
-    print(f"[DepMap] Loaded {len(_df)} cell lines × {len(_df.columns)} genes into memory ✅")
+    print(
+        f"[DepMap] Loaded {len(_df)} cell lines × {len(_df.columns)} genes into memory ✅",
+        file=sys.stderr,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -70,6 +74,8 @@ class DepMapConnector(CollectorConnector):
 
             # 2. Load CSV into memory (no-op on subsequent calls within same process)
             _load_dataframe()
+            if _df is None:
+                raise RuntimeError("DepMap dataframe failed to load.")
 
             # 3. Find this gene's column
             symbol_norm = request.gene_symbol.strip().upper()
@@ -147,6 +153,7 @@ class DepMapConnector(CollectorConnector):
                             confidence=self.safe_float(per_line_conf),
                             support={
                                 "cell_line_id": str(cell_line_id),
+                                "gene_effect": effect_value,
                                 "rank_within_gene": idx,
                                 "column_name": col_name,
                                 "screen_type": "CRISPRGeneEffect",

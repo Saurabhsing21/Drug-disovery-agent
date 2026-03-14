@@ -6,7 +6,9 @@ import subprocess
 import time
 from typing import Any
 
+from .health import run_source_health_checks
 from .schema import SourceName
+from .telemetry import log_event
 
 
 class ExternalServerContext:
@@ -15,10 +17,13 @@ class ExternalServerContext:
     def __init__(self, sources: list[SourceName]) -> None:
         self.sources = sources
         self._pharos_proc: subprocess.Popen[Any] | None = None
+        self._log_file: Any | None = None
 
     async def __aenter__(self) -> "ExternalServerContext":
-        if SourceName.PHAROS in self.sources:
-            await self._start_pharos()
+        for result in run_source_health_checks(type("Req", (), {"sources": self.sources})()):
+            log_event("source_health_check", source=result.source, healthy=result.healthy, message=result.message)
+        if SourceName.EXT_PHAROS in self.sources:
+            await self._start_ext_pharos()
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -35,17 +40,19 @@ class ExternalServerContext:
         except OSError:
             return False
 
-    async def _start_pharos(self) -> None:
+    async def _start_ext_pharos(self) -> None:
         # Avoid starting if something is already on 8787 (like a manually started server)
         in_use = await self._is_port_in_use(8787)
         if in_use:
-            print("[\033[93mExternalServerContext\033[0m] Port 8787 in use, assuming Pharos is running.")
+            log_event("external_server_port_in_use", source=SourceName.EXT_PHAROS.value, port=8787)
             return
 
-        print("[\033[94mExternalServerContext\033[0m] Spinning up Pharos background server (wrangler dev)...")
         script_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), "..", "external_mcps", "run_pharos_mcp.sh"
         ))
+        if not os.path.exists(script_path):
+            raise RuntimeError(f"Pharos launcher missing at {script_path}")
+        log_event("external_server_start", source=SourceName.EXT_PHAROS.value, command=script_path)
 
         self._log_file = open("pharos_server.log", "w")
         self._pharos_proc = subprocess.Popen(
@@ -59,12 +66,13 @@ class ExternalServerContext:
         import urllib.request
         from urllib.error import URLError
 
+        timeout_s = float(os.getenv("A4T_PHAROS_START_TIMEOUT_S", "30"))
         start = time.time()
         ready = False
-        while time.time() - start < 30:  # 30s timeout
+        while time.time() - start < timeout_s:
             try:
                 # The SSE path itself will 400 or 404 without correct headers, but we just want to know it connects
-                response = urllib.request.urlopen("http://127.0.0.1:8787/")
+                urllib.request.urlopen("http://127.0.0.1:8787/")
                 ready = True
                 break
             except URLError as e:
@@ -73,17 +81,18 @@ class ExternalServerContext:
                     ready = True
                     break
                 # If it's a connection refused, sleep and retry
-                time.sleep(0.5)
+                await asyncio.sleep(0.5)
 
         if ready:
-            print("[\033[92mExternalServerContext\033[0m] Pharos server is ready.")
+            log_event("external_server_ready", source=SourceName.EXT_PHAROS.value, port=8787)
         else:
-            print("[\033[91mExternalServerContext\033[0m] Pharos server failed to report ready within timeout.")
+            self._stop_pharos()
+            raise RuntimeError("Pharos server failed to report ready within timeout.")
 
     def _stop_pharos(self) -> None:
         if self._pharos_proc:
             import signal
-            print("[\033[90mExternalServerContext\033[0m] Shutting down Pharos background server...")
+            log_event("external_server_stop", source=SourceName.EXT_PHAROS.value)
             try:
                 os.killpg(os.getpgid(self._pharos_proc.pid), signal.SIGTERM)
             except ProcessLookupError:
@@ -91,3 +100,4 @@ class ExternalServerContext:
             self._pharos_proc = None
             if hasattr(self, "_log_file") and self._log_file:
                 self._log_file.close()
+                self._log_file = None

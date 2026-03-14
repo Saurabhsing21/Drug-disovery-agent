@@ -1,116 +1,70 @@
-# Agent4Target Architecture and Execution Flow
+# Architecture Flow (Detailed)
 
-This document provides a visual representation of how the `Agent4Target` evidence collector application is architected and how its requests flow through the system.
+This document provides the execution flow view for the Phase-1 Evidence Collector.
 
-## 1. High-Level Architecture Overview
-
-The project provides two primary interfaces to interact with the underlying evidence connectors (DepMap, PHAROS, Open Targets, and Literature):
-
-1. **Standalone CLI (`main.py`)**: A local command-line tool that orchestrates data collection sequentially using **LangGraph**.
-2. **MCP Server (`mcp_server/server.py`)**: A Model Context Protocol server that exposes these connectors as standalone tools or as a bundled concurrent executor using **Asyncio**.
+## Canonical Stage Sequence
 
 ```mermaid
-graph TD
-    User([User / LLM Client])
+flowchart TB
+    A["validate_input"] --> B["plan_collection"]
+    B --> C["collect_sources_parallel"]
+    C --> D["normalize_evidence"]
+    D --> E["verify_evidence"]
+    E --> F["analyze_conflicts"]
+    F --> G["build_evidence_graph"]
+    G --> H["generate_explanation"]
+    H --> I["human_review_gate"]
+    I --> J["emit_dossier"]
 
-    User -- "Run CLI" --> CLI[main.py CLI entrypoint]
-    User -- "MCP Tool Call" --> MCPServer[mcp_server/server.py]
-
-    subgraph "Core Agent Logic"
-        direction TB
-        CLI --> Graph["agent.graph.py (LangGraph)"]
-        MCPServer --> Service["agent.collector_service.py (Async Service)"]
-
-        Graph -- "Sequential Execution" --> Connectors
-        Service -- "Concurrent execution" --> Connectors
-    end
-
-    subgraph "Connectors (mcp_server/connectors/)"
-        Connectors[Connectors Interface]
-        Connectors --> DepMap[DepMap Connector]
-        Connectors --> PHAROS[PHAROS Connector]
-        Connectors --> OT[Open Targets Connector]
-        Connectors --> Lit[Literature Connector]
-    end
-
-    Graph --> Normalize["agent.normalize.py (Dedupe & Normalize)"]
-    Service --> Normalize
-
-    DepMap -.-> Data1[(Depmap Source)]
-    PHAROS -.-> Data2[(Pharos Source)]
-    OT -.-> Data3[(Open Targets)]
-    Lit -.-> Data4[(Literature PMC)]
+    I -->|needs_more_evidence| B
+    I -->|rejected| K["terminal_rejected"]
 ```
 
----
+## Stage Responsibilities
 
-## 2. CLI Execution Flow (LangGraph)
+1. `validate_input`  
+Validate query contract and initialize run metadata.
 
-When executing via `main.py`, the flow uses **LangGraph** where the connectors are orchestrated sequentially as graph nodes. The state is accumulated as it flows through the graph.
+2. `plan_collection`  
+Create source plan, fallback strategy, and execution directives.
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant Main as main.py
-    participant Graph as agent.graph.py (LangGraph)
-    participant Normalize as agent.normalize.py
+3. `collect_sources_parallel`  
+Collect from DepMap/OpenTargets/PHAROS/Literature concurrently.
 
-    User->>Main: Provide gene_symbol, disease_id, sources
-    Main->>Graph: dispatch CollectorRequest
-    
-    activate Graph
-    Graph->>Graph: validate_input node
-    Graph->>Graph: collect_depmap node
-    Graph->>Graph: collect_pharos node
-    Graph->>Graph: collect_opentargets node
-    Graph->>Graph: collect_literature node
-    Graph->>Normalize: merge node runs dedupe & normalize
-    Normalize-->>Graph: Unified Evidence Record
-    deactivate Graph
-    
-    Graph-->>Main: Return CollectorResult JSON
-    Main-->>User: Prints Result
-```
+4. `normalize_evidence`  
+Map raw payloads into canonical evidence schema.
 
----
+5. `verify_evidence`  
+Run integrity checks (schema/provenance/mapping/citations/duplicates).
 
-## 3. MCP Server Execution Flow
+6. `analyze_conflicts`  
+Detect and classify contradictory evidence.
 
-When acting as an MCP server, the flow changes. LLMs can either call an individual tool (e.g., `collect_depmap_evidence`) or they can call the `collect_evidence_bundle` tool which runs everything natively in parallel via `asyncio.gather`.
+7. `build_evidence_graph`  
+Build relation graph (Target, Disease, Evidence, Publication, Source).
 
-```mermaid
-sequenceDiagram
-    actor LLM Client
-    participant Server as mcp_server/server.py
-    participant Service as agent.collector_service.py
-    participant Connectors as mcp_server/connectors/
-    participant Normalize as agent.normalize.py
+8. `generate_explanation`  
+Create grounded summary from verified evidence.
 
-    LLM Client->>Server: call_tool("collect_evidence_bundle", args)
-    
-    Server->>Service: collect_evidence_bundle(request)
-    activate Service
-    
-    par Concurrent collection tasks
-        Service->>Connectors: DepMap.collect()
-        Service->>Connectors: PHAROS.collect()
-        Service->>Connectors: OpenTargets.collect()
-        Service->>Connectors: Literature.collect()
-    end
-    Connectors-->>Service: Return Items, Status, Errors
-    
-    Service->>Normalize: dedupe_evidence(items)
-    Service->>Normalize: normalize_evidence(items)
-    Normalize-->>Service: Machine-readable bundles
-    
-    Service-->>Server: Return CollectorResult
-    deactivate Service
-    
-    Server-->>LLM Client: Return TextContent(JSON)
-```
+9. `human_review_gate`  
+Apply review decision: approved / rejected / needs_more_evidence.
 
-## Details on Data Structures (`agent/schema.py`)
+10. `emit_dossier`  
+Emit final `EvidenceDossier` and downstream handoff payload.
 
-Regardless of the execution path, the standard inputs and outputs remain the same:
-* **Input**: `CollectorRequest` which must contain a `gene_symbol` (e.g., "EGFR"), and optionally `disease_id` and specific `sources`.
-* **Output**: `CollectorResult` aggregating individual `EvidenceRecord`s, execution state, and deterministic run metrics.
+## Interfaces in This Repository
+
+- Graph orchestration: `agents/graph.py`
+- Shared state: `agents/state.py`
+- Contracts: `agents/schema.py`
+- MCP dispatch/runtime: `agents/mcp_runtime.py`
+- Bundle collection service: `agents/collector_service.py`
+- CLI runtime entry: `cli/main.py`
+- MCP tool entry: `mcps/server.py`
+
+## Alignment Rule
+
+All implementation changes must stay aligned with:
+- [WHAT_WE_ARE_BUILDING.md](/Users/apple/Desktop/Drugagent/docs/WHAT_WE_ARE_BUILDING.md)
+- [COMPLETE_FLOW_AND_RESPONSIBILITIES.md](/Users/apple/Desktop/Drugagent/docs/COMPLETE_FLOW_AND_RESPONSIBILITIES.md)
+- [TRACEABILITY_MATRIX_PRD_FLOW_TASKS.md](/Users/apple/Desktop/Drugagent/docs/TRACEABILITY_MATRIX_PRD_FLOW_TASKS.md)

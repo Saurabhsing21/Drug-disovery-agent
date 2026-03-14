@@ -49,6 +49,10 @@ class PharosConnector(CollectorConnector):
               name
               value
             }
+            diseases {
+              name
+              mondoID
+            }
           }
         }
         """
@@ -78,38 +82,66 @@ class PharosConnector(CollectorConnector):
             family = target.get("fam")
             novelty = target.get("novelty")
 
-            record = EvidenceRecord(
-                source=self.source,
-                target_id=target_symbol,
-                target_symbol=target_symbol,
-                disease_id=request.disease_id,
-                evidence_type="target_annotation",
-                raw_value={
-                    "tdl": tdl,
-                    "ligand_total": ligand_total,
-                    "novelty": novelty,
-                },
-                normalized_score=self.safe_float(normalized_score),
-                confidence=self.safe_float(confidence),
-                support={
-                    "target_name": target_name,
-                    "family": family,
-                    "tdl": tdl,
-                    "novelty": novelty,
-                    "ligand_total": ligand_total,
-                },
-                summary=(
-                    f"PHAROS annotations for {target_symbol}"
-                    f" (TDL={tdl or 'unknown'}, ligands={ligand_total})."
-                ),
-                provenance=Provenance(
-                    provider="PHAROS",
-                    endpoint=self.base_url,
-                    query={"gene_symbol": request.gene_symbol},
-                ),
-            )
+            # Get diseases for multiple records
+            diseases = target.get("diseases") or []
+            top_k = max(1, int(request.per_source_top_k))
+            
+            final_diseases = []
+            if request.disease_id:
+                # Try to find the specific requested disease
+                match = next((d for d in diseases if (d.get("mondoID") or "").lower() == request.disease_id.lower()), None)
+                if match:
+                    final_diseases.append(match)
+            
+            for d in diseases:
+                if len(final_diseases) >= top_k:
+                    break
+                if d not in final_diseases:
+                    final_diseases.append(d)
 
-            return [record], self.success_status(started_at, 1), []
+            # If no diseases found but target exists, still return one generic annotation
+            if not final_diseases:
+                final_diseases = [{"name": "Generic Annotation", "mondoID": request.disease_id}]
+
+            records: list[EvidenceRecord] = []
+            for d in final_diseases:
+                d_name = d.get("name")
+                d_id = d.get("mondoID")
+                
+                records.append(EvidenceRecord(
+                    source=self.source,
+                    target_id=target_symbol,
+                    target_symbol=target_symbol,
+                    disease_id=d_id or request.disease_id,
+                    evidence_type="target_annotation",
+                    raw_value={
+                        "tdl": tdl,
+                        "ligand_total": ligand_total,
+                        "novelty": novelty,
+                        "disease_name": d_name,
+                    },
+                    normalized_score=self.safe_float(normalized_score),
+                    confidence=self.safe_float(confidence),
+                    support={
+                        "target_name": target_name,
+                        "family": family,
+                        "tdl": tdl,
+                        "novelty": novelty,
+                        "ligand_total": ligand_total,
+                        "associated_disease": d_name,
+                    },
+                    summary=(
+                        f"PHAROS annotations for {target_symbol} relating to {d_name or 'target'}"
+                        f" (TDL={tdl or 'unknown'}, ligands={ligand_total})."
+                    ),
+                    provenance=Provenance(
+                        provider="PHAROS",
+                        endpoint=self.base_url,
+                        query={"gene_symbol": request.gene_symbol, "disease": d_name},
+                    ),
+                ))
+
+            return records, self.success_status(started_at, len(records)), []
 
         except Exception as exc:  # noqa: BLE001
             code = self.upstream_error_code(exc)

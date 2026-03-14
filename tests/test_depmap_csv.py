@@ -2,8 +2,13 @@ import httpx
 import asyncio
 import csv
 import io
+import os
+import pytest
 
 async def test_depmap_csv_access():
+    if os.getenv("RUN_NETWORK_TESTS") != "1":
+        pytest.skip("Set RUN_NETWORK_TESTS=1 to run DepMap live network test.")
+
     print("🚀 Starting DepMap CSV Access Test...")
     
     files_api = "https://depmap.org/portal/api/download/files"

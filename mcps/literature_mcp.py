@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, cast
+
 from mcp.server.fastmcp import FastMCP
 
 from agents.collector_service import collect_evidence_bundle
@@ -16,13 +18,16 @@ literature_mcp = FastMCP("literature_mcp")
         "Collect summarized literature evidence for a target using the literature connector. "
         "This is a read-only evidence retrieval tool."
     ),
-    annotations={
-        "title": "Literature Collect Target Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=cast(
+        Any,
+        {
+            "title": "Literature Collect Target Evidence",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+    ),
 )
 async def literature_collect_target_evidence(params: LiteratureCollectInput) -> str | dict:
     """Retrieve literature evidence for a target and optional disease context."""

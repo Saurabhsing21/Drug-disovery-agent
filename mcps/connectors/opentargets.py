@@ -92,58 +92,69 @@ class OpenTargetsConnector(CollectorConnector):
                 message = f"No disease associations found for '{request.gene_symbol}'"
                 return [], self.skipped_status(started_at, message), []
 
-            selected_row = rows[0]
+            top_k = max(1, int(request.per_source_top_k))
+            final_rows = []
+            
+            # If disease_id is requested, find it first
             if request.disease_id:
                 match = next(
                     (
                         row
                         for row in rows
-                        if (row.get("disease", {}).get("id") or "").lower()
-                        == request.disease_id.lower()
+                        if (row.get("disease", {}).get("id") or "").lower() == request.disease_id.lower()
                     ),
                     None,
                 )
-                if match is None:
-                    message = (
-                        f"Disease '{request.disease_id}' not found in Open Targets rows "
-                        f"for '{request.gene_symbol}'"
-                    )
-                    return [], self.skipped_status(started_at, message), []
-                selected_row = match
+                if match:
+                    final_rows.append(match)
+            
+            # Fill remaining slots with top associations
+            for row in rows:
+                if len(final_rows) >= top_k:
+                    break
+                if row not in final_rows:
+                    final_rows.append(row)
 
-            score = float(selected_row.get("score") or 0.0)
-            association_count = int(target.get("associatedDiseases", {}).get("count") or 0)
-            confidence = min(0.95, max(0.2, 0.55 + (score * 0.3) + min(association_count / 2000, 0.1)))
+            records: list[EvidenceRecord] = []
+            for selected_row in final_rows:
+                score = float(selected_row.get("score") or 0.0)
+                association_count = int(target.get("associatedDiseases", {}).get("count") or 0)
+                confidence = min(0.95, max(0.2, 0.55 + (score * 0.3) + min(association_count / 2000, 0.1)))
 
-            disease = selected_row.get("disease") or {}
-            disease_id = disease.get("id")
-            disease_name = disease.get("name")
+                disease = selected_row.get("disease") or {}
+                disease_id = disease.get("id")
+                disease_name = disease.get("name")
 
-            record = EvidenceRecord(
-                source=self.source,
-                target_id=target.get("id") or ensembl_id,
-                target_symbol=target.get("approvedSymbol") or resolved_symbol or request.gene_symbol,
-                disease_id=disease_id,
-                evidence_type="disease_association",
-                raw_value=score,
-                normalized_score=self.safe_float(score, default=0.0),
-                confidence=self.safe_float(confidence),
-                support={
-                    "evidence_count": association_count,
-                    "disease_name": disease_name,
-                    "requested_disease": request.disease_id,
-                },
-                summary=(
-                    f"Open Targets association score for {request.gene_symbol}"
-                    f" and {disease_name or disease_id or 'top disease'} is {score:.3f}."
-                ),
-                provenance=Provenance(
-                    provider="Open Targets",
-                    endpoint=self.base_url,
-                    query={"gene_symbol": request.gene_symbol, "ensembl_id": ensembl_id, "disease_id": request.disease_id},
-                ),
-            )
-            return [record], self.success_status(started_at, 1), []
+                records.append(EvidenceRecord(
+                    source=self.source,
+                    target_id=target.get("id") or ensembl_id,
+                    target_symbol=target.get("approvedSymbol") or resolved_symbol or request.gene_symbol,
+                    disease_id=disease_id,
+                    evidence_type="disease_association",
+                    raw_value=score,
+                    normalized_score=self.safe_float(score, default=0.0),
+                    confidence=self.safe_float(confidence),
+                    support={
+                        "evidence_count": association_count,
+                        "disease_name": disease_name,
+                        "requested_disease": request.disease_id,
+                    },
+                    summary=(
+                        f"Open Targets association score for {request.gene_symbol}"
+                        f" and {disease_name or disease_id or 'disease association'} is {score:.3f}."
+                    ),
+                    provenance=Provenance(
+                        provider="Open Targets",
+                        endpoint=self.base_url,
+                        query={"gene_symbol": request.gene_symbol, "ensembl_id": ensembl_id, "disease_id": request.disease_id},
+                    ),
+                ))
+
+            if not records:
+                 message = f"No suitable disease associations found for '{request.gene_symbol}'"
+                 return [], self.skipped_status(started_at, message), []
+
+            return records, self.success_status(started_at, len(records)), []
 
         except Exception as exc:  # noqa: BLE001
             code = self.upstream_error_code(exc)

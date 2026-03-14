@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, cast
+
 from mcp.server.fastmcp import FastMCP
 
 from agents.collector_service import collect_evidence_bundle
@@ -16,13 +18,16 @@ depmap_mcp = FastMCP("depmap_mcp")
         "Collect target-level genetic perturbation/dependency evidence from DepMap. "
         "This is a read-only evidence retrieval tool."
     ),
-    annotations={
-        "title": "DepMap Collect Target Evidence",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True,
-    },
+    annotations=cast(
+        Any,
+        {
+            "title": "DepMap Collect Target Evidence",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+    ),
 )
 async def depmap_collect_target_evidence(params: SourceCollectInput) -> str | dict:
     """Retrieve DepMap evidence for a target and optional disease context."""

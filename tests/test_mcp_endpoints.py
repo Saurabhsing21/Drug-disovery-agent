@@ -1,11 +1,5 @@
 import asyncio
 import argparse
-import sys
-from pathlib import Path
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
 
 from agents.mcp_runtime import collect_source_via_mcp
 from agents.schema import CollectorRequest, SourceName
@@ -16,6 +10,7 @@ C_OK = "\033[92m"
 C_INFO = "\033[94m"
 C_END = "\033[0m"
 C_BOLD = "\033[1m"
+
 
 async def run_test(source, gene, disease):
     print(f"\n{C_BOLD}{C_INFO}🔬 TESTING SOURCE: {source.upper()} | TARGET: {gene}{C_END}")
@@ -38,6 +33,7 @@ async def run_test(source, gene, disease):
     except Exception as e:
         print(f"\033[91m❌ ERROR: {str(e)}\033[0m")
 
+
 async def main():
     parser = argparse.ArgumentParser(description="MCP Tool Tester")
     parser.add_argument("--source", required=True, choices=["literature", "opentargets", "pharos", "depmap"])
@@ -46,6 +42,7 @@ async def main():
     
     args = parser.parse_args()
     await run_test(args.source, args.gene, args.disease)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
