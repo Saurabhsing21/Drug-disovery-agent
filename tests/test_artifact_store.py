@@ -8,6 +8,7 @@ def test_artifact_layout_is_deterministic(tmp_path) -> None:
 
     assert layout["plan"].endswith("plans/run-123.collection_plan.json")
     assert layout["graph"].endswith("graphs/run-123.evidence_graph.json")
+    assert layout["evidence_dashboard"].endswith("evidence_dashboards/run-123.evidence_dashboard.html")
     assert layout["working_memory"].endswith("working_memory/run-123")
 
 

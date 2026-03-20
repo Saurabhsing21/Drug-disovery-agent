@@ -1,4 +1,4 @@
-import type { PlanDecisionStatus, ReviewDecisionStatus, Snapshot, SourceName } from "@/lib/types";
+import type { PlanDecisionStatus, ReviewDecisionStatus, SavedRunDetail, SavedRunSummary, Snapshot, SourceName } from "@/lib/types";
 
 const ENV_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_BASE =
@@ -126,12 +126,80 @@ export async function resumeRun(runId: string): Promise<{ run_id: string; status
   return res.json();
 }
 
+export async function cancelRun(runId: string): Promise<{ run_id: string; status: string }> {
+  const res = await fetch(`${API_BASE}/runs/${encodeURIComponent(runId)}/cancel`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
 export function eventsUrl(runId: string): string {
   return `${API_BASE}/runs/${encodeURIComponent(runId)}/events`;
 }
 
 export async function getArtifacts(runId: string): Promise<{ run_id: string; artifacts: Record<string, { path: string; exists: boolean; kind: string }> }> {
   const res = await fetch(`${API_BASE}/runs/${encodeURIComponent(runId)}/artifacts`, { cache: "no-store" });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export function evidenceDashboardUrl(runId: string): string {
+  const ts = Date.now();
+  return `${API_BASE}/runs/${encodeURIComponent(runId)}/evidence-dashboard?t=${ts}`;
+}
+
+export async function listSavedRuns(): Promise<SavedRunSummary[]> {
+  const res = await fetch(`${API_BASE}/saved-runs`, { cache: "no-store" });
+  if (!res.ok) throw new Error(await readApiError(res));
+  const data = await res.json();
+  return Array.isArray(data?.saved_runs) ? data.saved_runs : [];
+}
+
+export async function getSavedRun(savedId: string): Promise<SavedRunDetail> {
+  const res = await fetch(`${API_BASE}/saved-runs/${encodeURIComponent(savedId)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function renameSavedRun(savedId: string, title: string): Promise<SavedRunSummary> {
+  const res = await fetch(`${API_BASE}/saved-runs/${encodeURIComponent(savedId)}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function deleteSavedRun(savedId: string): Promise<{ id: string; status: string }> {
+  const res = await fetch(`${API_BASE}/saved-runs/${encodeURIComponent(savedId)}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function saveRun(input: { run_id: string; title?: string }): Promise<{ id: string; run_id: string; title: string }> {
+  const res = await fetch(`${API_BASE}/saved-runs`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function postCompareReport(input: {
+  title_a: string;
+  title_b: string;
+  report_a: string;
+  report_b: string;
+  model_override?: string;
+}): Promise<{ markdown: string }> {
+  const res = await fetch(`${API_BASE}/compare-report`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
   if (!res.ok) throw new Error(await readApiError(res));
   return res.json();
 }

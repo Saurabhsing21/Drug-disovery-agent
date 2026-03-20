@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getArtifacts } from "@/lib/api";
+import { evidenceDashboardUrl, getArtifacts } from "@/lib/api";
 
 type ArtifactMeta = { path: string; exists: boolean; kind: string };
 
@@ -56,6 +56,7 @@ export function ArtifactsPanel({ runId }: { runId: string }) {
             ["plan", "Plan (collection_plan)"],
             ["procedural_memory", "Procedural memory"],
             ["working_memory", "Working memory snapshots"],
+            ["evidence_dashboard", "Evidence dashboard (HTML)"],
             ["dossier", "Final dossier"],
             ["graph", "Evidence graph snapshot"],
             ["episodic_memory_runs", "Episodic memory (runs.json)"],
@@ -65,6 +66,11 @@ export function ArtifactsPanel({ runId }: { runId: string }) {
               <li key={key} className="flex items-start justify-between gap-3 rounded border border-slate-100 bg-slate-50 p-2">
                 <div className="flex flex-col gap-1">
                   <div className="text-slate-900">{label}</div>
+                  {key === "evidence_dashboard" && meta?.exists ? (
+                    <a className="font-mono text-slate-600 underline" href={evidenceDashboardUrl(runId)} target="_blank" rel="noopener noreferrer">
+                      Open in browser
+                    </a>
+                  ) : null}
                   {meta ? <div className="font-mono text-slate-500 break-all">{meta.path}</div> : <div className="text-slate-500">Missing</div>}
                 </div>
                 <span className={`h-fit rounded-full border px-2 py-0.5 text-[11px] ${badge(Boolean(meta?.exists))}`}>

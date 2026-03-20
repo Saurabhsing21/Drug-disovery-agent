@@ -91,3 +91,40 @@ class FollowupResponse(BaseModel):
     target_switch_detected: bool = False
     extracted_gene_symbol: str | None = None
     used_urls: list[str] = Field(default_factory=list)
+
+
+class RenameSavedRunInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    title: str = Field(..., min_length=1, max_length=255)
+
+
+class SaveRunInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    run_id: str = Field(..., min_length=1)
+    title: str | None = Field(default=None, max_length=255)
+
+
+class SaveRunResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    run_id: str
+    title: str
+
+
+class CompareReportInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    title_a: str = Field(..., min_length=1)
+    title_b: str = Field(..., min_length=1)
+    report_a: str = Field(..., min_length=1)
+    report_b: str = Field(..., min_length=1)
+    model_override: str | None = None
+
+
+class CompareReportResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    markdown: str

@@ -442,7 +442,7 @@ def _llm_gate_exit(provider: str) -> None:
         sem.release()
 
 
-async def _ainvoke_guarded(runnable: Runnable, prompt: str, *, provider: str) -> Any:
+async def _ainvoke_guarded(runnable: Runnable, prompt: list[tuple[str, str]] | str, *, provider: str) -> Any:
     await _llm_gate_enter(provider)
     try:
         # langchain-google-genai has had cases where `ainvoke()` blocks the event loop (no await points),

@@ -11,7 +11,7 @@ from langgraph.errors import GraphInterrupt
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, Overwrite, interrupt
 
-from agents.artifact_store import apply_retention_policy
+from agents.artifact_store import apply_retention_policy, artifact_layout
 from agents.conflicts import analyze_conflicts
 from agents.dossier import persist_evidence_dossier
 from agents.evidence_sufficiency import (
@@ -40,6 +40,9 @@ from agents.telemetry import log_event
 from agents.verifier import run_verification
 from agents.working_memory import persist_working_memory_snapshot
 from agents.run_state_store import RunStateStore
+from agents.scoring_agent import NormalizationScoringAgent
+from agents.scoring_schemas import SourceEvidence
+from agents.visualize_evidence import generate_evidence_html
 
 from .schema import (
     CollectorRequest,
@@ -69,6 +72,7 @@ COLLECTOR_NODE_SEQUENCE = [
     "normalize_evidence",
     "verify_evidence",
     "analyze_conflicts",
+    "score_evidence",
     "assess_sufficiency",
     "build_evidence_graph",
     "generate_explanation",
@@ -86,7 +90,8 @@ STATIC_NEXT_STAGE = {
     "collect_sources_parallel": "normalize_evidence",
     "normalize_evidence": "verify_evidence",
     "verify_evidence": "analyze_conflicts",
-    "analyze_conflicts": "assess_sufficiency",
+    "analyze_conflicts": "score_evidence",
+    "score_evidence": "assess_sufficiency",
     "assess_sufficiency": "build_evidence_graph",
     "build_evidence_graph": "generate_explanation",
     "generate_explanation": "supervisor_decide",
@@ -713,6 +718,150 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
 
         return {"evidence_sufficiency": sufficiency, "auto_recollect_pending": False}
 
+    async def score_evidence_node(state: CollectorState):
+        query = state["query"]
+        items = state.get("normalized_items", [])
+        source_status = state.get("source_status", [])
+        
+        # 1. Group records by source
+        by_source: dict[str, list[Any]] = {}
+        for item in items:
+            src = str(item.source.value if hasattr(item.source, "value") else item.source)
+            if src not in by_source:
+                by_source[src] = []
+            by_source[src].append(item)
+            
+        status_map = {str(s.source.value if hasattr(s.source, "value") else s.source): s for s in source_status}
+        
+        # 2. Build SourceEvidence list
+        evidence_list = []
+        scoring_sources = ["pharos", "depmap", "open_targets", "literature"]
+        upstream_aliases = {
+            "pharos": ("pharos", "ext_pharos"),
+            "depmap": ("depmap",),
+            # NOTE: internally we use `opentargets` as a SourceName value, but the
+            # scoring agent + evidence dashboard expect `open_targets`.
+            "open_targets": ("opentargets", "ext_opentargets", "open_targets"),
+            "literature": ("literature",),
+        }
+
+        def _pick_records_and_status(scoring_src: str):
+            for upstream in upstream_aliases.get(scoring_src, (scoring_src,)):
+                records = by_source.get(upstream, [])
+                status = status_map.get(upstream)
+                if records or status:
+                    return upstream, records, status
+            return scoring_src, [], None
+
+        for scoring_key in scoring_sources:
+            _upstream_name, records, status = _pick_records_and_status(scoring_key)
+            
+            if not records and not status:
+                continue
+                
+            data_present = len(records) > 0
+            total_available = len(records)
+            
+            raw_signal = None
+            raw_signal_label = None
+            metadata = {}
+            
+            if scoring_key == "pharos" and records:
+                # Pharos: extract TDL and ligand_total from first record raw_value
+                first_raw = records[0].raw_value
+                if isinstance(first_raw, dict):
+                    tdl = first_raw.get("tdl")
+                    raw_signal = tdl
+                    metadata["tdl"] = tdl
+                    metadata["ligand_total"] = first_raw.get("ligand_total")
+                total_available = 1
+                raw_signal_label = "TDL"
+                    
+            elif scoring_key == "depmap" and records:
+                # DepMap: prefer average_gene_effect when available; total_available=cell_line_count.
+                sup = records[0].support if isinstance(records[0].support, dict) else {}
+                raw_signal = sup.get("average_gene_effect", records[0].raw_value)
+                if isinstance(sup.get("cell_line_count"), (int, float)):
+                    total_available = int(sup.get("cell_line_count") or 0)
+                raw_signal_label = "CERES"
+                
+            elif scoring_key == "open_targets" and records:
+                # Open Targets: raw_value is the score (0-1)
+                raw_signal = records[0].raw_value
+                # Collect all disease scores for max() normalization
+                all_scores = [float(r.raw_value) for r in records if isinstance(r.raw_value, (int, float))]
+                metadata["all_disease_scores"] = all_scores
+                metadata["requested_disease_id"] = query.disease_id
+                metadata["disease_scores"] = [
+                    {
+                        "disease_id": r.disease_id,
+                        "score": float(r.raw_value) if isinstance(r.raw_value, (int, float)) else None,
+                        "summary": r.summary,
+                    }
+                    for r in records[:10]
+                ]
+                # Prefer the upstream evidence_count field as total_available (total associations).
+                try:
+                    counts = []
+                    for r in records:
+                        sup = r.support if isinstance(r.support, dict) else {}
+                        if isinstance(sup.get("evidence_count"), (int, float)):
+                            counts.append(int(sup.get("evidence_count") or 0))
+                    if counts:
+                        total_available = max(counts)
+                except Exception:
+                    pass
+                raw_signal_label = "association_score"
+                
+            elif scoring_key == "literature":
+                # Literature: raw_signal is citations from first record, 
+                # but scoring uses total paper count (hit count).
+                try:
+                    hit_counts = []
+                    eligible_counts = []
+                    for r in records:
+                        sup = r.support if isinstance(r.support, dict) else {}
+                        if isinstance(sup.get("total_hit_count"), (int, float)):
+                            hit_counts.append(int(sup.get("total_hit_count") or 0))
+                        if isinstance(sup.get("eligible_hit_count"), (int, float)):
+                            eligible_counts.append(int(sup.get("eligible_hit_count") or 0))
+                    if hit_counts:
+                        metadata["total_hit_count"] = max(hit_counts)
+                    if eligible_counts:
+                        total_available = max(eligible_counts)
+                    else:
+                        total_available = 0
+                except Exception:
+                    pass
+                raw_signal = total_available
+                raw_signal_label = "paper_count"
+                    
+            evidence_list.append(SourceEvidence(
+                source=scoring_key,
+                gene=query.gene_symbol,
+                data_present=data_present,
+                total_available=total_available,
+                top_k_results=[r.model_dump() for r in records[:5]],
+                raw_signal=float(raw_signal) if isinstance(raw_signal, (int, float)) else raw_signal,
+                raw_signal_label=raw_signal_label,
+                metadata=metadata
+            ))
+            
+        # 3. Score
+        agent = NormalizationScoringAgent()
+        scored_target = agent.score(evidence_list)
+
+        # 4. Evidence dashboard artifact
+        dashboard_path: str | None = None
+        try:
+            dashboard_path = artifact_layout(query.run_id).get("evidence_dashboard")
+            if dashboard_path:
+                generate_evidence_html([scored_target], dashboard_path)
+        except Exception as exc:  # noqa: BLE001
+            scored_target.notes.append(f"Evidence dashboard generation failed: {exc}")
+
+        return {"scored_target": scored_target, "evidence_dashboard_path": dashboard_path}
+
     async def build_evidence_graph_node(state: CollectorState):
         query = state["query"]
         snapshot = build_evidence_graph_snapshot(
@@ -733,6 +882,8 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             verification_report=state.get("verification_report"),
             conflicts=state.get("conflicts", []),
             evidence_graph=state.get("evidence_graph"),
+            scored_target=state.get("scored_target"),
+            evidence_dashboard_path=state.get("evidence_dashboard_path"),
         )
         _notify_progress(
             progress_cb,
@@ -984,6 +1135,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
     async def emit_dossier_node(state: CollectorState):
         query = state["query"]
         final_result = state["final_result"]
+        dashboard_path = state.get("evidence_dashboard_path") or artifact_layout(query.run_id).get("evidence_dashboard") or ""
         handoff_payload = Phase2HandoffPayload(
             run_id=query.run_id,
             ready=(
@@ -1038,6 +1190,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             artifacts={
                 "plan": state["plan"].artifact_path or "",
                 "graph": state["evidence_graph"].artifact_path or "",
+                "evidence_dashboard": dashboard_path,
             },
             handoff_payload=handoff_payload,
         )
@@ -1059,6 +1212,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             for run_id in [token.strip() for token in extra.split(",") if token.strip()]:
                 keep.add(run_id)
             apply_retention_policy(retain_run_ids=keep)
+
         return {"final_result": final_result, "final_dossier": final_dossier, "dossier_agent_report": dossier_report}
 
     graph_builder = StateGraph(CollectorState)
@@ -1069,6 +1223,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
     graph_builder.add_node("normalize_evidence", cast(Any, _wrap_stage("normalize_evidence", normalize_evidence_node, progress_cb=progress_cb)))
     graph_builder.add_node("verify_evidence", cast(Any, _wrap_stage("verify_evidence", verify_evidence_node, progress_cb=progress_cb)))
     graph_builder.add_node("analyze_conflicts", cast(Any, _wrap_stage("analyze_conflicts", analyze_conflicts_node, progress_cb=progress_cb)))
+    graph_builder.add_node("score_evidence", cast(Any, _wrap_stage("score_evidence", score_evidence_node, progress_cb=progress_cb)))
     graph_builder.add_node("assess_sufficiency", cast(Any, _wrap_stage("assess_sufficiency", assess_sufficiency_node, progress_cb=progress_cb)))
     graph_builder.add_node("build_evidence_graph", cast(Any, _wrap_stage("build_evidence_graph", build_evidence_graph_node, progress_cb=progress_cb)))
     graph_builder.add_node("generate_explanation", cast(Any, _wrap_stage("generate_explanation", generate_explanation_node, progress_cb=progress_cb)))
@@ -1084,7 +1239,8 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
     graph_builder.add_edge("collect_sources_parallel", "normalize_evidence")
     graph_builder.add_edge("normalize_evidence", "verify_evidence")
     graph_builder.add_edge("verify_evidence", "analyze_conflicts")
-    graph_builder.add_edge("analyze_conflicts", "assess_sufficiency")
+    graph_builder.add_edge("analyze_conflicts", "score_evidence")
+    graph_builder.add_edge("score_evidence", "assess_sufficiency")
 
     def route_after_sufficiency(state: CollectorState) -> str:
         if state.get("auto_recollect_pending", False):

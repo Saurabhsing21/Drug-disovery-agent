@@ -4,13 +4,15 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { AssistantToolUI, type SourceStep as UISourceStep } from "@/components/AssistantToolUI";
 import { ChatComposer } from "@/components/ChatComposer";
+import { CompareReportPanel } from "@/components/CompareReportPanel";
 import { MarkdownReport } from "@/components/MarkdownReport";
+import { EvidenceDashboardFrame } from "@/components/EvidenceDashboardFrame";
 import { SourcesGrid } from "@/components/SourcesGrid";
 import { PlanApprovalPanel } from "@/components/PlanApprovalPanel";
 import { ReviewDecisionPanel } from "@/components/ReviewDecisionPanel";
 import { useRunEvents } from "@/hooks/useRunEvents";
-import { createRun, createRunFromText, postFollowup } from "@/lib/api";
-import type { SourceName } from "@/lib/types";
+import { cancelRun, createRun, createRunFromText, deleteSavedRun, evidenceDashboardUrl, getSavedRun, listSavedRuns, postFollowup, renameSavedRun, saveRun } from "@/lib/api";
+import type { SavedRunDetail, SavedRunSummary, SourceName } from "@/lib/types";
 import { Github } from "lucide-react";
 
 const ALL_SOURCES: { key: SourceName; label: string }[] = [
@@ -43,11 +45,38 @@ function getRunIdFromUrl(): string | null {
   }
 }
 
+function getCompareIdsFromUrl(): { a: string | null; b: string | null } {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const a = params.get("compareA");
+    const b = params.get("compareB");
+    return {
+      a: a && a.trim() ? a.trim() : null,
+      b: b && b.trim() ? b.trim() : null,
+    };
+  } catch {
+    return { a: null, b: null };
+  }
+}
+
 function setRunIdInUrl(runId: string | null) {
   try {
     const url = new URL(window.location.href);
     if (runId) url.searchParams.set("run", runId);
     else url.searchParams.delete("run");
+    window.history.replaceState({}, "", url.toString());
+  } catch {
+    // ignore
+  }
+}
+
+function setCompareIdsInUrl(compareA: string | null, compareB: string | null) {
+  try {
+    const url = new URL(window.location.href);
+    if (compareA) url.searchParams.set("compareA", compareA);
+    else url.searchParams.delete("compareA");
+    if (compareB) url.searchParams.set("compareB", compareB);
+    else url.searchParams.delete("compareB");
     window.history.replaceState({}, "", url.toString());
   } catch {
     // ignore
@@ -183,13 +212,43 @@ function tabButton(active: boolean): string {
     : "text-neutral-400 hover:text-neutral-200 border-b border-transparent";
 }
 
+function formatThreadTitle(baseTitle: string, startedAt: number): string {
+  const stamp = new Date(startedAt).toLocaleString(undefined, {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${baseTitle} · ${stamp}`;
+}
+
 export default function Page() {
   const [runId, setRunId] = useState<string | null>(null);
   const [reviewerId, setReviewerId] = useState<string>("user@example.com");
   const [history, setHistory] = useState<Array<{ runId: string; startedAt: number; title: string; gene: string }>>([]);
-  const [activeTab, setActiveTab] = useState<"answer" | "links" | "images">("answer");
+  const [activeTab, setActiveTab] = useState<"answer" | "links" | "images" | "compare">("answer");
+  const [sidebarTab, setSidebarTab] = useState<"threads" | "saved">("threads");
+  const [error, setError] = useState<string | null>(null);
+  const [savedRuns, setSavedRuns] = useState<SavedRunSummary[]>([]);
+  const [savedError, setSavedError] = useState<string | null>(null);
+  const [editingSavedId, setEditingSavedId] = useState<string | null>(null);
+  const [editingSavedTitle, setEditingSavedTitle] = useState<string>("");
+  const [compareAId, setCompareAId] = useState<string | null>(null);
+  const [compareBId, setCompareBId] = useState<string | null>(null);
+  const [compareA, setCompareA] = useState<SavedRunDetail | null>(null);
+  const [compareB, setCompareB] = useState<SavedRunDetail | null>(null);
 
-  const { log, paused, failed, completed, snapshot } = useRunEvents(runId);
+  const { log, paused, failed, cancelled, completed, snapshot } = useRunEvents(runId);
+
+  const refreshSavedRuns = async () => {
+    try {
+      const items = await listSavedRuns();
+      setSavedRuns(items);
+      setSavedError(null);
+    } catch (err) {
+      setSavedError(err instanceof Error ? err.message : "Failed to load saved runs");
+    }
+  };
 
   // Restore state on load:
   // - prefer URL `?run=<id>` (shareable)
@@ -204,7 +263,58 @@ export default function Page() {
     const lastRun = (localStorage.getItem(LS_LAST_RUN_KEY) ?? "").trim() || null;
     const initial = urlRun ?? lastRun;
     if (initial) setRunId(initial);
+    const compare = getCompareIdsFromUrl();
+    if (compare.a) setCompareAId(compare.a);
+    if (compare.b) setCompareBId(compare.b);
+    void refreshSavedRuns();
   }, []);
+
+  const isActiveSaved = useMemo(() => {
+    if (!runId) return false;
+    return savedRuns.some((r) => r.run_id === runId);
+  }, [runId, savedRuns]);
+
+  const handleSaveRun = async (activeRunId: string, title?: string) => {
+    await saveRun({ run_id: activeRunId, title });
+    void refreshSavedRuns();
+    setSidebarTab("saved");
+  };
+
+  useEffect(() => {
+    if (!compareAId) {
+      setCompareA(null);
+      return;
+    }
+    let active = true;
+    getSavedRun(compareAId)
+      .then((data) => {
+        if (active) setCompareA(data);
+      })
+      .catch(() => {
+        if (active) setCompareA(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [compareAId]);
+
+  useEffect(() => {
+    if (!compareBId) {
+      setCompareB(null);
+      return;
+    }
+    let active = true;
+    getSavedRun(compareBId)
+      .then((data) => {
+        if (active) setCompareB(data);
+      })
+      .catch(() => {
+        if (active) setCompareB(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [compareBId]);
 
   // Persist history for thread continuity across refresh.
   useEffect(() => {
@@ -226,10 +336,14 @@ export default function Page() {
     }
   }, [runId]);
 
+  useEffect(() => {
+    setCompareIdsInUrl(compareAId, compareBId);
+  }, [compareAId, compareBId]);
+
   const { title: queryTitle, gene: activeGene } = useMemo(() => queryTitleFromSnapshot(snapshot, runId, history), [snapshot, runId, history]);
   const currentStage = useMemo(() => deriveCurrentStage(log), [log]);
   const sourceSteps = useMemo(() => deriveSourceSteps(log, snapshot), [log, snapshot]);
-  const runState: RunState = failed ? "failed" : completed ? "completed" : paused ? "paused" : runId ? "running" : "idle";
+  const runState: RunState = failed ? "failed" : cancelled ? "failed" : completed ? "completed" : paused ? "paused" : runId ? "running" : "idle";
 
   const rerunFromSnapshot = async (overrides: {
     objective?: string;
@@ -302,8 +416,10 @@ export default function Page() {
       per_source_top_k: input.per_source_top_k,
       max_literature_articles: input.max_literature_articles,
     });
+    const startedAt = Date.now();
+    const baseTitle = input.objective?.trim() || `Research: ${input.gene_symbol.trim()}`;
     setRunId(resp.run_id);
-    setHistory((prev) => [{ runId: resp.run_id, startedAt: Date.now(), title: input.objective?.trim() || `Research: ${input.gene_symbol.trim()}`, gene: input.gene_symbol.trim() }, ...prev].slice(0, 50));
+    setHistory((prev) => [{ runId: resp.run_id, startedAt, title: formatThreadTitle(baseTitle, startedAt), gene: input.gene_symbol.trim() }, ...prev].slice(0, 50));
   };
 
   const startRunFromText = async (input: {
@@ -318,8 +434,9 @@ export default function Page() {
       per_source_top_k: input.per_source_top_k,
       max_literature_articles: input.max_literature_articles,
     });
+    const startedAt = Date.now();
     setRunId(resp.run_id);
-    setHistory((prev) => [{ runId: resp.run_id, startedAt: Date.now(), title: input.message.trim(), gene: "" }, ...prev].slice(0, 50));
+    setHistory((prev) => [{ runId: resp.run_id, startedAt, title: formatThreadTitle(input.message.trim(), startedAt), gene: "" }, ...prev].slice(0, 50));
   };
 
   const gatePanel = useMemo(() => {
@@ -353,28 +470,124 @@ export default function Page() {
           + New Thread
         </button>
 
-        <div className="mt-4 px-2 text-xs font-semibold text-neutral-500">Threads</div>
-        <div className="mt-2 flex-1 overflow-auto px-1">
-          <ul className="flex flex-col gap-1">
-            {history.length ? (
-              history.map((h) => (
-                <li key={h.runId}>
-                  <button
-                    className={`w-full rounded-xl px-3 py-2 text-left text-sm ${
-                      h.runId === runId ? "bg-white/10 text-neutral-100" : "text-neutral-300 hover:bg-white/5"
-                    }`}
-                    onClick={() => setRunId(h.runId)}
-                  >
-                    <div className="truncate">{h.title}</div>
-                    <div className="mt-0.5 text-[11px] text-neutral-500">{new Date(h.startedAt).toLocaleString()}</div>
-                  </button>
-                </li>
-              ))
-            ) : (
-              <li className="px-3 py-2 text-sm text-neutral-500">No threads yet</li>
-            )}
-          </ul>
+        <div className="mt-4 flex items-center gap-2 px-2 text-xs font-semibold">
+          <button
+            className={`rounded-full px-3 py-1 ${sidebarTab === "threads" ? "bg-white/10 text-neutral-100" : "text-neutral-400 hover:text-neutral-200"}`}
+            onClick={() => setSidebarTab("threads")}
+          >
+            Threads
+          </button>
+          <button
+            className={`rounded-full px-3 py-1 ${sidebarTab === "saved" ? "bg-white/10 text-neutral-100" : "text-neutral-400 hover:text-neutral-200"}`}
+            onClick={() => setSidebarTab("saved")}
+          >
+            Saved
+          </button>
         </div>
+
+        {sidebarTab === "threads" ? (
+          <div className="mt-2 flex-1 overflow-auto px-1">
+            <ul className="flex flex-col gap-1">
+              {history.length ? (
+                history.map((h) => (
+                  <li key={h.runId}>
+                    <button
+                      className={`w-full rounded-xl px-3 py-2 text-left text-sm ${
+                        h.runId === runId ? "bg-white/10 text-neutral-100" : "text-neutral-300 hover:bg-white/5"
+                      }`}
+                      onClick={() => setRunId(h.runId)}
+                    >
+                      <div className="truncate">{h.title}</div>
+                      <div className="mt-0.5 text-[11px] text-neutral-500">{new Date(h.startedAt).toLocaleString()}</div>
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <li className="px-3 py-2 text-sm text-neutral-500">No threads yet</li>
+              )}
+            </ul>
+          </div>
+        ) : (
+          <div className="mt-2 flex-1 overflow-auto px-1">
+            {savedError ? <div className="px-3 py-2 text-xs text-red-300">{savedError}</div> : null}
+            <ul className="flex flex-col gap-1">
+              {savedRuns.length ? (
+                savedRuns.map((item) => (
+                  <li key={item.id} className="group">
+                    {editingSavedId === item.id ? (
+                      <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
+                        <input
+                          className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-neutral-100"
+                          value={editingSavedTitle}
+                          onChange={(e) => setEditingSavedTitle(e.target.value)}
+                          onKeyDown={async (e) => {
+                            if (e.key === "Enter") {
+                              try {
+                                await renameSavedRun(item.id, editingSavedTitle.trim() || item.title);
+                                setEditingSavedId(null);
+                                setEditingSavedTitle("");
+                                void refreshSavedRuns();
+                              } catch (err) {
+                                setError(err instanceof Error ? err.message : "Rename failed");
+                              }
+                            }
+                            if (e.key === "Escape") {
+                              setEditingSavedId(null);
+                              setEditingSavedTitle("");
+                            }
+                          }}
+                        />
+                        <button
+                          className="text-[11px] text-neutral-300 hover:text-neutral-100"
+                          onClick={() => {
+                            setEditingSavedId(null);
+                            setEditingSavedTitle("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${item.run_id === runId ? "bg-white/10 text-neutral-100" : "text-neutral-300 hover:bg-white/5"}`}>
+                        <button className="min-w-0 text-left text-sm" onClick={() => setRunId(item.run_id)}>
+                          <div className="truncate">{item.title}</div>
+                          <div className="mt-0.5 text-[11px] text-neutral-500">{new Date(item.created_at).toLocaleString()}</div>
+                        </button>
+                        <div className="flex shrink-0 items-center gap-2 opacity-0 transition group-hover:opacity-100">
+                          <button
+                            className="text-[11px] text-neutral-400 hover:text-neutral-100"
+                            onClick={() => {
+                              setEditingSavedId(item.id);
+                              setEditingSavedTitle(item.title);
+                            }}
+                          >
+                            Rename
+                          </button>
+                          <button
+                            className="text-[11px] text-red-300 hover:text-red-200"
+                            onClick={async () => {
+                              if (!confirm("Delete saved run? This does not delete artifacts.")) return;
+                              try {
+                                await deleteSavedRun(item.id);
+                                void refreshSavedRuns();
+                              } catch (err) {
+                                setError(err instanceof Error ? err.message : "Delete failed");
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                ))
+              ) : (
+                <li className="px-3 py-2 text-sm text-neutral-500">No saved runs yet</li>
+              )}
+            </ul>
+          </div>
+        )}
 
         <div className="mt-auto border-t border-white/10 px-2 pt-3 pb-3">
           <a
@@ -398,6 +611,11 @@ export default function Page() {
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col">
+        {error ? (
+          <div className="mx-6 mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+            {error}
+          </div>
+        ) : null}
         {!runId ? (
           <HomeView
             onStart={startRun}
@@ -416,16 +634,44 @@ export default function Page() {
             sourceSteps={sourceSteps}
             log={log}
             failed={failed}
+            cancelled={cancelled}
             snapshot={snapshot}
             showGate={showGate}
             gatePanel={gatePanel}
             onMoreEvidence={() => void onMoreEvidence()}
             onAllSources={() => void onAllSources()}
             onTightenObjective={() => void onTightenObjective()}
+            onCancelRun={
+              runId
+                ? async () => {
+                    try {
+                      await cancelRun(runId);
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Failed to cancel run");
+                    }
+                  }
+                : undefined
+            }
             onFollowup={async (message) => {
               const resp = await postFollowup(runId, { message });
               return resp.answer_markdown;
             }}
+            onSaveRun={async (activeRunId, title) => {
+              try {
+                await handleSaveRun(activeRunId, title);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "Save failed");
+                throw err;
+              }
+            }}
+            isSaved={isActiveSaved}
+            savedRuns={savedRuns}
+            compareAId={compareAId}
+            compareBId={compareBId}
+            onSelectCompareA={setCompareAId}
+            onSelectCompareB={setCompareBId}
+            compareA={compareA}
+            compareB={compareB}
           />
         )}
       </main>
@@ -634,6 +880,7 @@ function RunView({
   sourceSteps,
   log,
   failed,
+  cancelled,
   snapshot,
   showGate,
   gatePanel,
@@ -641,16 +888,27 @@ function RunView({
   onMoreEvidence,
   onAllSources,
   onTightenObjective,
+  onCancelRun,
+  onSaveRun,
+  isSaved,
+  savedRuns,
+  compareAId,
+  compareBId,
+  onSelectCompareA,
+  onSelectCompareB,
+  compareA,
+  compareB,
 }: {
   runId: string;
-  activeTab: "answer" | "links" | "images";
-  onTab: (t: "answer" | "links" | "images") => void;
+  activeTab: "answer" | "links" | "images" | "compare";
+  onTab: (t: "answer" | "links" | "images" | "compare") => void;
   queryTitle: string;
   runState: RunState;
   currentStage: string | null;
   sourceSteps: UISourceStep[];
   log: Array<{ ts: number; event: string; data: Record<string, unknown> }>;
   failed: string | null;
+  cancelled: string | null;
   snapshot: any;
   showGate: boolean;
   gatePanel: ReactNode;
@@ -658,11 +916,34 @@ function RunView({
   onMoreEvidence: () => void;
   onAllSources: () => void;
   onTightenObjective: () => void;
+  onCancelRun?: () => void;
+  onSaveRun: (runId: string, title?: string) => Promise<void>;
+  isSaved: boolean;
+  savedRuns: SavedRunSummary[];
+  compareAId: string | null;
+  compareBId: string | null;
+  onSelectCompareA: (id: string | null) => void;
+  onSelectCompareB: (id: string | null) => void;
+  compareA: SavedRunDetail | null;
+  compareB: SavedRunDetail | null;
 }) {
   const [followupBusy, setFollowupBusy] = useState(false);
   const [followups, setFollowups] = useState<Array<{ q: string; a: string }>>([]);
+  const [compareLinkCopied, setCompareLinkCopied] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const answer = useMemo(() => answerFromSnapshot(snapshot), [snapshot]);
+  const reportHasDashboard = typeof answer === "string" && answer.includes("[[EVIDENCE_DASHBOARD]]");
   const followupEnabled = Boolean(answer && answer.trim().length > 0);
+  const compareShareUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    if (!compareAId && !compareBId) return "";
+    const url = new URL(window.location.href);
+    if (compareAId) url.searchParams.set("compareA", compareAId);
+    else url.searchParams.delete("compareA");
+    if (compareBId) url.searchParams.set("compareB", compareBId);
+    else url.searchParams.delete("compareB");
+    return url.toString();
+  }, [compareAId, compareBId]);
 
   // Restore and persist follow-ups per run.
   useEffect(() => {
@@ -682,6 +963,24 @@ function RunView({
     }
   }, [followups, runId]);
 
+  useEffect(() => {
+    setSaveStatus(isSaved ? "saved" : "idle");
+  }, [isSaved, runId]);
+
+  const saveDisabled = !runId || runState !== "completed" || !answer;
+
+  const onSaveReport = async () => {
+    if (!runId || saveDisabled) return;
+    setSaveStatus("saving");
+    try {
+      const title = queryTitle && queryTitle !== "New thread" ? queryTitle : undefined;
+      await onSaveRun(runId, title);
+      setSaveStatus("saved");
+    } catch {
+      setSaveStatus("idle");
+    }
+  };
+
   return (
     <div className="relative flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
@@ -693,7 +992,10 @@ function RunView({
             Links
           </button>
           <button className={tabButton(activeTab === "images")} onClick={() => onTab("images")}>
-            Images
+            Visuals
+          </button>
+          <button className={tabButton(activeTab === "compare")} onClick={() => onTab("compare")}>
+            Compare
           </button>
           <span className="ml-2 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-neutral-300">
             {runState}
@@ -727,6 +1029,12 @@ function RunView({
               <pre className="mt-2 whitespace-pre-wrap break-words text-xs">{failed}</pre>
             </div>
           ) : null}
+          {cancelled ? (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+              <div className="font-semibold">Run cancelled</div>
+              <div className="mt-2 text-xs">{cancelled}</div>
+            </div>
+          ) : null}
 
           {activeTab === "answer" ? (
             <>
@@ -738,9 +1046,13 @@ function RunView({
                 sourceSteps={sourceSteps}
                 answer={answer}
                 sourcesUI={<SourcesGrid snapshot={snapshot} variant="strip" hideWhenEmpty />}
+                onSaveReport={onSaveReport}
+                saveStatus={saveStatus}
+                saveDisabled={saveDisabled}
                 onMoreEvidence={onMoreEvidence}
                 onAllSources={onAllSources}
                 onTightenObjective={onTightenObjective}
+                onCancelRun={onCancelRun}
               />
 
               {followups.length ? (
@@ -755,7 +1067,11 @@ function RunView({
                         <div className="text-xs font-semibold text-neutral-300">Question</div>
                         <div className="mt-2 text-sm text-neutral-100/90">{f.q}</div>
                         <div className="mt-4 text-xs font-semibold text-neutral-300">Answer</div>
-                        <MarkdownReport markdown={f.a} defaultMode="rendered" />
+                        <MarkdownReport
+                          markdown={f.a}
+                          defaultMode="rendered"
+                          dashboardUrl={runId ? evidenceDashboardUrl(runId) : null}
+                        />
                       </div>
                     ))}
                   </div>
@@ -767,8 +1083,102 @@ function RunView({
           {activeTab === "links" ? <SourcesGrid snapshot={snapshot} variant="grid" /> : null}
 
           {activeTab === "images" ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-neutral-400">
-              Images view is not available yet.
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-neutral-200">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-neutral-300">Evidence contribution dashboard</div>
+                  <div className="mt-1 text-xs text-neutral-400">
+                    {typeof (snapshot as any)?.values?.evidence_dashboard_path === "string"
+                      ? "Generated after scoring."
+                      : "Appears after the scoring stage completes."}
+                  </div>
+                </div>
+                {runId ? (
+                  <a
+                    href={evidenceDashboardUrl(runId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-neutral-100 hover:bg-white/10"
+                  >
+                    Open
+                  </a>
+                ) : null}
+              </div>
+
+              {runId && !reportHasDashboard ? (
+                <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  <EvidenceDashboardFrame src={evidenceDashboardUrl(runId)} className="min-h-[720px] w-full bg-transparent" />
+                </div>
+              ) : runId ? (
+                <div className="mt-4 text-xs text-neutral-400">Dashboard is embedded in the report body.</div>
+              ) : (
+                <div className="mt-4 text-xs text-neutral-400">Start a run to view the dashboard.</div>
+              )}
+
+              <div className="mt-3 text-xs text-neutral-500">
+                If charts render blank, confirm you have internet access (Chart.js loads from jsdelivr).
+              </div>
+            </div>
+          ) : null}
+
+          {activeTab === "compare" ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-neutral-200">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xs font-semibold text-neutral-300">Compare saved runs</div>
+                {compareShareUrl ? (
+                  <button
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-neutral-100 hover:bg-white/10"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(compareShareUrl);
+                        setCompareLinkCopied(true);
+                        setTimeout(() => setCompareLinkCopied(false), 1500);
+                      } catch {
+                        // ignore
+                      }
+                    }}
+                  >
+                    {compareLinkCopied ? "Link copied" : "Copy share link"}
+                  </button>
+                ) : null}
+              </div>
+              {savedRuns.length < 2 ? (
+                <div className="mt-2 text-xs text-neutral-400">Save your results first for comparing.</div>
+              ) : null}
+              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold text-neutral-500">Run A</span>
+                  <select
+                    className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
+                    value={compareAId ?? ""}
+                    onChange={(e) => onSelectCompareA(e.target.value || null)}
+                  >
+                    <option value="">Select a saved run</option>
+                    {savedRuns.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold text-neutral-500">Run B</span>
+                  <select
+                    className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
+                    value={compareBId ?? ""}
+                    onChange={(e) => onSelectCompareB(e.target.value || null)}
+                  >
+                    <option value="">Select a saved run</option>
+                    {savedRuns.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <CompareReportPanel runA={compareA} runB={compareB} />
             </div>
           ) : null}
 

@@ -89,8 +89,38 @@ class OpenTargetsConnector(CollectorConnector):
             rows = target.get("associatedDiseases", {}).get("rows", [])
 
             if not rows:
-                message = f"No disease associations found for '{request.gene_symbol}'"
-                return [], self.skipped_status(started_at, message), []
+                # "Definitive zero": target exists but no disease associations found.
+                # Emit a single record with score=0.0 so downstream normalization/scoring can treat
+                # this as an informative absence rather than "missing source".
+                association_count = int(target.get("associatedDiseases", {}).get("count") or 0)
+                confidence = 0.85
+                absence_records = [
+                    EvidenceRecord(
+                        source=self.source,
+                        target_id=target.get("id") or ensembl_id,
+                        target_symbol=target.get("approvedSymbol") or resolved_symbol or request.gene_symbol,
+                        disease_id=request.disease_id,
+                        evidence_type="disease_association_absence",
+                        raw_value=0.0,
+                        normalized_score=0.0,
+                        confidence=self.safe_float(confidence),
+                        support={
+                            "absence": True,
+                            "evidence_count": association_count,
+                            "requested_disease": request.disease_id,
+                        },
+                        summary=(
+                            f"Open Targets returned no disease associations for {request.gene_symbol}; "
+                            "treat association score as 0.0."
+                        ),
+                        provenance=Provenance(
+                            provider="Open Targets",
+                            endpoint=self.base_url,
+                            query={"gene_symbol": request.gene_symbol, "ensembl_id": ensembl_id, "disease_id": request.disease_id},
+                        ),
+                    )
+                ]
+                return absence_records, self.success_status(started_at, len(absence_records)), []
 
             top_k = max(1, int(request.per_source_top_k))
             final_rows = []

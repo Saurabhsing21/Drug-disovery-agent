@@ -11,6 +11,7 @@ export function useRunEvents(runId: string | null) {
   const [log, setLog] = useState<LogItem[]>([]);
   const [paused, setPaused] = useState<{ reason: string; nextStages: string[] } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+  const [cancelled, setCancelled] = useState<string | null>(null);
   const [completed, setCompleted] = useState<boolean>(false);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const esRef = useRef<EventSource | null>(null);
@@ -21,6 +22,7 @@ export function useRunEvents(runId: string | null) {
     setLog([]);
     setPaused(null);
     setFailed(null);
+    setCancelled(null);
     setCompleted(false);
     setSnapshot(null);
 
@@ -98,6 +100,16 @@ export function useRunEvents(runId: string | null) {
       }
       onAny("run_failed")(evt);
     });
+    es.addEventListener("run_cancelled", (evt) => {
+      setPaused(null);
+      try {
+        const data = JSON.parse(evt.data ?? "{}") as { reason?: string };
+        setCancelled(data.reason ?? "cancelled");
+      } catch {
+        setCancelled("cancelled");
+      }
+      onAny("run_cancelled")(evt);
+    });
 
     es.onerror = () => {
       // Browser will auto-reconnect; we keep last state.
@@ -109,5 +121,29 @@ export function useRunEvents(runId: string | null) {
     };
   }, [url, runId]);
 
-  return { log, paused, failed, completed, snapshot };
+  useEffect(() => {
+    if (!runId) return;
+    let alive = true;
+    const poll = async () => {
+      try {
+        const snap = await getState(runId);
+        if (!alive) return;
+        setSnapshot(snap);
+        const status = String((snap as any)?._persisted?.status ?? "").toLowerCase();
+        if (status === "cancelled") {
+          setCancelled("cancelled");
+        }
+      } catch {
+        // ignore
+      }
+    };
+    const t = setInterval(poll, 10000);
+    poll();
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [runId]);
+
+  return { log, paused, failed, cancelled, completed, snapshot };
 }

@@ -3,15 +3,18 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+from pathlib import Path
 from typing import Any, AsyncGenerator
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from dotenv import load_dotenv
 
 from agents.artifact_store import artifact_layout, artifact_root
+from agents.visualize_evidence import generate_evidence_html
 from agents.graph import CollectionPaused, get_collection_state, resume_collection_graph, run_collection_graph
 from agents.plan_interface import apply_plan_decision
 from agents.provider_select import current_provider_selection, select_provider_once
@@ -21,14 +24,29 @@ from agents.schema import CollectorRequest, EvidenceDossier, EvidenceRecord, Sou
 from agents.query_interpretation_agent import QueryInterpretationAgent, QueryInterpretationContext
 from agents.followup_agent import FollowupAgent, FollowupContext
 from agents.url_resource_fetcher import UrlResourceFetcher, extract_urls as extract_urls_from_text
+from agents.compare_report_agent import CompareReportAgent
 from ui_api.event_bus import BUS
+from ui_api.db import init_db
+from ui_api.saved_runs import (
+    SavedRunsUnavailable,
+    delete_saved_run,
+    get_saved_run,
+    list_saved_runs,
+    rename_saved_run,
+    upsert_saved_run_from_snapshot,
+)
 from ui_api.models import (
     CreateRunInput,
     CreateRunResponse,
     CreateRunFromTextInput,
+    CompareReportInput,
+    CompareReportResponse,
     FollowupInput,
     FollowupResponse,
     PlanDecisionBody,
+    RenameSavedRunInput,
+    SaveRunInput,
+    SaveRunResponse,
     ResumeRunResponse,
     ReviewDecisionBody,
 )
@@ -39,6 +57,7 @@ def _bool_env(name: str, default: str = "0") -> bool:
 
 
 app = FastAPI(title="Drugagent UI Gateway", version="0.1.0")
+RUN_TASKS: dict[str, asyncio.Task] = {}
 
 # Load repo-local .env so UI runs match CLI behavior (keys + runtime toggles).
 try:
@@ -90,9 +109,9 @@ os.environ.setdefault("A4T_REQUIRE_PLAN_APPROVAL", "0")
 # Reasonable defaults for free-tier Gemini: minimize burstiness to reduce 429s.
 os.environ.setdefault("A4T_LLM_CONCURRENCY", "1")
 os.environ.setdefault("A4T_LLM_MIN_INTERVAL_S", "3.0")
-os.environ.setdefault("A4T_LLM_RETRY_ATTEMPTS", "2")
+os.environ.setdefault("A4T_LLM_RETRY_ATTEMPTS", "3")
 # Planner/summarizer calls can legitimately take >60s (especially compiler reports with large payloads).
-os.environ.setdefault("A4T_LLM_TIMEOUT_S", "180")
+os.environ.setdefault("A4T_LLM_TIMEOUT_S", "300")
 os.environ.setdefault("A4T_LLM_429_BASE_DELAY_S", "2.0")
 os.environ.setdefault("A4T_LLM_429_MAX_DELAY_S", "8.0")
 os.environ.setdefault("A4T_LLM_RPM", "10")
@@ -116,6 +135,48 @@ async def _select_llm_provider_on_startup() -> None:
     except Exception:
         # Never block UI startup; agents will fall back deterministically if LLM calls are disabled.
         pass
+    try:
+        init_db()
+    except Exception:
+        # Do not block UI startup if DB is unavailable.
+        pass
+
+
+def _default_title_from_values(values: dict[str, Any]) -> str:
+    query = values.get("query") if isinstance(values.get("query"), dict) else {}
+    objective = str(query.get("objective") or "").strip()
+    if objective:
+        return objective
+    gene = str(query.get("gene_symbol") or "").strip()
+    if gene:
+        return f"Research: {gene}"
+    return "Saved run"
+
+
+def _saved_run_payload(run_id: str) -> dict[str, Any] | None:
+    persisted = RunStateStore.load_latest(run_id)
+    if persisted is None:
+        return None
+    values = persisted.values or {}
+    query = values.get("query") if isinstance(values.get("query"), dict) else {}
+    final_dossier = values.get("final_dossier") if isinstance(values.get("final_dossier"), dict) else None
+    summary = None
+    if final_dossier and isinstance(final_dossier.get("summary_markdown"), str):
+        summary = final_dossier.get("summary_markdown")
+    if summary is None:
+        summary = values.get("explanation") if isinstance(values.get("explanation"), str) else None
+
+    return {
+        "run_id": run_id,
+        "title": _default_title_from_values(values),
+        "gene_symbol": str(query.get("gene_symbol") or "").strip() or None,
+        "disease_id": str(query.get("disease_id") or "").strip() or None,
+        "objective": str(query.get("objective") or "").strip() or None,
+        "summary_markdown": summary,
+        "scored_target": values.get("scored_target") if isinstance(values.get("scored_target"), dict) else None,
+        "final_dossier": final_dossier,
+        "evidence_graph": values.get("evidence_graph") if isinstance(values.get("evidence_graph"), dict) else None,
+    }
 
 
 @app.get("/api/health")
@@ -130,6 +191,26 @@ async def health() -> dict[str, Any]:
         "require_llm_planner": os.getenv("A4T_REQUIRE_LLM_PLANNER", "0"),
         "has_openai_key": bool(os.getenv("OPENAI_API_KEY", "").strip()),
     }
+
+
+async def _cancel_run(run_id: str, reason: str) -> None:
+    task = RUN_TASKS.get(run_id)
+    if not task or task.done():
+        return
+    task.cancel()
+    # Persist cancellation for UI continuity.
+    persisted = RunStateStore.load_latest(run_id)
+    if persisted is not None:
+        RunStateStore.write_latest(
+            run_id,
+            stage=persisted.last_stage or "cancelled",
+            state=persisted.values,
+            update=None,
+            next_stages=(),
+            status="cancelled",
+            error=reason,
+        )
+    BUS.publish(run_id, "run_cancelled", {"run_id": run_id, "status": "cancelled", "reason": reason})
 
 
 async def _run_in_background(request, *, is_resume: bool = False) -> None:
@@ -148,6 +229,9 @@ async def _run_in_background(request, *, is_resume: bool = False) -> None:
             result = await run_collection_graph(request, progress_cb=on_progress)
 
         BUS.publish(run_id, "run_completed", {"run_id": run_id, "status": "completed", "result": result.model_dump(mode="json") if hasattr(result, "model_dump") else result})
+    except asyncio.CancelledError:
+        await _cancel_run(run_id, "cancelled_by_user")
+        raise
     except CollectionPaused as exc:
         BUS.publish(
             run_id,
@@ -168,7 +252,10 @@ async def create_run(body: CreateRunInput, background: BackgroundTasks) -> Creat
     request = body.to_request()
     run_id = request.run_id
     BUS.ensure_run(run_id)
-    background.add_task(_run_in_background, request, is_resume=False)
+    await _cancel_run(run_id, "superseded_by_new_run")
+    task = asyncio.create_task(_run_in_background(request, is_resume=False))
+    RUN_TASKS[run_id] = task
+    task.add_done_callback(lambda _t, rid=run_id: RUN_TASKS.pop(rid, None))
     return CreateRunResponse(run_id=run_id, status="started")
 
 
@@ -200,7 +287,10 @@ async def create_run_from_text(body: CreateRunFromTextInput, background: Backgro
         run_id=run_id,
     )
     BUS.ensure_run(run_id)
-    background.add_task(_run_in_background, request, is_resume=False)
+    await _cancel_run(run_id, "superseded_by_new_run")
+    task = asyncio.create_task(_run_in_background(request, is_resume=False))
+    RUN_TASKS[run_id] = task
+    task.add_done_callback(lambda _t, rid=run_id: RUN_TASKS.pop(rid, None))
     return CreateRunResponse(run_id=run_id, status="started")
 
 
@@ -213,14 +303,35 @@ async def resume_run(run_id: str, background: BackgroundTasks) -> ResumeRunRespo
         raise HTTPException(status_code=404, detail=f"Unknown run_id `{run_id}`")
     if isinstance(request, dict):
         request = CollectorRequest.model_validate(request)
-    background.add_task(_run_in_background, request, is_resume=True)
+    await _cancel_run(run_id, "superseded_by_resume")
+    task = asyncio.create_task(_run_in_background(request, is_resume=True))
+    RUN_TASKS[run_id] = task
+    task.add_done_callback(lambda _t, rid=run_id: RUN_TASKS.pop(rid, None))
     return ResumeRunResponse(run_id=run_id, status="resumed")
+
+
+@app.post("/api/runs/{run_id}/cancel")
+async def cancel_run(run_id: str) -> dict[str, str]:
+    await _cancel_run(run_id, "cancelled_by_user")
+    return {"run_id": run_id, "status": "cancelled"}
 
 
 @app.get("/api/runs/{run_id}/state")
 async def get_state(run_id: str) -> dict[str, Any]:
     snapshot = await get_collection_state(run_id)
     persisted = RunStateStore.load_latest(run_id)
+    if persisted is not None and persisted.status == "running" and run_id not in RUN_TASKS:
+        # Treat stale "running" state as cancelled after server restart.
+        RunStateStore.write_latest(
+            run_id,
+            stage=persisted.last_stage or "unknown",
+            state=persisted.values,
+            update=None,
+            next_stages=(),
+            status="cancelled",
+            error="cancelled_or_server_restart",
+        )
+        persisted = RunStateStore.load_latest(run_id)
     return {
         "run_id": run_id,
         "next": list(snapshot.next),
@@ -295,6 +406,94 @@ def _artifact_meta_for_run(run_id: str) -> dict[str, Any]:
 @app.get("/api/runs/{run_id}/artifacts")
 async def get_artifacts(run_id: str) -> dict[str, Any]:
     return {"run_id": run_id, "artifacts": _artifact_meta_for_run(run_id)}
+
+
+@app.get("/api/runs/{run_id}/evidence-dashboard")
+async def get_evidence_dashboard(run_id: str) -> Response:
+    layout = artifact_layout(run_id)
+    root = artifact_root().resolve()
+    raw_path = layout.get("evidence_dashboard")
+    if not raw_path:
+        raise HTTPException(status_code=404, detail="Evidence dashboard path is not configured.")
+    # Regenerate the dashboard on-demand using the latest scored target so UI always reflects latest styling.
+    latest_path = (root / "working_memory" / run_id / "latest.json").resolve()
+    if latest_path.exists():
+        try:
+            latest_state = json.loads(latest_path.read_text())
+            scored = (latest_state.get("values") or {}).get("scored_target")
+            if scored:
+                Path(raw_path).parent.mkdir(parents=True, exist_ok=True)
+                generate_evidence_html([scored], raw_path)
+        except Exception:
+            pass
+    try:
+        path = (root / os.path.relpath(raw_path, str(root))).resolve()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Evidence dashboard not found.")
+
+    # Safety: only serve artifacts inside the configured artifact root.
+    if root not in path.parents and path != root:
+        raise HTTPException(status_code=404, detail="Evidence dashboard not found.")
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Evidence dashboard not found (not generated yet).")
+
+    # Serve inline HTML so the UI can embed it in an iframe without triggering downloads.
+    return Response(path.read_text(encoding="utf-8"), media_type="text/html")
+
+
+@app.get("/api/saved-runs")
+async def list_saved_runs_route() -> dict[str, Any]:
+    try:
+        return {"saved_runs": await run_in_threadpool(list_saved_runs)}
+    except SavedRunsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/api/saved-runs", response_model=SaveRunResponse)
+async def save_run_route(body: SaveRunInput) -> SaveRunResponse:
+    payload = _saved_run_payload(body.run_id)
+    if payload is None:
+        raise HTTPException(status_code=404, detail="Run not found or not ready to save")
+    if body.title:
+        payload["title"] = body.title.strip()
+    try:
+        saved_id = await run_in_threadpool(upsert_saved_run_from_snapshot, payload)
+    except SavedRunsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return SaveRunResponse(id=str(saved_id), run_id=str(payload["run_id"]), title=str(payload["title"]))
+
+
+@app.get("/api/saved-runs/{saved_id}")
+async def get_saved_run_route(saved_id: str) -> dict[str, Any]:
+    try:
+        item = await run_in_threadpool(get_saved_run, saved_id)
+    except SavedRunsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if item is None:
+        raise HTTPException(status_code=404, detail="Saved run not found")
+    return item
+
+
+@app.patch("/api/saved-runs/{saved_id}")
+async def rename_saved_run_route(saved_id: str, body: RenameSavedRunInput) -> dict[str, Any]:
+    try:
+        item = await run_in_threadpool(rename_saved_run, saved_id, body.title)
+    except SavedRunsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if item is None:
+        raise HTTPException(status_code=404, detail="Saved run not found")
+    return item
+
+
+@app.delete("/api/saved-runs/{saved_id}")
+async def delete_saved_run_route(saved_id: str) -> dict[str, Any]:
+    try:
+        ok = await run_in_threadpool(delete_saved_run, saved_id)
+    except SavedRunsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if not ok:
+        raise HTTPException(status_code=404, detail="Saved run not found")
+    return {"id": saved_id, "status": "deleted"}
 
 
 def _evidence_index_from_dossier(dossier: EvidenceDossier, *, max_items: int = 60) -> list[dict[str, Any]]:
@@ -463,6 +662,18 @@ async def followup(run_id: str, body: FollowupInput) -> FollowupResponse:
     except Exception as exc:  # noqa: BLE001
         BUS.publish(run_id, "followup_failed", {"run_id": run_id, "error": str(exc)})
         raise HTTPException(status_code=500, detail=f"Follow-up failed: {exc}")
+
+
+@app.post("/api/compare-report", response_model=CompareReportResponse)
+async def compare_report(body: CompareReportInput) -> CompareReportResponse:
+    agent = CompareReportAgent(model=body.model_override)
+    markdown = await agent.run(
+        report_a=body.report_a,
+        report_b=body.report_b,
+        title_a=body.title_a,
+        title_b=body.title_b,
+    )
+    return CompareReportResponse(markdown=markdown)
 
 
 @app.post("/api/runs/{run_id}/plan-decision")

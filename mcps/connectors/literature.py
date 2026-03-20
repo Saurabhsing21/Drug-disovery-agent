@@ -79,8 +79,34 @@ class LiteratureConnector(CollectorConnector):
 
         results = payload.get("resultList", {}).get("result", [])
         if not results:
-            message = "No literature evidence found for query"
-            return [], self.skipped_status(started_at, message), []
+            # "Definitive zero": query succeeded but returned 0 hits.
+            # Emit a single record so downstream scoring can treat this as informative absence.
+            absence_records = [
+                EvidenceRecord(
+                    source=self.source,
+                    target_id=f"{request.gene_symbol}:LIT:ABSENCE",
+                    target_symbol=request.gene_symbol,
+                    disease_id=request.disease_id,
+                    evidence_type="literature_absence",
+                    raw_value=0.0,
+                    normalized_score=0.0,
+                    confidence=self.safe_float(0.6),
+                    support={
+                        "absence": True,
+                        "article_count_returned": 0,
+                        "fetch_page_size": fetch_n,
+                        "total_hit_count": 0,
+                        "query": query_string,
+                    },
+                    summary=f"Europe PMC returned 0 hits for query: {query_string}",
+                    provenance=Provenance(
+                        provider="Europe PMC",
+                        endpoint=self.base_url,
+                        query={"query": query_string, "disease_id": request.disease_id},
+                    ),
+                )
+            ]
+            return absence_records, self.success_status(started_at, len(absence_records)), []
 
         def _has_gene_in_title(paper: dict) -> bool:
             title = str(paper.get("title") or "")
@@ -88,13 +114,52 @@ class LiteratureConnector(CollectorConnector):
                 return False
             # Prefer a whole-word match for the symbol to de-emphasize generic method papers
             # that only mention the target in the abstract/metadata.
-            return bool(re.search(rf"\\b{re.escape(request.gene_symbol)}\\b", title, flags=re.IGNORECASE))
+            return bool(re.search(rf"\b{re.escape(request.gene_symbol)}\b", title, flags=re.IGNORECASE))
+
+        def _has_gene_in_abstract(paper: dict) -> bool:
+            abstract = str(paper.get("abstractText") or "")
+            if not abstract:
+                return False
+            return bool(re.search(rf"\b{re.escape(request.gene_symbol)}\b", abstract, flags=re.IGNORECASE))
+
+        eligible = [paper for paper in results if _has_gene_in_title(paper) or _has_gene_in_abstract(paper)]
+        eligible_hit_count = len(eligible)
+        total_hits = int(payload.get("hitCount") or len(results))
+
+        if eligible_hit_count == 0:
+            absence_records = [
+                EvidenceRecord(
+                    source=self.source,
+                    target_id=f"{request.gene_symbol}:LIT:ABSENCE",
+                    target_symbol=request.gene_symbol,
+                    disease_id=request.disease_id,
+                    evidence_type="literature_absence",
+                    raw_value=0.0,
+                    normalized_score=0.0,
+                    confidence=self.safe_float(0.6),
+                    support={
+                        "absence": True,
+                        "article_count_returned": 0,
+                        "fetch_page_size": fetch_n,
+                        "total_hit_count": total_hits,
+                        "eligible_hit_count": 0,
+                        "query": query_string,
+                    },
+                    summary=f"No eligible articles for {request.gene_symbol} in title or abstract.",
+                    provenance=Provenance(
+                        provider="Europe PMC",
+                        endpoint=self.base_url,
+                        query={"query": query_string, "disease_id": request.disease_id},
+                    ),
+                )
+            ]
+            return absence_records, self.success_status(started_at, len(absence_records)), []
 
         # Europe PMC sorting by citations is useful but can over-select generic "toolkit" papers.
         # Re-rank locally to boost papers where the target appears in the title (higher topicality),
         # then break ties by citations (impact).
         reranked = sorted(
-            enumerate(results, start=1),
+            enumerate(eligible, start=1),
             key=lambda pair: (
                 1 if _has_gene_in_title(pair[1]) else 0,
                 int(pair[1].get("citedByCount") or 0),
@@ -110,7 +175,6 @@ class LiteratureConnector(CollectorConnector):
             int(request.max_literature_articles),
         )
         selected = reranked[:limit]
-        total_hits = int(payload.get("hitCount") or len(results))
         records: list[EvidenceRecord] = []
 
         for idx, (orig_rank, paper) in enumerate(selected, start=1):
@@ -136,12 +200,14 @@ class LiteratureConnector(CollectorConnector):
                         "article_count_returned": limit,
                         "fetch_page_size": fetch_n,
                         "total_hit_count": total_hits,
+                        "eligible_hit_count": eligible_hit_count,
                         "pmid": pmid,
                         "title": title,
                         "journal": paper.get("journalTitle"),
                         "pub_year": pub_year,
                         "cited_by_count": citations,
                         "gene_in_title": _has_gene_in_title(paper),
+                        "gene_in_abstract": _has_gene_in_abstract(paper),
                         "original_rank_by_cited_sort": orig_rank,
                         "query": query_string,
                     },

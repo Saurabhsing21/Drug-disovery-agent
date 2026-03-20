@@ -122,10 +122,30 @@ async def select_provider_once() -> ProviderSelection:
         openai_task = _probe_openai(model=openai_model)
         google_task = _probe_google(model=google_model)
         
-        results = await asyncio.gather(openai_task, google_task, return_exceptions=True)
-        
-        openai_ok, openai_err = results[0] if not isinstance(results[0], Exception) else (False, str(results[0]))
-        google_ok, google_err = results[1] if not isinstance(results[1], Exception) else (False, str(results[1]))
+        results: tuple[
+            tuple[bool, str | None] | BaseException,
+            tuple[bool, str | None] | BaseException,
+        ] = await asyncio.gather(
+            openai_task,
+            google_task,
+            return_exceptions=True,
+        )
+
+        openai_result = results[0]
+        openai_ok: bool
+        openai_err: str | None
+        if isinstance(openai_result, BaseException):
+            openai_ok, openai_err = False, str(openai_result)
+        else:
+            openai_ok, openai_err = openai_result
+
+        google_result = results[1]
+        google_ok: bool
+        google_err: str | None
+        if isinstance(google_result, BaseException):
+            google_ok, google_err = False, str(google_result)
+        else:
+            google_ok, google_err = google_result
 
         selected: str | None = None
         
@@ -144,8 +164,10 @@ async def select_provider_once() -> ProviderSelection:
         selected_at_ms = int(time.time() * 1000)
         if selected is None:
             errors = []
-            if openai_err: errors.append(f"openai: {openai_err}")
-            if google_err: errors.append(f"google: {google_err}")
+            if openai_err:
+                errors.append(f"openai: {openai_err}")
+            if google_err:
+                errors.append(f"google: {google_err}")
             
             os.environ["A4T_LLM_CALLS_ENABLED"] = "0"
             os.environ["A4T_LLM_CROSS_PROVIDER_FALLBACK"] = "0"

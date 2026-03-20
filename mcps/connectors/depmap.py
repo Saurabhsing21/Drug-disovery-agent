@@ -6,6 +6,7 @@ import time
 import sys
 
 from agents.schema import CollectorRequest, EvidenceRecord, Provenance, SourceName
+from agents.depmap_normalization import normalize_depmap_ceres
 
 from .base import CollectorConnector
 
@@ -93,9 +94,11 @@ class DepMapConnector(CollectorConnector):
 
             count = int(series.count())
             avg_effect = float(series.mean())
+            median_effect = float(series.median())
             strong_dep = int((series <= -0.5).sum())
             strong_fraction = strong_dep / count
-            normalized = max(0.0, min(1.0, (1.5 - avg_effect) / 3.0))
+            normalized = normalize_depmap_ceres(avg_effect)
+            normalized = 0.0 if normalized is None else max(0.0, min(1.0, normalized))
             confidence = min(0.95, 0.5 + min(count / 1000, 0.3) + min(strong_fraction * 0.3, 0.15))
 
             records: list[EvidenceRecord] = []
@@ -113,6 +116,7 @@ class DepMapConnector(CollectorConnector):
                 support={
                     "cell_line_count": count,
                     "average_gene_effect": round(avg_effect, 4),
+                    "median_gene_effect": round(median_effect, 4),
                     "strong_dependency_count": strong_dep,
                     "strong_dependency_fraction": round(strong_fraction, 4),
                     "column_name": col_name,
@@ -139,7 +143,8 @@ class DepMapConnector(CollectorConnector):
                 strongest = series.nsmallest(per_line_slots)
                 for idx, (cell_line_id, effect) in enumerate(strongest.items(), start=1):
                     effect_value = float(effect)
-                    per_line_norm = max(0.0, min(1.0, (1.5 - effect_value) / 3.0))
+                    per_line_norm = normalize_depmap_ceres(effect_value)
+                    per_line_norm = 0.0 if per_line_norm is None else max(0.0, min(1.0, per_line_norm))
                     per_line_conf = min(0.95, 0.55 + min(count / 1000, 0.25) + max(0.0, (0.7 - effect_value) * 0.05))
                     records.append(
                         EvidenceRecord(

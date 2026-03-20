@@ -14,6 +14,8 @@ The system is built on a modular "Orchestrator-Compiler" pattern using **LangGra
   <img src="public/Agent4target (1).svg" alt="Drug Discovery Agent Workflow" width="800" />
 </div>
 
+For the detailed scoring + normalization architecture (including formulas and conflict logic), see `docs/architecture_diagram.md`.
+
 ### 1. Agent Layer (The Intelligence)
 The agent layer consists of specialized LLM-powered nodes that handle reasoning, planning, and synthesis:
 *   **Orchestrator (Supervisor Agent)**: The central controller that manages the state machine, decides when to move between stages, and handles human-in-the-loop triggers for high-severity conflicts.

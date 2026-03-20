@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Check, ChevronDown, ChevronRight, List, Loader2, Search } from "lucide-react";
 
+import { evidenceDashboardUrl } from "@/lib/api";
 import type { Snapshot } from "@/lib/types";
 import { MarkdownReport } from "@/components/MarkdownReport";
 
@@ -237,6 +238,7 @@ export function makeAssistantToolUI({
   answer,
   sourcesUI,
   actions,
+  reportActions,
 }: {
   runState: "idle" | "running" | "paused" | "completed" | "failed";
   currentStage: string | null;
@@ -249,6 +251,11 @@ export function makeAssistantToolUI({
     onMoreEvidence?: () => void;
     onAllSources?: () => void;
     onTightenObjective?: () => void;
+  };
+  reportActions?: {
+    onSaveReport?: () => Promise<void> | void;
+    saveStatus?: "idle" | "saving" | "saved";
+    saveDisabled?: boolean;
   };
 }): ToolStep[] {
   const stages = deriveStages(log);
@@ -513,7 +520,14 @@ export function makeAssistantToolUI({
           <div className="mt-2 whitespace-pre-wrap break-words text-sm">{String((snapshot as any)._persisted.error)}</div>
         </div>
       ) : null}
-      <MarkdownReport markdown={answer} defaultMode="rendered" />
+      <MarkdownReport
+        markdown={answer}
+        defaultMode="rendered"
+        dashboardUrl={snapshot?.run_id ? evidenceDashboardUrl(snapshot.run_id) : null}
+        onSave={reportActions?.onSaveReport}
+        saveStatus={reportActions?.saveStatus}
+        saveDisabled={reportActions?.saveDisabled}
+      />
       {actions?.onMoreEvidence || actions?.onAllSources || actions?.onTightenObjective ? (
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {actions?.onMoreEvidence ? (
@@ -731,9 +745,13 @@ export function AssistantToolUI({
   sourceSteps,
   answer,
   sourcesUI,
+  onSaveReport,
+  saveStatus,
+  saveDisabled,
   onMoreEvidence,
   onAllSources,
   onTightenObjective,
+  onCancelRun,
 }: {
   runState: "idle" | "running" | "paused" | "completed" | "failed";
   currentStage: string | null;
@@ -742,9 +760,13 @@ export function AssistantToolUI({
   sourceSteps: SourceStep[];
   answer: string | null;
   sourcesUI: ReactNode;
+  onSaveReport?: () => Promise<void> | void;
+  saveStatus?: "idle" | "saving" | "saved";
+  saveDisabled?: boolean;
   onMoreEvidence?: () => void;
   onAllSources?: () => void;
   onTightenObjective?: () => void;
+  onCancelRun?: () => void;
 }) {
   const steps = useMemo(
     () =>
@@ -761,8 +783,13 @@ export function AssistantToolUI({
           onAllSources,
           onTightenObjective,
         },
+        reportActions: {
+          onSaveReport,
+          saveStatus,
+          saveDisabled,
+        },
       }),
-    [answer, currentStage, log, onAllSources, onMoreEvidence, onTightenObjective, runState, snapshot, sourceSteps, sourcesUI],
+    [answer, currentStage, log, onAllSources, onMoreEvidence, onTightenObjective, onSaveReport, runState, saveDisabled, saveStatus, snapshot, sourceSteps, sourcesUI],
   );
 
   const visibleSteps = useMemo(() => {
@@ -803,6 +830,15 @@ export function AssistantToolUI({
   return (
     <div className="mt-6">
       <div className="mb-6 flex items-center justify-end gap-2">
+        {onCancelRun && runState === "running" ? (
+          <button
+            type="button"
+            onClick={onCancelRun}
+            className="rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-xs text-red-100 hover:bg-red-500/20"
+          >
+            Cancel run
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => {

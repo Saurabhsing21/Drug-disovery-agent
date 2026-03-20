@@ -21,6 +21,7 @@ from .schema import (
     SourceStatus,
     VerificationReport,
 )
+from .scoring_schemas import ScoredTarget
 
 
 class CollectorState(TypedDict, total=False):
@@ -56,3 +57,5 @@ class CollectorState(TypedDict, total=False):
     final_result: CollectorResult
     final_dossier: EvidenceDossier
     dossier_agent_report: AgentReport
+    scored_target: ScoredTarget
+    evidence_dashboard_path: str

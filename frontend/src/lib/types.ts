@@ -32,3 +32,21 @@ export type Snapshot = {
 export type PlanDecisionStatus = "approved" | "rejected" | "needs_changes";
 
 export type ReviewDecisionStatus = "approved" | "rejected" | "needs_more_evidence";
+
+export type SavedRunSummary = {
+  id: string;
+  run_id: string;
+  title: string;
+  gene_symbol?: string | null;
+  created_at: string;
+};
+
+export type SavedRunDetail = SavedRunSummary & {
+  disease_id?: string | null;
+  objective?: string | null;
+  summary_markdown?: string | null;
+  scored_target?: Record<string, unknown> | null;
+  final_dossier?: Record<string, unknown> | null;
+  evidence_graph?: Record<string, unknown> | null;
+  updated_at?: string;
+};

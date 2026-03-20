@@ -16,6 +16,7 @@ from .schema import (
     StatusName,
     VerificationReport,
 )
+from .scoring_schemas import ScoredTarget
 from . import prompts
 from .summary_validation import validate_summary_markdown
 from .content_memory import inject_content_memory
@@ -37,6 +38,42 @@ class SummaryAgent:
         return raw if raw in {"structured", "dossier", "compiler"} else "structured"
 
     @staticmethod
+    def _dashboard_block(run_id: str, evidence_dashboard_path: str | None) -> str:
+        return "\n".join(
+            [
+                "## Evidence Contribution Dashboard",
+                "[[EVIDENCE_DASHBOARD]]",
+            ]
+        )
+
+    @staticmethod
+    def _header_block(gene_symbol: str, run_id: str | None) -> str:
+        if run_id:
+            return f"Gene: {gene_symbol} | Run ID: {run_id}"
+        return f"Gene: {gene_symbol}"
+
+    def _inject_header_and_dashboard(
+        self,
+        text: str,
+        *,
+        gene_symbol: str,
+        run_id: str | None,
+        evidence_dashboard_path: str | None,
+    ) -> str:
+        if "[[EVIDENCE_DASHBOARD]]" in text:
+            return text
+        header = self._header_block(gene_symbol, run_id)
+        dashboard = self._dashboard_block(run_id or "unknown", evidence_dashboard_path) if run_id else ""
+        title = "# THERAPEUTIC TARGET EVIDENCE SUMMARY REPORT"
+        if title in text:
+            before, after = text.split(title, 1)
+            after = after.lstrip("\n")
+            injected = f"{title}\n\n{header}\n\n{dashboard}\n\n{after}" if dashboard else f"{title}\n\n{header}\n\n{after}"
+            return (before + injected).strip()
+        injected = f"{header}\n\n{dashboard}\n\n{text}" if dashboard else f"{header}\n\n{text}"
+        return injected.strip()
+
+    @staticmethod
     def _enum_value(value: object) -> str:
         return value.value if hasattr(value, "value") else str(value)
 
@@ -48,6 +85,8 @@ class SummaryAgent:
         verification_report: VerificationReport | None = None,
         conflicts: list[ConflictRecord] | None = None,
         evidence_graph: EvidenceGraphSnapshot | None = None,
+        scored_target: ScoredTarget | None = None,
+        evidence_dashboard_path: str | None = None,
     ) -> dict:
         coverage = [
             {
@@ -116,6 +155,13 @@ class SummaryAgent:
                 if evidence_graph
                 else None
             ),
+            "evidence_dashboard": {
+                "url": f"/api/runs/{request.run_id}/evidence-dashboard",
+                "artifact_path": evidence_dashboard_path,
+            }
+            if request.run_id
+            else None,
+            "scored_target": scored_target.model_dump(mode="json") if scored_target else None,
         }
 
     def _evidence_ref(self, item: EvidenceRecord) -> str:
@@ -351,6 +397,7 @@ class SummaryAgent:
         grounded_findings: list[str],
         verification_report: VerificationReport | None = None,
         evidence_graph: EvidenceGraphSnapshot | None = None,
+        evidence_dashboard_path: str | None = None,
     ) -> str:
         success = robustness.successful_source_count
         total = robustness.requested_source_count
@@ -402,6 +449,9 @@ class SummaryAgent:
                 ]
             )
 
+        if request.run_id:
+            lines.extend(["", self._dashboard_block(request.run_id, evidence_dashboard_path)])
+
         return "\n".join(lines)
 
     def _compiler_table(self, headers: list[str], rows: list[list[str]], include_index: bool = True) -> str:
@@ -429,6 +479,7 @@ class SummaryAgent:
         source_status: list[SourceStatus],
         verification_report: VerificationReport | None = None,
         conflicts: list[ConflictRecord] | None = None,
+        evidence_dashboard_path: str | None = None,
     ) -> str:
         def ev_id(item: EvidenceRecord) -> str:
             return self._evidence_ref(item)
@@ -631,6 +682,11 @@ class SummaryAgent:
         lines: list[str] = []
         lines.append("# THERAPEUTIC TARGET EVIDENCE SUMMARY REPORT")
         lines.append("")
+        lines.append(self._header_block(request.gene_symbol, request.run_id))
+        lines.append("")
+        if request.run_id:
+            lines.append(self._dashboard_block(request.run_id, evidence_dashboard_path))
+            lines.append("")
         lines.append("## 1. Executive Summary")
         lines.append("")
         lines.append(
@@ -671,15 +727,9 @@ class SummaryAgent:
                 f"Literature evidence {lit_ref} includes {len(literature)} Europe PMC items selected from a larger hit set "
                 "and ranked to emphasize target-in-title relevance while retaining citation impact."
             )
-            lines.append("")
         lines.append("")
-        lines.append("Evidence coverage is compiled below by category with tables listing canonical evidence ids.")
         lines.append("")
-        lines.append("Coverage by source execution status:")
-        lines.append(self._compiler_table(["source", "status", "records", "duration_ms", "error"], coverage_rows))
-        lines.append("")
-
-        lines.append("## 2. Target Annotation Evidence")
+        lines.append("## 2. Target Annotation — PHAROS")
         lines.append("")
         lines.append("This section compiles target annotation evidence as provided by the evidence payload.")
         if target_annot:
@@ -707,7 +757,7 @@ class SummaryAgent:
         )
         lines.append("")
 
-        lines.append("## 3. Genetic Dependency Evidence")
+        lines.append("## 3. Genetic Dependency — DepMap")
         lines.append("")
         lines.append("### Global Dependency Analysis")
         lines.append("")
@@ -756,7 +806,7 @@ class SummaryAgent:
         )
         lines.append("")
 
-        lines.append("## 4. Disease Association Evidence")
+        lines.append("## 4. Disease Associations — Open Targets")
         lines.append("")
         lines.append("This section compiles disease association evidence (gene-to-disease links) provided by the payload.")
         if not request.disease_id:
@@ -785,7 +835,7 @@ class SummaryAgent:
         )
         lines.append("")
 
-        lines.append("## 5. Literature Evidence")
+        lines.append("## 5. Literature")
         lines.append("")
         lines.append("This section compiles literature-derived evidence items as provided by the payload.")
         lines.append(
@@ -811,7 +861,7 @@ class SummaryAgent:
         )
         lines.append("")
 
-        lines.append("## 6. Integrated Evidence Interpretation")
+        lines.append("## 6. Integrated Interpretation")
         lines.append("")
         lines.append(
             "Integrated interpretation connects evidence categories strictly as present in the payload. "
@@ -861,7 +911,7 @@ class SummaryAgent:
         lines.append(conflict_text)
         lines.append("")
 
-        lines.append("## 8. Overall Target Assessment")
+        lines.append("## 8. Overall Assessment")
         lines.append("")
         lines.append(
             "Overall target assessment is a synthesis grounded in the compiled tables. "
@@ -875,7 +925,7 @@ class SummaryAgent:
             )
         lines.append("")
 
-        lines.append("## 9. Final Evidence-Based Conclusion")
+        lines.append("## 9. Final Conclusion")
         lines.append("")
         lines.append(
             "Conclusion is limited to what is supported by the compiled evidence categories above. "
@@ -892,6 +942,7 @@ class SummaryAgent:
         request: CollectorRequest,
         items: list[EvidenceRecord],
         source_status: list[SourceStatus],
+        evidence_dashboard_path: str | None = None,
     ) -> str:
         """Appendix with machine-compiled Markdown tables for UI readability.
 
@@ -1023,7 +1074,7 @@ class SummaryAgent:
             )
 
         lines: list[str] = []
-        lines.append("# Appendix A: Evidence Tables (Machine-Compiled)")
+        lines.append("# Appendix A — Raw Evidence Tables")
         lines.append("")
         lines.append(
             "These tables are compiled directly from the verified evidence payload to make the report scannable.\n"
@@ -1036,7 +1087,6 @@ class SummaryAgent:
         lines.append("## A1. Source Coverage")
         lines.append(self._compiler_table(["source", "status", "records", "duration_ms", "error"], coverage_rows))
         lines.append("")
-
         lines.append("## A2. Target Annotation (PHAROS)")
         lines.append(
             self._compiler_table(
@@ -1103,6 +1153,7 @@ class SummaryAgent:
         verification_report: VerificationReport | None = None,
         conflicts: list[ConflictRecord] | None = None,
         evidence_graph: EvidenceGraphSnapshot | None = None,
+        evidence_dashboard_path: str | None = None,
     ) -> LLMSummary:
         robustness = self._build_robustness(source_status, item_count=len(items))
 
@@ -1113,6 +1164,7 @@ class SummaryAgent:
                 source_status=source_status,
                 verification_report=verification_report,
                 conflicts=conflicts,
+                evidence_dashboard_path=evidence_dashboard_path,
             )
         else:
             markdown_report = self._build_markdown_report(
@@ -1124,6 +1176,7 @@ class SummaryAgent:
                 grounded_findings=self._grounded_findings(items),
                 verification_report=verification_report,
                 evidence_graph=evidence_graph,
+                evidence_dashboard_path=evidence_dashboard_path,
             )
 
         return LLMSummary(
@@ -1141,6 +1194,8 @@ class SummaryAgent:
         verification_report: VerificationReport | None = None,
         conflicts: list[ConflictRecord] | None = None,
         evidence_graph: EvidenceGraphSnapshot | None = None,
+        scored_target: ScoredTarget | None = None,
+        evidence_dashboard_path: str | None = None,
     ) -> LLMSummary:
         item_list = list(items)
         status_list = list(source_status)
@@ -1163,6 +1218,8 @@ class SummaryAgent:
                 verification_report=verification_report,
                 conflicts=conflicts,
             )
+            if request.run_id:
+                markdown_report += "\n\n" + self._dashboard_block(request.run_id, evidence_dashboard_path)
             summary = LLMSummary(markdown_report=markdown_report, generation_mode="deterministic_scored")
             summary.robustness = self._build_robustness(status_list, item_count=len(item_list))
             summary.model_used = None
@@ -1215,6 +1272,8 @@ class SummaryAgent:
             verification_report=verification_report,
             conflicts=conflicts,
             evidence_graph=evidence_graph,
+            scored_target=scored_target,
+            evidence_dashboard_path=evidence_dashboard_path,
         )
 
         try:
@@ -1270,8 +1329,16 @@ class SummaryAgent:
                     request=request,
                     items=item_list,
                     source_status=status_list,
+                    evidence_dashboard_path=evidence_dashboard_path,
                 )
                 combined_text = combined_text + "\n\n---\n\n" + appendix
+
+            combined_text = self._inject_header_and_dashboard(
+                combined_text,
+                gene_symbol=request.gene_symbol,
+                run_id=request.run_id,
+                evidence_dashboard_path=evidence_dashboard_path,
+            )
 
             summary = LLMSummary(markdown_report=combined_text, generation_mode="llm_raw_text")
             
@@ -1300,6 +1367,7 @@ class SummaryAgent:
                 verification_report=verification_report,
                 conflicts=conflicts,
                 evidence_graph=evidence_graph,
+                evidence_dashboard_path=evidence_dashboard_path,
             )
 
     def _system_prompt(self) -> str:
