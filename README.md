@@ -11,7 +11,7 @@ A high-fidelity drug discovery ecosystem that orchestrates specialized LLM agent
 The system is built on a modular "Orchestrator-Compiler" pattern using **LangGraph**, managing a stateful pipeline designed for maximum reliability, traceability, and speed.
 
 <div align="center">
-  <img src="public/Agent4target (1).svg" alt="Drug Discovery Agent Workflow" width="800" />
+  <img src="public/system_architecture.png" alt="Drug Discovery Agent System Architecture" width="800" />
 </div>
 
 For the detailed scoring + normalization architecture (including formulas and conflict logic), see `docs/architecture_diagram.md`.
