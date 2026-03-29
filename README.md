@@ -8,13 +8,24 @@ A high-fidelity drug discovery ecosystem that orchestrates specialized LLM agent
 
 ## 🏗️ Core Architecture
 
+
+
 The system is built on a modular "Orchestrator-Compiler" pattern using **LangGraph**, managing a stateful pipeline designed for maximum reliability, traceability, and speed.
 
 <div align="center">
   <img src="public/system_architecture.png" alt="Drug Discovery Agent System Architecture" width="800" />
 </div>
 
-For the detailed scoring + normalization architecture (including formulas and conflict logic), see `docs/architecture_diagram.md`.
+<div align="center">
+  <h3>📺 Video Demo</h3>
+  <a href="https://www.loom.com/share/544e617a5a0643d7841c73dcd8930385">
+    <img src="https://img.shields.io/badge/Watch_Demo_on-Loom-blue?style=for-the-badge&logo=loom" alt="Loom Demo" />
+  </a>
+  <br />
+  <sub>Click the badge above to watch the system in action</sub>
+</div>
+
+### For the detailed scoring + normalization architecture (including formulas and conflict logic), see `docs/architecture_diagram.md`.
 
 ### 1. Agent Layer (The Intelligence)
 The agent layer consists of specialized LLM-powered nodes that handle reasoning, planning, and synthesis:
