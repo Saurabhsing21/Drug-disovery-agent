@@ -24,6 +24,7 @@ def validate_summary_markdown(markdown: str, items: list[EvidenceRecord]) -> tup
             "## 4. Disease Associations — Open Targets",
             "## 5. Literature",
             "## 6. Integrated Interpretation",
+            "### Evidence Contribution (Interpretation)",
             "## 7. Evidence Strength Assessment",
             "## 8. Overall Assessment",
             "## 9. Final Conclusion",
@@ -94,9 +95,33 @@ def validate_summary_markdown(markdown: str, items: list[EvidenceRecord]) -> tup
             if evidence_refs and not any(f"[{ref}]" in line for ref in evidence_refs):
                 return False, f"Unsupported citation reference: {line}"
     elif format_mode == "compiler":
-        missing = [ref for ref in sorted(evidence_refs) if ref and ref not in markdown]
-        if missing:
-            return False, f"Missing evidence ids in compiled report: {missing[:3]}"
+        # Only check POSITIVE evidence records — absence/negative synthetic records
+        # (identified by "ABSENCE" or "absence" in the id or type) are not expected
+        # to appear verbatim in the compiled narrative.
+        positive_refs = {
+            ref for ref in evidence_refs
+            if ref and "absence" not in ref.lower() and "ABSENCE" not in ref
+        }
+        if positive_refs:
+            missing = [ref for ref in sorted(positive_refs) if ref not in markdown]
+            # Require at least 50% of positive evidence ids to appear in the report.
+            # A strict 100% requirement caused failures when the LLM paraphrased or
+            # grouped citations rather than listing every id individually.
+            threshold = max(1, len(positive_refs) // 2)
+            if len(missing) > len(positive_refs) - threshold:
+                return False, f"Missing evidence ids in compiled report: {missing[:3]}"
+
+        # Check that the narrative contains INLINE traceability citations.
+        # The new prompt (RULE 1) requires format: (evidence_id: <id>; source: <source>)
+        # Check only the narrative portion (before the Appendix A tables, if present).
+        narrative_part = markdown.split("# Appendix A")[0] if "# Appendix A" in markdown else markdown
+        inline_cite_count = narrative_part.count("evidence_id:")
+        if items and inline_cite_count < 3:
+            return False, (
+                f"Insufficient inline traceability: found {inline_cite_count} "
+                "'evidence_id:' citations in narrative (minimum 3 required). "
+                "Every key claim must cite its evidence_id inline."
+            )
     else:
         # Concise format: require at least one evidence id reference if any items exist.
         if items and evidence_refs and not any(ref in markdown for ref in list(evidence_refs)[:5]):

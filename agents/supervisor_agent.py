@@ -29,8 +29,8 @@ from .schema import (
 
 class SupervisorDecisionResponse(BaseModel):
     action: SupervisorAction
-    rationale: str = Field(..., min_length=1)
-    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
+    rationale: str
+    confidence: float = 0.5
     follow_up_actions: list[str] = Field(default_factory=list)
 
 

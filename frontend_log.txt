@@ -1,0 +1,31 @@
+
+> drugagent-frontend@0.1.0 dev
+> next dev -p 3001
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.0.104:3001
+
+ ✓ Starting...
+ ✓ Ready in 57.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 2.4s (1193 modules)
+ GET / 200 in 3324ms
+ GET / 200 in 2281ms
+ GET / 200 in 2177ms
+ GET / 200 in 1157ms
+ GET /?run=run-07df90206878 200 in 4060ms
+ GET / 200 in 1615ms
+ GET / 200 in 909ms
+ GET / 200 in 477ms
+ GET / 200 in 151ms
+ GET / 200 in 748ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 17.7s (1212 modules)
+ GET /health 404 in 21041ms
+ GET /health 404 in 20380ms
+ GET /?run=run-07df90206878 200 in 2113ms
+ GET /?run=run-07df90206878 200 in 2114ms
+ GET /?run=run-0393594af740 200 in 2118ms
+ GET / 200 in 1322ms
+[?25h

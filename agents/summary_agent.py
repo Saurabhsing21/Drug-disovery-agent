@@ -22,10 +22,11 @@ from .summary_validation import validate_summary_markdown
 from .content_memory import inject_content_memory
 from .prompt_trace import persist_prompt_trace
 from .scoring import ScoredDecision, category_for_evidence, record_quality, score_evidence
+from .bio_context_fetcher import fetch_uniprot_context
 
 
 class SummaryAgent:
-    """Generate a structured evidence summary using OpenAI, with deterministic fallback."""
+    """Generate a structured evidence summary using Google Gemini (default), with deterministic fallback."""
 
     def __init__(self, model: str | None = None, temperature: float = 0.7):
         self.model: str = model or os.getenv("A4T_SUMMARY_MODEL") or default_fast_model()
@@ -128,6 +129,11 @@ class SummaryAgent:
             verification_report=verification_report,
         )
 
+        # Fetch biological context from UniProt (free, no key needed).
+        # This gives the LLM protein class + curated function text so it can
+        # explain WHY scores differ between targets, not just THAT they differ.
+        biological_context = fetch_uniprot_context(request.gene_symbol)
+
         return {
             "target": request.gene_symbol,
             "disease_context": request.disease_id,
@@ -162,6 +168,11 @@ class SummaryAgent:
             if request.run_id
             else None,
             "scored_target": scored_target.model_dump(mode="json") if scored_target else None,
+            # Biological context enrichment from UniProt.
+            # Fields: protein_full_name, protein_family, molecular_function,
+            #         curated_disease_assocs, uniprot_accession
+            # Empty dict if UniProt is unreachable (graceful degradation).
+            "biological_context": biological_context,
         }
 
     def _evidence_ref(self, item: EvidenceRecord) -> str:
@@ -1238,8 +1249,8 @@ class SummaryAgent:
                 )
             if not llm_configured():
                 raise RuntimeError(
-                    "Compiler report requires an LLM API key/configuration. "
-                    "Set OPENAI_API_KEY (or configure your provider) and retry."
+                    "Compiler report requires a valid LLM API key. "
+                    "Set OPENAI_API_KEY or GOOGLE_API_KEY (or GEMINI_API_KEY) and retry."
                 )
 
         if not llm_calls_enabled():
@@ -1320,9 +1331,40 @@ class SummaryAgent:
                 temperature=self.temperature,
             )
             
-            raw_text = str(response.content)
+            # 1. Robust extraction from potentially multi-part or structured AIMessage content.
+            # Some providers (like Gemini) return content as a list of dicts/text parts.
+            content_val = response.content
+            if isinstance(content_val, str):
+                raw_text = content_val
+            elif isinstance(content_val, list):
+                parts = []
+                for p in content_val:
+                    if isinstance(p, str):
+                        parts.append(p)
+                    elif isinstance(p, dict) and "text" in p:
+                        parts.append(p["text"])
+                    else:
+                        # Fallback for unexpected part types (e.g. tool_calls or artifacts)
+                        parts.append(str(p))
+                raw_text = "".join(parts)
+            else:
+                raw_text = str(content_val)
+
+            # 2. Strip potential LLM markdown artifacts (triple backticks)
+            # Some models wrap the entire report in a code block despite "Return ONLY report" instructions.
+            raw_text = raw_text.strip()
+            if raw_text.startswith("```"):
+                import re
+                # Strip ```markdown and ending ```
+                raw_text = re.sub(r"^```[a-zA-Z]*\n?", "", raw_text)
+                raw_text = re.sub(r"\n?```$", "", raw_text)
+                raw_text = raw_text.strip()
             
-            # Manually construct the summary object from raw text
+            # 3. Fix literal newline escaping if the LLM outputted real character sequences "\" + "n"
+            # This happens if there's an encoding/transport mismatch in the specific model version.
+            if "\\n" in raw_text and "\n" not in raw_text:
+                raw_text = raw_text.replace("\\n", "\n")
+
             combined_text = raw_text.strip()
             if os.getenv("A4T_SUMMARY_APPENDIX_TABLES", "1").strip().lower() not in {"0", "false", "no"}:
                 appendix = self._build_compiler_tables_appendix(

@@ -20,18 +20,16 @@ from .schema import CollectorRequest, SourceName
 
 
 class SourceDirective(BaseModel):
-    source: str = Field(..., min_length=1)
-    directive: str = Field(..., min_length=1)
+    source: str
+    directive: str
 
 
 class PlanningResponse(BaseModel):
-    query_intent: str = Field(..., min_length=1)
-    query_variants: list[str] = Field(..., description="Query variants/synonyms to use for retrieval.")
-    source_order: list[str] = Field(..., description="Ordered list of source names to collect from.")
-    # NOTE: Avoid dict[str,str] here because OpenAI structured output (json_schema) rejects
-    # additionalProperties and LangChain may drop such fields, causing schema validation errors.
-    source_directives: list[SourceDirective] = Field(..., description="Per-source directives for collectors.")
-    execution_notes: list[str] = Field(..., description="Execution notes, including memory context if relevant.")
+    query_intent: str
+    query_variants: list[str]
+    source_order: list[str]
+    source_directives: list[SourceDirective]
+    execution_notes: list[str]
 
     def directives_dict(self) -> dict[str, str]:
         return {entry.source: entry.directive for entry in self.source_directives if entry.source and entry.directive}

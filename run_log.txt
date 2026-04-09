@@ -1,0 +1,254 @@
+[11:38:22] · Initializing pipeline...
+[11:38:23] ⟶ Stage start: Validate Input
+[11:38:23] · input_validation_agent report
+[11:38:23] ✓ Stage complete: Validate Input
+[11:38:23] ⟶ Validate Input -> Plan Collection
+[11:38:23] ⟶ Stage start: Plan Collection
+[11:38:23] · planning_agent report
+[11:38:23] ✓ Stage complete: Plan Collection
+[11:38:23] ⟶ Plan Collection -> Plan Review Gate
+[11:38:23] ⟶ Stage start: Plan Review Gate
+[11:38:23] ✓ Stage complete: Plan Review Gate
+[11:38:23] ⟶ Plan Review Gate -> Collect Sources Parallel
+[11:38:23] ⟶ Stage start: Collect Sources Parallel
+[11:38:23] → Connecting to depmap MCP...
+[11:38:23] → Connecting to pharos MCP...
+[11:38:23] → Connecting to open_targets MCP...
+[11:38:23] → Connecting to literature MCP...
+[04/09/26 11:38:23] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 11:38:23] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 11:38:23] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 11:38:23] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[DepMap] Loading CRISPRGeneEffect.csv into memory… (one-time per session)
+[04/09/26 11:38:24] INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+[04/09/26 11:38:24] INFO     HTTP Request: POST                  _client.py:1740
+                             https://pharos-api.ncats.io/graphql                
+                             "HTTP/1.1 200 OK"                                  
+                    INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[04/09/26 11:38:25] INFO     HTTP Request: GET                   _client.py:1740
+                             https://www.ebi.ac.uk/europepmc/web                
+                             services/rest/search?query=%22BRAF%                
+                             22&format=json&pageSize=75&resultTy                
+                             pe=core&sort=CITED+desc "HTTP/1.1                  
+                             200 OK"                                            
+[11:38:25] ✓ open_targets complete
+[11:38:25] ✓ pharos complete
+[04/09/26 11:38:26] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[11:38:26] ✓ literature complete
+[DepMap] Loaded 1169 cell lines × 18435 genes into memory ✅
+[04/09/26 11:38:32] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[11:38:32] ✓ depmap complete
+[11:38:32] ✓ Stage complete: Collect Sources Parallel
+[11:38:32] ⟶ Collect Sources Parallel -> Normalize Evidence
+[11:38:32] ⟶ Stage start: Normalize Evidence
+[11:38:32] · normalization_agent report
+[11:38:32] ✓ Stage complete: Normalize Evidence
+[11:38:32] ⟶ Normalize Evidence -> Verify Evidence
+[11:38:32] ⟶ Stage start: Verify Evidence
+[11:38:32] ✓ Stage complete: Verify Evidence
+[11:38:32] ⟶ Verify Evidence -> Analyze Conflicts
+[11:38:32] ⟶ Stage start: Analyze Conflicts
+[11:38:32] ✓ Stage complete: Analyze Conflicts
+[11:38:32] ⟶ Analyze Conflicts -> Score Evidence
+[11:38:32] ⟶ Stage start: Score Evidence
+[11:38:32] ✓ Stage complete: Score Evidence
+[11:38:32] ⟶ Score Evidence -> Assess Sufficiency
+[11:38:32] ⟶ Stage start: Assess Sufficiency
+[11:38:32] ✓ Stage complete: Assess Sufficiency
+[11:38:32] ⟶ Assess Sufficiency -> Build Evidence Graph
+[11:38:32] ⟶ Assess Sufficiency -> Build Evidence Graph
+[11:38:32] ⟶ Stage start: Build Evidence Graph
+[11:38:32] ✓ Stage complete: Build Evidence Graph
+[11:38:32] ⟶ Build Evidence Graph -> Generate Explanation
+[11:38:32] ⟶ Stage start: Generate Explanation
+[11:38:32] · summary_agent report
+[11:38:32] ✓ Stage complete: Generate Explanation
+[11:38:32] ⟶ Generate Explanation -> Supervisor Decide
+[11:38:32] ⟶ Stage start: Supervisor Decide
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+[11:40:18] ✗ Stage error: Supervisor Decide
+[11:40:18] ✗ supervisor_agent failed: All LLM candidates failed. provider=google
+role=reasoning timeout_s=60.0 gpt-5: RateLimit(attempt=1/3 delay_s=2.0): Error 
+calling model 'gemini-flash-latest' (RESOURCE_EXHAUSTED): 429 
+RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your 
+current quota, please check your plan and billing details. For more information 
+on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To 
+monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota 
+exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 
+20, model: gemini-3-flash\nPlease retry in 53.244409813s.', 'status': 
+'RESOURCE_EXHAUSTED', 'details': [{'@type': 
+'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more 
+about Gemini API quotas', 'url': 
+'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 
+'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_requests', 
+'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 
+'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 
+'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 
+'retryDelay': '53s'}]}} | gemini-pro-latest: RateLimit(attempt=1/3 delay_s=6.0):
+Error calling model 'gemini-pro-latest' (RESOURCE_EXHAUSTED): 429 
+RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your 
+current quota, please check your plan and billing details. For more information 
+on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To 
+monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota 
+exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, 
+limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, 
+limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0,
+model: gemini-3.1-pro\n* Quota exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0,
+model: gemini-3.1-pro\nPlease retry in 19.031210725s.', 'status': 
+'RESOURCE_EXHAUSTED', 'details': [{'@type': 
+'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more 
+about Gemini API quotas', 'url': 
+'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 
+'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count'
+, 'quotaId': 'GenerateContentInputTokensPerModelPerDay-FreeTier', 
+'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}}, 
+{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count'
+, 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 
+'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}}, 
+{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_requests', 
+'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 
+'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}}, 
+{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_requests', 
+'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 
+'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}}]}, 
+{'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '19s'}]}} | 
+gemini-1.5-pro: ChatGoogleGenerativeAIError: Error calling model 
+'gemini-1.5-pro' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 
+'models/gemini-1.5-pro is not found for API version v1beta, or is not supported 
+for generateContent. Call ListModels to see the list of available models and 
+their supported methods.', 'status': 'NOT_FOUND'}} | gemini-flash-latest: 
+RateLimit(attempt=1/3 delay_s=6.0): Error calling model 'gemini-flash-latest' 
+(RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message':
+'You exceeded your current quota, please check your plan and billing details. 
+For more information on this error, head to: 
+https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current 
+usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: 
+generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 
+20, model: gemini-3-flash\nPlease retry in 41.140658801s.', 'status': 
+'RESOURCE_EXHAUSTED', 'details': [{'@type': 
+'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more 
+about Gemini API quotas', 'url': 
+'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 
+'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 
+'generativelanguage.googleapis.com/generate_content_free_tier_requests', 
+'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 
+'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 
+'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 
+'retryDelay': '41s'}]}}
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ Pipeline failed at summarizing: supervisor_agent failed: All LLM candidates  │
+│ failed. provider=google role=reasoning timeout_s=60.0 gpt-5:                 │
+│ RateLimit(attempt=1/3 delay_s=2.0): Error calling model                      │
+│ 'gemini-flash-latest' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED.          │
+│ {'error': {'code': 429, 'message': 'You exceeded your current quota, please  │
+│ check your plan and billing details. For more information on this error,     │
+│ head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your  │
+│ current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for    │
+│ metric:                                                                      │
+│ generativelanguage.googleapis.com/generate_content_free_tier_requests,       │
+│ limit: 20, model: gemini-3-flash\nPlease retry in 53.244409813s.', 'status': │
+│ 'RESOURCE_EXHAUSTED', 'details': [{'@type':                                  │
+│ 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more │
+│ about Gemini API quotas', 'url':                                             │
+│ 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type':            │
+│ 'type.googleapis.com/google.rpc.QuotaFailure', 'violations':                 │
+│ [{'quotaMetric':                                                             │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_requests',     │
+│ 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',              │
+│ 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'},        │
+│ 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', │
+│ 'retryDelay': '53s'}]}} | gemini-pro-latest: RateLimit(attempt=1/3           │
+│ delay_s=6.0): Error calling model 'gemini-pro-latest' (RESOURCE_EXHAUSTED):  │
+│ 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded     │
+│ your current quota, please check your plan and billing details. For more     │
+│ information on this error, head to:                                          │
+│ https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current   │
+│ usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric:    │
+│ generativelanguage.googleapis.com/generate_content_free_tier_input_token_cou │
+│ nt, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric:            │
+│ generativelanguage.googleapis.com/generate_content_free_tier_input_token_cou │
+│ nt, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric:            │
+│ generativelanguage.googleapis.com/generate_content_free_tier_requests,       │
+│ limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric:                │
+│ generativelanguage.googleapis.com/generate_content_free_tier_requests,       │
+│ limit: 0, model: gemini-3.1-pro\nPlease retry in 19.031210725s.', 'status':  │
+│ 'RESOURCE_EXHAUSTED', 'details': [{'@type':                                  │
+│ 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more │
+│ about Gemini API quotas', 'url':                                             │
+│ 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type':            │
+│ 'type.googleapis.com/google.rpc.QuotaFailure', 'violations':                 │
+│ [{'quotaMetric':                                                             │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_co │
+│ unt', 'quotaId': 'GenerateContentInputTokensPerModelPerDay-FreeTier',        │
+│ 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}},       │
+│ {'quotaMetric':                                                              │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_co │
+│ unt', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier',     │
+│ 'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}},       │
+│ {'quotaMetric':                                                              │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_requests',     │
+│ 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier',           │
+│ 'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}},       │
+│ {'quotaMetric':                                                              │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_requests',     │
+│ 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',              │
+│ 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}}]},     │
+│ {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay':          │
+│ '19s'}]}} | gemini-1.5-pro: ChatGoogleGenerativeAIError: Error calling model │
+│ 'gemini-1.5-pro' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404,         │
+│ 'message': 'models/gemini-1.5-pro is not found for API version v1beta, or is │
+│ not supported for generateContent. Call ListModels to see the list of        │
+│ available models and their supported methods.', 'status': 'NOT_FOUND'}} |    │
+│ gemini-flash-latest: RateLimit(attempt=1/3 delay_s=6.0): Error calling model │
+│ 'gemini-flash-latest' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED.          │
+│ {'error': {'code': 429, 'message': 'You exceeded your current quota, please  │
+│ check your plan and billing details. For more information on this error,     │
+│ head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your  │
+│ current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for    │
+│ metric:                                                                      │
+│ generativelanguage.googleapis.com/generate_content_free_tier_requests,       │
+│ limit: 20, model: gemini-3-flash\nPlease retry in 41.140658801s.', 'status': │
+│ 'RESOURCE_EXHAUSTED', 'details': [{'@type':                                  │
+│ 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more │
+│ about Gemini API quotas', 'url':                                             │
+│ 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type':            │
+│ 'type.googleapis.com/google.rpc.QuotaFailure', 'violations':                 │
+│ [{'quotaMetric':                                                             │
+│ 'generativelanguage.googleapis.com/generate_content_free_tier_requests',     │
+│ 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',              │
+│ 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'},        │
+│ 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', │
+│ 'retryDelay': '41s'}]}}                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+[Error] supervisor_agent failed: All LLM candidates failed. provider=google role=reasoning timeout_s=60.0 gpt-5: RateLimit(attempt=1/3 delay_s=2.0): Error calling model 'gemini-flash-latest' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 53.244409813s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '53s'}]}} | gemini-pro-latest: RateLimit(attempt=1/3 delay_s=6.0): Error calling model 'gemini-pro-latest' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\nPlease retry in 19.031210725s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerDay-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.1-pro', 'location': 'global'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.1-pro'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '19s'}]}} | gemini-1.5-pro: ChatGoogleGenerativeAIError: Error calling model 'gemini-1.5-pro' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}} | gemini-flash-latest: RateLimit(attempt=1/3 delay_s=6.0): Error calling model 'gemini-flash-latest' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\nPlease retry in 41.140658801s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}}

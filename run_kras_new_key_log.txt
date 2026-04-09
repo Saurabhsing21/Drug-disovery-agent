@@ -1,0 +1,217 @@
+[14:22:45] · Initializing pipeline...
+[14:22:45] ⟶ Stage start: Validate Input
+[14:22:45] · input_validation_agent report
+[14:22:45] ✓ Stage complete: Validate Input
+[14:22:45] ⟶ Validate Input -> Plan Collection
+[14:22:45] ⟶ Stage start: Plan Collection
+[14:22:45] · planning_agent report
+[14:22:45] ✓ Stage complete: Plan Collection
+[14:22:45] ⟶ Plan Collection -> Plan Review Gate
+[14:22:45] ⟶ Stage start: Plan Review Gate
+[14:22:45] ✓ Stage complete: Plan Review Gate
+[14:22:45] ⟶ Plan Review Gate -> Collect Sources Parallel
+[14:22:45] ⟶ Stage start: Collect Sources Parallel
+[14:22:45] → Connecting to depmap MCP...
+[14:22:45] → Connecting to pharos MCP...
+[14:22:45] → Connecting to open_targets MCP...
+[14:22:45] → Connecting to literature MCP...
+[04/09/26 14:22:47] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 14:22:47] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 14:22:47] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/09/26 14:22:47] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+                    INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+[DepMap] Loading CRISPRGeneEffect.csv into memory… (one-time per session)
+[04/09/26 14:22:48] INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[04/09/26 14:22:48] INFO     HTTP Request: POST                  _client.py:1740
+                             https://pharos-api.ncats.io/graphql                
+                             "HTTP/1.1 200 OK"                                  
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[14:22:48] ✓ open_targets complete
+[14:22:48] ✓ pharos complete
+[04/09/26 14:22:48] INFO     HTTP Request: GET                   _client.py:1740
+                             https://www.ebi.ac.uk/europepmc/web                
+                             services/rest/search?query=%22KRAS%                
+                             22&format=json&pageSize=75&resultTy                
+                             pe=core&sort=CITED+desc "HTTP/1.1                  
+                             200 OK"                                            
+[04/09/26 14:22:50] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[14:22:50] ✓ literature complete
+[DepMap] Loaded 1169 cell lines × 18435 genes into memory ✅
+[04/09/26 14:22:56] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[14:22:56] ✓ depmap complete
+[14:22:56] ✓ Stage complete: Collect Sources Parallel
+[14:22:56] ⟶ Collect Sources Parallel -> Normalize Evidence
+[14:22:56] ⟶ Stage start: Normalize Evidence
+[14:22:56] · normalization_agent report
+[14:22:56] ✓ Stage complete: Normalize Evidence
+[14:22:56] ⟶ Normalize Evidence -> Verify Evidence
+[14:22:56] ⟶ Stage start: Verify Evidence
+[14:22:56] ✓ Stage complete: Verify Evidence
+[14:22:56] ⟶ Verify Evidence -> Analyze Conflicts
+[14:22:56] ⟶ Stage start: Analyze Conflicts
+[14:22:56] ✓ Stage complete: Analyze Conflicts
+[14:22:56] ⟶ Analyze Conflicts -> Score Evidence
+[14:22:56] ⟶ Stage start: Score Evidence
+[14:22:56] ✓ Stage complete: Score Evidence
+[14:22:56] ⟶ Score Evidence -> Assess Sufficiency
+[14:22:56] ⟶ Stage start: Assess Sufficiency
+[14:22:56] ✓ Stage complete: Assess Sufficiency
+[14:22:56] ⟶ Assess Sufficiency -> Build Evidence Graph
+[14:22:56] ⟶ Assess Sufficiency -> Build Evidence Graph
+[14:22:56] ⟶ Stage start: Build Evidence Graph
+[14:22:56] ✓ Stage complete: Build Evidence Graph
+[14:22:56] ⟶ Build Evidence Graph -> Generate Explanation
+[14:22:56] ⟶ Stage start: Generate Explanation
+[14:22:56] · summary_agent report
+[14:22:56] ✓ Stage complete: Generate Explanation
+[14:22:56] ⟶ Generate Explanation -> Supervisor Decide
+[14:22:56] ⟶ Stage start: Supervisor Decide
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+[14:24:12] → supervisor_agent -> emit_dossier
+[14:24:13] ✓ Stage complete: Supervisor Decide
+[14:24:13] ⟶ Supervisor Decide -> Prepare Review Brief
+[14:24:13] ⟶ Stage start: Prepare Review Brief
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Key 'parameters' is not supported in schema, ignoring
+[14:24:38] · review_support_agent report
+[14:24:38] ✓ Stage complete: Prepare Review Brief
+[14:24:38] ⟶ Prepare Review Brief -> Human Review Gate
+[14:24:38] ⟶ Stage start: Human Review Gate
+[14:24:38] ✓ Stage complete: Human Review Gate
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.CollectorRequest from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'CollectorRequest')]
+Deserializing unregistered type agents.schema.AgentReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'AgentReport')]
+Deserializing unregistered type agents.schema.CollectionPlan from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'CollectionPlan')]
+Deserializing unregistered type agents.schema.AgentReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'AgentReport')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.SourceStatus from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceStatus')]
+Deserializing unregistered type agents.schema.SourceStatus from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceStatus')]
+Deserializing unregistered type agents.schema.SourceStatus from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceStatus')]
+Deserializing unregistered type agents.schema.SourceStatus from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceStatus')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.EvidenceRecord from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceRecord')]
+Deserializing unregistered type agents.schema.AgentReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'AgentReport')]
+Deserializing unregistered type agents.schema.VerificationReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'VerificationReport')]
+Deserializing unregistered type agents.scoring_schemas.ScoredTarget from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.scoring_schemas', 'ScoredTarget')]
+Deserializing unregistered type agents.schema.EvidenceSufficiencyReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceSufficiencyReport')]
+Deserializing unregistered type agents.schema.EvidenceGraphSnapshot from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'EvidenceGraphSnapshot')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.SourceName from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SourceName')]
+Deserializing unregistered type agents.schema.CollectorResult from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'CollectorResult')]
+Deserializing unregistered type agents.schema.AgentReport from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'AgentReport')]
+Deserializing unregistered type agents.schema.SupervisorDecision from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'SupervisorDecision')]
+Deserializing unregistered type agents.schema.ReviewBrief from checkpoint. This will be blocked in a future version. Add to allowed_msgpack_modules to silence: [('agents.schema', 'ReviewBrief')]
+[14:24:38] ! Workflow paused - awaiting review decision
+[14:24:38] ! Run paused: run-61f41c02c23d

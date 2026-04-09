@@ -62,9 +62,9 @@ RUN_TASKS: dict[str, asyncio.Task] = {}
 # Load repo-local .env so UI runs match CLI behavior (keys + runtime toggles).
 try:
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # If Docker Compose injects empty env vars (e.g., OPENAI_API_KEY=""), treat them as unset so
+    # If Docker Compose injects empty env vars, treat them as unset so
     # repo-local `.env` can populate values for local/dev runs.
-    for key in ("OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY"):
+    for key in ("GOOGLE_API_KEY", "GEMINI_API_KEY"):
         if os.getenv(key, None) == "":
             os.environ.pop(key, None)
     load_dotenv(os.path.join(repo_root, ".env"), override=False)
@@ -72,14 +72,10 @@ except Exception:
     pass
 
 # UI default provider behavior:
-# - Many developers set both GOOGLE_API_KEY and OPENAI_API_KEY locally.
-# - The library "auto" preference may pick Google first; if quota/timeouts occur and
-#   cross-provider fallback is disabled, the UI will silently degrade to deterministic output.
-# Prefer OpenAI by default when a key is present, unless the user explicitly set A4T_LLM_PROVIDER.
+# - We use Google/Gemini exclusively. OpenAI key is not configured.
+# Prefer Google by default unless the user explicitly set A4T_LLM_PROVIDER.
 if not os.getenv("A4T_LLM_PROVIDER"):
-    if os.getenv("OPENAI_API_KEY", "").strip():
-        os.environ.setdefault("A4T_LLM_PROVIDER", "openai")
-    elif os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip():
+    if os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip():
         os.environ.setdefault("A4T_LLM_PROVIDER", "google")
 
 # UI default: strict mode. Do not silently fall back to deterministic summaries.
@@ -129,7 +125,7 @@ if _bool_env("A4T_UI_CORS_ENABLED", "1"):
 
 @app.on_event("startup")
 async def _select_llm_provider_on_startup() -> None:
-    # Choose a single provider for this process (OpenAI-first by default) so runs are consistent.
+    # Choose a single provider for this process (Google/Gemini) so runs are consistent.
     try:
         await select_provider_once()
     except Exception:
@@ -189,7 +185,7 @@ async def health() -> dict[str, Any]:
         "require_llm_agents": os.getenv("A4T_REQUIRE_LLM_AGENTS", ""),
         "llm_timeout_s": os.getenv("A4T_LLM_TIMEOUT_S", ""),
         "require_llm_planner": os.getenv("A4T_REQUIRE_LLM_PLANNER", "0"),
-        "has_openai_key": bool(os.getenv("OPENAI_API_KEY", "").strip()),
+        "has_google_key": bool(os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip()),
     }
 
 

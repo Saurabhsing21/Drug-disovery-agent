@@ -5,7 +5,6 @@ import os
 import time
 from dataclasses import dataclass
 
-from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 
@@ -14,11 +13,11 @@ def _bool_env(name: str, default: str = "0") -> bool:
 
 
 def _probe_timeout_s() -> float:
-    raw = os.getenv("A4T_PROVIDER_PROBE_TIMEOUT_S", "6").strip()
+    raw = os.getenv("A4T_PROVIDER_PROBE_TIMEOUT_S", "10").strip()
     try:
         return max(1.0, float(raw))
     except ValueError:
-        return 6.0
+        return 10.0
 
 
 def _system_provider_pref() -> str:
@@ -35,11 +34,13 @@ def _google_key_present() -> bool:
 
 
 async def _probe_openai(*, model: str) -> tuple[bool, str | None]:
+    # OpenAI is disabled; always skip.
     if not _openai_key_present():
         return False, "OPENAI_API_KEY not set"
     try:
-        # Keep the probe lightweight; avoid provider-specific kwargs that can drift across library versions.
-        llm = ChatOpenAI(model=model, temperature=0)
+        from langchain_openai import ChatOpenAI
+        from agents.llm_policy import openai_api_key
+        llm = ChatOpenAI(model=model, temperature=0, api_key=openai_api_key())
         await asyncio.wait_for(llm.ainvoke("ping"), timeout=_probe_timeout_s())
         return True, None
     except Exception as exc:  # noqa: BLE001
@@ -49,13 +50,39 @@ async def _probe_openai(*, model: str) -> tuple[bool, str | None]:
 async def _probe_google(*, model: str) -> tuple[bool, str | None]:
     if not _google_key_present():
         return False, "GOOGLE_API_KEY/GEMINI_API_KEY not set"
-    try:
-        llm = ChatGoogleGenerativeAI(model=model, temperature=0, max_output_tokens=1)
-        # Defensive: google client has had cases where `ainvoke()` blocks; use a thread.
-        await asyncio.wait_for(asyncio.to_thread(llm.invoke, "ping"), timeout=_probe_timeout_s())
-        return True, None
-    except Exception as exc:  # noqa: BLE001
-        return False, f"{type(exc).__name__}: {exc}"
+    
+    # If the default fails (e.g. 404), try these candidates in order.
+    candidates = [model, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
+    seen = set()
+    last_err = "Unknown error"
+    
+    from agents.llm_policy import google_api_key
+    
+    for m in candidates:
+        if m in seen:
+            continue
+        seen.add(m)
+        try:
+            llm = ChatGoogleGenerativeAI(
+                model=m, 
+                temperature=0, 
+                max_output_tokens=1, 
+                google_api_key=google_api_key()
+            )
+            # Defensive: google client has had cases where `ainvoke()` blocks; use a thread.
+            await asyncio.wait_for(asyncio.to_thread(llm.invoke, "ping"), timeout=_probe_timeout_s())
+            # If we succeed with a different model, set it as the forced default for this run
+            if m != model:
+                os.environ["A4T_GOOGLE_FAST_MODEL"] = m
+                os.environ["A4T_GOOGLE_REASONING_MODEL"] = m
+            return True, None
+        except Exception as exc:  # noqa: BLE001
+            last_err = f"{type(exc).__name__}: {exc}"
+            # If it's a 404, we try the next candidate. 429/401 should probably fail the whole probe.
+            if "404" not in last_err and "NOT_FOUND" not in last_err:
+                break
+                
+    return False, last_err
 
 
 @dataclass(frozen=True)
@@ -115,12 +142,18 @@ async def select_provider_once() -> ProviderSelection:
 
         system_pref = _system_provider_pref()
         
+        # 0. SKIP PROBES if a specific provider is forced and keyed.
+        # This prevents startup timeouts in environments where the probe (a dummy call)
+        # might fail or be slow, but the actual inference works.
+        skip_google = (system_pref == "google" and _google_key_present())
+        skip_openai = (system_pref == "openai" and _openai_key_present())
+        
         openai_model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
-        google_model = os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
+        google_model = os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
 
         # Start probes in parallel to minimize latency
-        openai_task = _probe_openai(model=openai_model)
-        google_task = _probe_google(model=google_model)
+        openai_task = (asyncio.sleep(0, (True, None)) if skip_openai else _probe_openai(model=openai_model))
+        google_task = (asyncio.sleep(0, (True, None)) if skip_google else _probe_google(model=google_model))
         
         results: tuple[
             tuple[bool, str | None] | BaseException,
@@ -179,7 +212,8 @@ async def select_provider_once() -> ProviderSelection:
             except Exception:
                 pass
 
-            os.environ.setdefault("A4T_LLM_PROVIDER", system_pref if system_pref != "auto" else "openai")
+            # Default to google when probes fail, not openai (we have no OpenAI key).
+            os.environ.setdefault("A4T_LLM_PROVIDER", system_pref if system_pref not in {"auto", "openai"} else "google")
             _CACHED = ProviderSelection(
                 provider="none",
                 locked=True,

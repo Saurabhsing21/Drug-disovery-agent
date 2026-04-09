@@ -44,7 +44,8 @@ def google_api_key() -> str | None:
 
 
 def openai_api_key() -> str | None:
-    return os.getenv("OPENAI_API_KEY")
+    # Nuclear Disable: Keep this returning None to prevent any OpenAI initialization.
+    return None
 
 
 def llm_configured() -> bool:
@@ -82,12 +83,12 @@ def preferred_provider() -> str:
     if override == "openai" and openai_api_key():
         return "openai"
 
-    # Default logic if selection hasn't happened yet (OpenAI priority)
-    if openai_api_key():
-        return "openai"
+    # Default logic (Google priority for this environment)
     if google_api_key():
         return "google"
-    return "openai"
+    if openai_api_key():
+        return "openai"
+    return "google"
 
 
 def forced_provider() -> str | None:
@@ -105,14 +106,14 @@ def forced_provider() -> str | None:
 
 def default_reasoning_model() -> str:
     if preferred_provider() == "google":
-        # Default to flash to avoid free-tier pro quota issues; override via env if pro is available.
-        return os.getenv("A4T_GOOGLE_REASONING_MODEL", "gemini-2.5-flash")
+        # Check both reasoning and standard model envs
+        return os.getenv("A4T_GOOGLE_REASONING_MODEL") or os.getenv("A4T_GOOGLE_FAST_MODEL") or "gemini-2.0-flash"
     return os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
 
 
 def default_fast_model() -> str:
     if preferred_provider() == "google":
-        return os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.5-flash")
+        return os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.0-flash")
     return os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
 
 
@@ -127,10 +128,16 @@ def fallback_models(provider: str, *, role: str) -> list[str]:
         models = _csv_env("A4T_GOOGLE_FALLBACK_MODELS")
         if models:
             return models
-        # Safe default: fall back from pro -> flash.
-        return [default_fast_model()] if role == "reasoning" else []
+        # Try 2.0/2.5 models which are confirmed active on the user's key.
+        if role == "reasoning":
+            return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-flash-latest"]
+        return ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"]
     models = _csv_env("A4T_OPENAI_FALLBACK_MODELS")
-    return models
+    if models:
+        return models
+    if role == "reasoning":
+        return ["gpt-4o", "gpt-4-turbo", "o1-preview", "gpt-4"]
+    return ["gpt-4o-mini", "gpt-3.5-turbo"]
 
 
 def ensure_llm_available(agent_name: str) -> None:
@@ -161,23 +168,35 @@ def get_llm(model: str, temperature: float = 0.0, **kwargs: Any) -> ChatOpenAI |
             **kwargs,
         )
     
-    # Force OpenAI if model looks like GPT
-    if "gpt-" in m_lower:
-        return ChatOpenAI(model=model, temperature=temperature, **kwargs)
-    
-    # If ambiguous, use the preferred provider.
-    if provider == "google":
+    # Force Gemini for ANY model if Google is configured and OpenAI is not.
+    if google_api_key() and not openai_api_key():
+        # Map gpt- or legacy models to a safe Gemini default
+        target_model = os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.5-flash")
         return ChatGoogleGenerativeAI(
-            model=model,
+            model=target_model,
             temperature=temperature,
             google_api_key=google_api_key(),
             **kwargs,
         )
-    if openai_api_key():
-        return ChatOpenAI(model=model, temperature=temperature, **kwargs)
-        
-    # Default fallback
-    return ChatOpenAI(model=model, temperature=temperature, **kwargs)
+    
+    # Force OpenAI ONLY if model looks like GPT AND we have a key.
+    if "gpt-" in m_lower and openai_api_key():
+        return ChatOpenAI(
+            model=model, 
+            temperature=temperature, 
+            api_key=openai_api_key(),
+            **kwargs
+        )
+    
+    # Default fallback (strictly Google prioritized)
+    if google_api_key():
+        return ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            temperature=temperature,
+            google_api_key=google_api_key(),
+            **kwargs,
+        )
+    raise RuntimeError(f"No functional LLM provider (Google/Gemini) configured. Attempted model: {model}")
 
 
 def structured_runnable(
@@ -265,7 +284,7 @@ def structured_runnable_with_fallbacks(
     if cross_enabled:
         if provider == "google" and openai_api_key():
             candidates.extend(fallback_models("openai", role=role))
-            candidates.append(os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-5") if role == "reasoning" else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-5-mini"))
+            candidates.append(os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o") if role == "reasoning" else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini"))
         if provider == "openai" and google_api_key():
             candidates.extend(fallback_models("google", role=role))
             candidates.append(default_reasoning_model() if role == "reasoning" else default_fast_model())
@@ -473,7 +492,7 @@ async def ainvoke_with_fallbacks(
             if provider == "google" and openai_api_key():
                 candidates.extend(fallback_models("openai", role=role))
                 candidates.append(
-                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4")
+                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
                     if role == "reasoning"
                     else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
                 )
@@ -551,9 +570,9 @@ async def structured_ainvoke_with_fallbacks(
             if provider == "google" and openai_api_key():
                 candidates.extend(fallback_models("openai", role=role))
                 candidates.append(
-                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-5")
+                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
                     if role == "reasoning"
-                    else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-5-mini")
+                    else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
                 )
             if provider == "openai" and google_api_key():
                 candidates.extend(fallback_models("google", role=role))

@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from .schema import ConflictRecord, ConflictSeverity, EvidenceRecord, SourceName
+from .bio_context_fetcher import fetch_reactome_pathways
 
 
 def analyze_conflicts(items: list[EvidenceRecord]) -> list[ConflictRecord]:
@@ -30,12 +31,30 @@ def analyze_conflicts(items: list[EvidenceRecord]) -> list[ConflictRecord]:
         if severity is None:
             continue
 
+        # Enrich the rationale with Reactome pathway context.
+        # This turns "score spread=0.4" into a biologically interpretable
+        # statement: which pathways is this gene part of, and is the
+        # conflict expected given the disease context?
+        pathways = fetch_reactome_pathways(target_symbol)
+        pathway_clause = ""
+        if pathways:
+            pathway_str = "; ".join(pathways[:3])
+            pathway_clause = (
+                f" Reactome pathway context: {target_symbol} participates in "
+                f"{pathway_str}. "
+                f"Evaluate whether this conflict is disease-subtype specific "
+                f"(e.g. target is essential only in a particular tissue lineage) "
+                f"or reflects a true evidence gap."
+            )
+
         conflicts.append(
             ConflictRecord(
                 severity=severity,
                 rationale=(
                     f"Conflicting {evidence_type} evidence for {target_symbol}"
-                    f"{' in ' + disease_id if disease_id else ''}: score spread={spread:.3f}."
+                    f"{' in ' + disease_id if disease_id else ''}: "
+                    f"score spread={spread:.3f}."
+                    f"{pathway_clause}"
                 ),
                 sources=[
                     SourceName(source)

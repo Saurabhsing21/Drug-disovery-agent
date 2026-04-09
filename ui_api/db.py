@@ -35,14 +35,15 @@ def get_engine():
     if _ENGINE is not None:
         return _ENGINE
     url = _database_url()
-    if not url:
-        return None
+    kwargs = {}
+    if url.startswith("postgresql"):
+        kwargs["connect_args"] = {"connect_timeout": 10}
+
     _ENGINE = create_engine(
         url,
         future=True,
         pool_pre_ping=True,
-        # Avoid hanging requests when DB is unreachable.
-        connect_args={"connect_timeout": 10},
+        **kwargs
     )
     return _ENGINE
 
