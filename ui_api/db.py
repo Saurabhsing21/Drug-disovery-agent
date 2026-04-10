@@ -72,3 +72,13 @@ def new_session() -> Optional[Session]:
     if factory is None:
         return None
     return factory()
+
+
+def get_db():
+    session = new_session()
+    if session is None:
+        return
+    try:
+        yield session
+    finally:
+        session.close()

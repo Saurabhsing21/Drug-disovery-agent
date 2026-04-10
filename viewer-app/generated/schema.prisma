@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model saved_runs {
+  id               String   @id
+  run_id           String   @unique
+  title            String
+  gene_symbol      String?
+  disease_id       String?
+  objective        String?
+  summary_markdown String?
+  scored_target    Json?
+  final_dossier    Json?
+  evidence_graph   Json?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @default(now())
+}
+
+model saved_comparisons {
+  id               String   @id
+  run_a_id         String
+  run_b_id         String
+  title            String
+  compare_markdown String?
+  data_snapshot    Json?
+  created_at       DateTime @default(now())
+}

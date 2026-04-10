@@ -35,6 +35,7 @@ from ui_api.saved_runs import (
     rename_saved_run,
     upsert_saved_run_from_snapshot,
 )
+from ui_api.saved_comparisons import router as saved_comparisons_router
 from ui_api.models import (
     CreateRunInput,
     CreateRunResponse,
@@ -111,7 +112,10 @@ os.environ.setdefault("A4T_LLM_TIMEOUT_S", "300")
 os.environ.setdefault("A4T_LLM_429_BASE_DELAY_S", "2.0")
 os.environ.setdefault("A4T_LLM_429_MAX_DELAY_S", "8.0")
 os.environ.setdefault("A4T_LLM_RPM", "10")
+os.environ.setdefault("A4T_LLM_RPM", "10")
 os.environ.setdefault("A4T_SOURCE_DISPATCH_MODE", "sequential")
+
+app.include_router(saved_comparisons_router, prefix="/api")
 
 if _bool_env("A4T_UI_CORS_ENABLED", "1"):
     app.add_middleware(

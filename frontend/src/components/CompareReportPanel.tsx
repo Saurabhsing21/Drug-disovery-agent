@@ -17,7 +17,7 @@ import { Bar, Radar } from "react-chartjs-2";
 
 import type { SavedRunDetail } from "@/lib/types";
 import { MarkdownReport } from "@/components/MarkdownReport";
-import { postCompareReport } from "@/lib/api";
+import { postCompareReport, saveComparison } from "@/lib/api";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Filler, Tooltip, Legend);
 
@@ -95,6 +95,8 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
   const [compareMarkdown, setCompareMarkdown] = useState<string | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const scoredA = scoredTargetFrom(runA);
   const scoredB = scoredTargetFrom(runB);
 
@@ -163,6 +165,7 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
     if (!runA || !runB) {
       setCompareMarkdown(null);
       setCompareError(null);
+      setSaveSuccess(false);
       return () => {};
     }
     const reportA = runA.summary_markdown || "";
@@ -199,6 +202,40 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
   if (!runA || !runB) {
     return <div className="mt-4 text-sm text-neutral-400">Select two saved runs to generate a compare report.</div>;
   }
+
+  const handleSave = async () => {
+    if (!compareMarkdown || isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveComparison({
+        title: `${runA.title} vs ${runB.title}`,
+        run_a_id: runA.run_id,
+        run_b_id: runB.run_id,
+        compare_markdown: compareMarkdown,
+        data_snapshot: {
+          scoresA,
+          scoresB,
+          metrics: {
+            scoreA,
+            scoreB,
+            confA,
+            confB,
+            graphA,
+            graphB,
+            missingA,
+            missingB,
+            conflictA: conflictFlag(runA),
+            conflictB: conflictFlag(runB),
+          },
+        },
+      });
+      setSaveSuccess(true);
+    } catch (err) {
+      setCompareError(err instanceof Error ? err.message : "Failed to save comparison.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="mt-4 space-y-5">
@@ -430,7 +467,22 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <div className="text-xs font-semibold text-neutral-300">Comparison report</div>
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold text-neutral-300">Comparison report</div>
+          {showAgentReport && (
+            <button
+              onClick={handleSave}
+              disabled={isSaving || saveSuccess}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
+                saveSuccess
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
+                  : "bg-pink-500 hover:bg-pink-600 text-white shadow-sm"
+              }`}
+            >
+              {saveSuccess ? "✓ Saved to Database" : isSaving ? "Saving..." : "Save Comparison"}
+            </button>
+          )}
+        </div>
         <div className="mt-3 text-xs text-neutral-400">
           {compareLoading ? "Generating expert comparison report..." : null}
           {compareError ? compareError : null}

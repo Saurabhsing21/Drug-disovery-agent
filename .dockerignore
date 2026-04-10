@@ -12,10 +12,12 @@
 .mypy_cache/
 .ruff_cache/
 
-venv/
+# Build & runtime artifacts
+viewer-app/
 frontend/.next/
 frontend/node_modules/
-external_mcps/pharos-mcp-server/node_modules/
+venv/
+node_modules/
 
 artifacts/
 logs/

@@ -188,6 +188,22 @@ export async function saveRun(input: { run_id: string; title?: string }): Promis
   return res.json();
 }
 
+export async function saveComparison(input: {
+  title: string;
+  run_a_id: string;
+  run_b_id: string;
+  compare_markdown: string;
+  data_snapshot?: Record<string, unknown>;
+}): Promise<unknown> {
+  const res = await fetch(`${API_BASE}/saved-comparisons/`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
 export async function postCompareReport(input: {
   title_a: string;
   title_b: string;

@@ -37,7 +37,9 @@ class CompareReportAgent:
             role="fast",
             temperature=self.temperature,
         )
-        content = getattr(response, "content", None)
+        content = getattr(response, "content", str(response))
+        if isinstance(content, list):
+            content = "".join([m.get("text", "") for m in content if isinstance(m, dict)])
         return content if isinstance(content, str) and content.strip() else str(response)
 
     def _deterministic_fallback(self, report_a: str, report_b: str, title_a: str, title_b: str) -> str:
