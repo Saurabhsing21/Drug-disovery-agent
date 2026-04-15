@@ -43,9 +43,9 @@ If `docker compose` is not found, install the Compose plugin for your distro.
 
 On the VPS, create `deploy/.env` (copy from `deploy/.env.example`) and set:
 
-- `OPENAI_API_KEY` (recommended) **or** `GOOGLE_API_KEY` / `GEMINI_API_KEY`
+- `OPENAI_API_KEY`
 - Optional model defaults:
-  - `A4T_SYSTEM_LLM_PROVIDER=auto|openai|google` (default: `auto`, probes OpenAI first)
+  - `A4T_SYSTEM_LLM_PROVIDER=auto|openai` (default: `auto`, probes OpenAI)
   - `A4T_SYSTEM_REASONING_MODEL`
   - `A4T_SYSTEM_FAST_MODEL`
 
@@ -53,9 +53,7 @@ The backend writes run artifacts/state under `A4T_ARTIFACT_DIR` (mounted as a Do
 
 ### How to set your API key (beginner steps)
 
-1) Get a provider key:
-   - OpenAI: create an API key in your OpenAI account dashboard.
-   - Google: create a Gemini API key in Google AI Studio / Google Cloud.
+1) Get an OpenAI API key from your OpenAI account dashboard.
 2) Edit the env file on the server:
 
 ```bash
@@ -64,12 +62,10 @@ cp .env.example .env
 nano .env
 ```
 
-3) Put your key in **exactly one** of these:
+3) Put your key in `.env`:
 
 ```bash
 OPENAI_API_KEY=your_key_here
-# or
-GOOGLE_API_KEY=your_key_here
 ```
 
 Tip: keep `.env` private. Do not commit it to git or paste it in screenshots.

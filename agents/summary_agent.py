@@ -26,7 +26,7 @@ from .bio_context_fetcher import fetch_uniprot_context
 
 
 class SummaryAgent:
-    """Generate a structured evidence summary using Google Gemini (default), with deterministic fallback."""
+    """Generate a structured evidence summary using OpenAI GPT, with deterministic fallback."""
 
     def __init__(self, model: str | None = None, temperature: float = 0.7):
         self.model: str = model or os.getenv("A4T_SUMMARY_MODEL") or default_fast_model()
@@ -1238,7 +1238,7 @@ class SummaryAgent:
 
         from .llm_policy import llm_calls_enabled, llm_configured
 
-        if fmt == "compiler":
+        if fmt == "compiler" and require_llm_agents():
             if not llm_calls_enabled():
                 from .provider_select import current_provider_selection
                 sel = current_provider_selection()
@@ -1250,7 +1250,7 @@ class SummaryAgent:
             if not llm_configured():
                 raise RuntimeError(
                     "Compiler report requires a valid LLM API key. "
-                    "Set OPENAI_API_KEY or GOOGLE_API_KEY (or GEMINI_API_KEY) and retry."
+                    "Set OPENAI_API_KEY in your environment or .env file and retry."
                 )
 
         if not llm_calls_enabled():
@@ -1332,7 +1332,7 @@ class SummaryAgent:
             )
             
             # 1. Robust extraction from potentially multi-part or structured AIMessage content.
-            # Some providers (like Gemini) return content as a list of dicts/text parts.
+            # Some providers return content as a list of dicts/text parts.
             content_val = response.content
             if isinstance(content_val, str):
                 raw_text = content_val

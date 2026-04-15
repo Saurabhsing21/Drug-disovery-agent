@@ -19,7 +19,7 @@ On a server/VPS, you can deploy the full stack using Docker Compose:
 ```bash
 cd deploy
 cp .env.example .env
-# edit deploy/.env and set OPENAI_API_KEY (recommended) or GOOGLE_API_KEY
+# edit deploy/.env and set OPENAI_API_KEY
 docker compose up -d --build
 ```
 

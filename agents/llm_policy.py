@@ -8,18 +8,12 @@ import re
 from typing import Any, Literal
 
 from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
 
 def _provider_for_model(model: str) -> str:
-    m_lower = (model or "").lower()
-    if "gemini" in m_lower or "gemma" in m_lower:
-        return "google"
-    if "gpt-" in m_lower or m_lower.startswith("o") or "openai" in m_lower:
-        return "openai"
-    return preferred_provider()
+    return "openai"
 
 
 def require_llm_agents() -> bool:
@@ -38,19 +32,14 @@ def require_llm_planner() -> bool:
     return os.getenv("A4T_REQUIRE_LLM_PLANNER", "0").strip().lower() not in {"0", "false", "no"}
 
 
-def google_api_key() -> str | None:
-    # Support either env var name; LangChain expects GOOGLE_API_KEY by default.
-    return os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-
-
 def openai_api_key() -> str | None:
-    # Nuclear Disable: Keep this returning None to prevent any OpenAI initialization.
-    return None
+    """Return the OpenAI API key from environment."""
+    return os.getenv("OPENAI_API_KEY") or None
 
 
 def llm_configured() -> bool:
     """True if any supported LLM provider is configured via env vars (keys present)."""
-    return bool(openai_api_key() or google_api_key())
+    return bool(openai_api_key())
 
 
 def llm_calls_enabled() -> bool:
@@ -67,53 +56,22 @@ def llm_calls_enabled() -> bool:
 
 
 def preferred_provider() -> str:
-    """Resolve the active LLM provider.
-
-    `A4T_LLM_PROVIDER`:
-      - auto (default)
-      - google|gemini
-      - openai
-    """
-    override = os.getenv("A4T_LLM_PROVIDER", "").strip().lower()
-
-    # If provider_select.py has already run and narrowed the choice to a specific working provider,
-    # it will have set A4T_LLM_PROVIDER to that specific value ('openai' or 'google').
-    if override in {"google", "gemini"} and google_api_key():
-        return "google"
-    if override == "openai" and openai_api_key():
-        return "openai"
-
-    # Default logic (Google priority for this environment)
-    if google_api_key():
-        return "google"
-    if openai_api_key():
-        return "openai"
-    return "google"
+    """Resolve the active LLM provider."""
+    return "openai"
 
 
 def forced_provider() -> str | None:
-    """Return an explicitly forced provider override, if set.
-
-    Unlike preferred_provider(), this reflects user intent even if keys are missing.
-    """
     override = os.getenv("A4T_LLM_PROVIDER", "").strip().lower()
-    if override in {"google", "gemini"}:
-        return "google"
     if override == "openai":
         return "openai"
     return None
 
 
 def default_reasoning_model() -> str:
-    if preferred_provider() == "google":
-        # Check both reasoning and standard model envs
-        return os.getenv("A4T_GOOGLE_REASONING_MODEL") or os.getenv("A4T_GOOGLE_FAST_MODEL") or "gemini-2.0-flash"
     return os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
 
 
 def default_fast_model() -> str:
-    if preferred_provider() == "google":
-        return os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.0-flash")
     return os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
 
 
@@ -124,20 +82,13 @@ def _csv_env(name: str) -> list[str]:
 
 def fallback_models(provider: str, *, role: str) -> list[str]:
     """Return fallback model candidates for a provider/role."""
-    if provider == "google":
-        models = _csv_env("A4T_GOOGLE_FALLBACK_MODELS")
-        if models:
-            return models
-        # Try 2.0/2.5 models which are confirmed active on the user's key.
-        if role == "reasoning":
-            return ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-flash-latest"]
-        return ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"]
+    # OpenAI-only fallbacks
     models = _csv_env("A4T_OPENAI_FALLBACK_MODELS")
     if models:
         return models
     if role == "reasoning":
-        return ["gpt-4o", "gpt-4-turbo", "o1-preview", "gpt-4"]
-    return ["gpt-4o-mini", "gpt-3.5-turbo"]
+        return ["gpt-4o", "gpt-4-turbo", "gpt-4"]
+    return ["gpt-4o-mini", "gpt-4o"]
 
 
 def ensure_llm_available(agent_name: str) -> None:
@@ -147,56 +98,31 @@ def ensure_llm_available(agent_name: str) -> None:
     if require_llm_agents():
         raise RuntimeError(
             f"{agent_name} requires an API key because A4T_REQUIRE_LLM_AGENTS=1. "
-            "Set OPENAI_API_KEY or GOOGLE_API_KEY (or GEMINI_API_KEY)."
+            "Set OPENAI_API_KEY in your environment or .env file."
         )
 
 
-def get_llm(model: str, temperature: float = 0.0, **kwargs: Any) -> ChatOpenAI | ChatGoogleGenerativeAI:
+def get_llm(model: str, temperature: float = 0.0, **kwargs: Any) -> ChatOpenAI:
     """
     Factory function to get a LangChain LLM instance.
-    Correctly routes to OpenAI or Google based on model name substrings.
+    Routes all models to OpenAI GPT.
     """
-    provider = preferred_provider()
+    key = openai_api_key()
+    if not key:
+        raise RuntimeError(
+            f"No OPENAI_API_KEY configured. Cannot create LLM for model: {model}. "
+            "Set OPENAI_API_KEY in your environment or .env file."
+        )
+    # Map any non-OpenAI or unknown model name to the default OpenAI fast model.
     m_lower = model.lower()
-
-    # Force Google if model looks like Gemini/Gemma
-    if "gemini" in m_lower or "gemma" in m_lower:
-        return ChatGoogleGenerativeAI(
-            model=model,
-            temperature=temperature,
-            google_api_key=google_api_key(),
-            **kwargs,
-        )
-    
-    # Force Gemini for ANY model if Google is configured and OpenAI is not.
-    if google_api_key() and not openai_api_key():
-        # Map gpt- or legacy models to a safe Gemini default
-        target_model = os.getenv("A4T_GOOGLE_FAST_MODEL", "gemini-2.5-flash")
-        return ChatGoogleGenerativeAI(
-            model=target_model,
-            temperature=temperature,
-            google_api_key=google_api_key(),
-            **kwargs,
-        )
-    
-    # Force OpenAI ONLY if model looks like GPT AND we have a key.
-    if "gpt-" in m_lower and openai_api_key():
-        return ChatOpenAI(
-            model=model, 
-            temperature=temperature, 
-            api_key=openai_api_key(),
-            **kwargs
-        )
-    
-    # Default fallback (strictly Google prioritized)
-    if google_api_key():
-        return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            temperature=temperature,
-            google_api_key=google_api_key(),
-            **kwargs,
-        )
-    raise RuntimeError(f"No functional LLM provider (Google/Gemini) configured. Attempted model: {model}")
+    if "gpt-" not in m_lower and not m_lower.startswith("o"):
+        model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
+    return ChatOpenAI(
+        model=model,
+        temperature=temperature,
+        api_key=key,
+        **kwargs,
+    )
 
 
 def structured_runnable(
@@ -207,50 +133,7 @@ def structured_runnable(
     method: Literal["function_calling", "json_mode", "json_schema"] = "function_calling",
 ) -> Runnable:
     llm = get_llm(model=model, temperature=temperature)
-    # Gemini (langchain-google-genai) currently warns/ignores `$defs` in pydantic schemas.
-    # Inline `$ref` definitions so structured outputs work reliably across providers.
-    schema_obj: Any = schema
-    if isinstance(llm, ChatGoogleGenerativeAI) and hasattr(schema, "model_json_schema"):
-        schema_obj = _inline_pydantic_schema(schema)
-    return llm.with_structured_output(schema_obj, method=method)
-
-
-def _inline_pydantic_schema(model: type) -> dict[str, Any]:
-    """Inline $defs/$ref in pydantic-generated JSON schema.
-
-    Some providers (notably Gemini) reject or ignore `$defs`, which breaks `$ref` resolution.
-    """
-    raw: dict[str, Any] = model.model_json_schema()  # type: ignore[attr-defined]
-    defs: dict[str, Any] = dict(raw.get("$defs") or {})
-
-    def resolve(node: Any) -> Any:
-        if isinstance(node, list):
-            return [resolve(item) for item in node]
-        if not isinstance(node, dict):
-            return node
-
-        ref = node.get("$ref")
-        if isinstance(ref, str) and ref.startswith("#/$defs/"):
-            key = ref.split("/")[-1]
-            base = defs.get(key, {})
-            merged = {}
-            if isinstance(base, dict):
-                merged.update(resolve(base))
-            # Merge sibling keys over the referenced schema (minus $ref).
-            for k, v in node.items():
-                if k == "$ref":
-                    continue
-                merged[k] = resolve(v)
-            return merged
-
-        out: dict[str, Any] = {}
-        for k, v in node.items():
-            if k == "$defs":
-                continue
-            out[k] = resolve(v)
-        return out
-
-    return resolve(raw)
+    return llm.with_structured_output(schema, method=method)
 
 
 def structured_runnable_with_fallbacks(
@@ -261,13 +144,7 @@ def structured_runnable_with_fallbacks(
     temperature: float = 0.0,
     method: Literal["function_calling", "json_mode", "json_schema"] = "function_calling",
 ) -> Runnable:
-    """Build a structured runnable with provider/model fallbacks.
-
-    Fallbacks are controlled via:
-    - `A4T_LLM_FALLBACK_ENABLED` (default: 1)
-    - `A4T_GOOGLE_FALLBACK_MODELS`
-    - `A4T_OPENAI_FALLBACK_MODELS`
-    """
+    """Build a structured runnable with model fallbacks."""
     primary = structured_runnable(schema=schema, model=primary_model, temperature=temperature, method=method)
     enabled = os.getenv("A4T_LLM_FALLBACK_ENABLED", "1").strip().lower() not in {"0", "false", "no"}
     if not enabled:
@@ -276,18 +153,6 @@ def structured_runnable_with_fallbacks(
     provider = preferred_provider()
     candidates: list[str] = []
     candidates.extend(fallback_models(provider, role=role))
-    # Cross-provider fallback:
-    # - enabled by default only when provider is not explicitly forced
-    # - can be overridden with A4T_LLM_CROSS_PROVIDER_FALLBACK=1|0
-    cross_default = "0" if forced_provider() else "1"
-    cross_enabled = os.getenv("A4T_LLM_CROSS_PROVIDER_FALLBACK", cross_default).strip().lower() not in {"0", "false", "no"}
-    if cross_enabled:
-        if provider == "google" and openai_api_key():
-            candidates.extend(fallback_models("openai", role=role))
-            candidates.append(os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o") if role == "reasoning" else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini"))
-        if provider == "openai" and google_api_key():
-            candidates.extend(fallback_models("google", role=role))
-            candidates.append(default_reasoning_model() if role == "reasoning" else default_fast_model())
 
     fallbacks = [
         structured_runnable(schema=schema, model=m, temperature=temperature, method=method)
@@ -323,7 +188,7 @@ def _retry_delay_s(attempt_index: int) -> float:
 
 def _llm_concurrency(provider: str) -> int:
     """Global max in-flight LLM requests per provider."""
-    default = "1" if provider == "google" else "2"
+    default = "2"
     raw = os.getenv("A4T_LLM_CONCURRENCY", default).strip()
     try:
         return max(1, int(raw))
@@ -335,7 +200,7 @@ def _llm_gate_acquire_timeout_s(provider: str) -> float:
 
     This prevents UI runs from hanging indefinitely if another LLM call is stuck.
     """
-    default = "8.0" if provider == "google" else "4.0"
+    default = "4.0"
     raw = os.getenv("A4T_LLM_GATE_ACQUIRE_TIMEOUT_S", default).strip()
     try:
         return max(0.1, float(raw))
@@ -345,7 +210,7 @@ def _llm_gate_acquire_timeout_s(provider: str) -> float:
 
 def _llm_min_interval_s(provider: str) -> float:
     """Minimum spacing between request starts for a provider."""
-    default = "2.5" if provider == "google" else "0.0"
+    default = "0.0"
     raw = os.getenv("A4T_LLM_MIN_INTERVAL_S", default).strip()
     try:
         base = max(0.0, float(raw))
@@ -395,7 +260,7 @@ def _is_timeout_error(exc: Exception) -> bool:
 
 
 def _rate_limit_base_delay_s(provider: str) -> float:
-    default = "6.0" if provider == "google" else "2.0"
+    default = "2.0"
     raw = os.getenv("A4T_LLM_429_BASE_DELAY_S", default).strip()
     try:
         return max(0.5, float(raw))
@@ -464,10 +329,6 @@ def _llm_gate_exit(provider: str) -> None:
 async def _ainvoke_guarded(runnable: Runnable, prompt: list[tuple[str, str]] | str, *, provider: str) -> Any:
     await _llm_gate_enter(provider)
     try:
-        # langchain-google-genai has had cases where `ainvoke()` blocks the event loop (no await points),
-        # which defeats asyncio timeouts and can hang UI runs. Run Google calls in a thread.
-        if provider == "google":
-            return await asyncio.wait_for(asyncio.to_thread(runnable.invoke, prompt), timeout=_timeout_s())
         return await asyncio.wait_for(runnable.ainvoke(prompt), timeout=_timeout_s())
     finally:
         _llm_gate_exit(provider)
@@ -486,19 +347,6 @@ async def ainvoke_with_fallbacks(
     candidates: list[str] = [primary_model]
     if enabled:
         candidates.extend(fallback_models(provider, role=role))
-        cross_default = "0" if forced_provider() else "1"
-        cross_enabled = os.getenv("A4T_LLM_CROSS_PROVIDER_FALLBACK", cross_default).strip().lower() not in {"0", "false", "no"}
-        if cross_enabled:
-            if provider == "google" and openai_api_key():
-                candidates.extend(fallback_models("openai", role=role))
-                candidates.append(
-                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
-                    if role == "reasoning"
-                    else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
-                )
-            if provider == "openai" and google_api_key():
-                candidates.extend(fallback_models("google", role=role))
-                candidates.append(default_reasoning_model() if role == "reasoning" else default_fast_model())
 
     seen: set[str] = set()
     ordered_candidates: list[str] = []
@@ -539,7 +387,7 @@ async def ainvoke_with_fallbacks(
                 break
 
     raise RuntimeError(
-        "All LLM candidates failed. "
+        "All LLM candidates (OpenAI) failed. "
         + f"provider={provider} role={role} timeout_s={_timeout_s()} "
         + " | ".join(errors[:5])
     )
@@ -564,19 +412,6 @@ async def structured_ainvoke_with_fallbacks(
     candidates: list[str] = [primary_model]
     if enabled:
         candidates.extend(fallback_models(provider, role=role))
-        cross_default = "0" if forced_provider() else "1"
-        cross_enabled = os.getenv("A4T_LLM_CROSS_PROVIDER_FALLBACK", cross_default).strip().lower() not in {"0", "false", "no"}
-        if cross_enabled:
-            if provider == "google" and openai_api_key():
-                candidates.extend(fallback_models("openai", role=role))
-                candidates.append(
-                    os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
-                    if role == "reasoning"
-                    else os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
-                )
-            if provider == "openai" and google_api_key():
-                candidates.extend(fallback_models("google", role=role))
-                candidates.append(default_reasoning_model() if role == "reasoning" else default_fast_model())
 
     seen: set[str] = set()
     ordered_candidates: list[str] = []
@@ -622,7 +457,7 @@ async def structured_ainvoke_with_fallbacks(
                 break
 
     raise RuntimeError(
-        "All LLM candidates failed. "
+        "All LLM candidates (OpenAI) failed. "
         + f"provider={provider} role={role} timeout_s={_timeout_s()} "
         + " | ".join(errors[:5])
     )

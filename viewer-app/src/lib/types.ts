@@ -14,7 +14,7 @@ export type Snapshot = {
   next: string[];
   values: Record<string, unknown>;
   _runtime?: {
-    provider: "openai" | "google" | "none";
+    provider: "openai" | "none";
     locked: boolean;
     llm_calls_enabled: boolean;
     error?: string | null;

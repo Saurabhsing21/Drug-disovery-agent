@@ -13,8 +13,6 @@ async def test_compiler_report_requires_llm_configuration(monkeypatch: pytest.Mo
     monkeypatch.setenv("A4T_LLM_CALLS_ENABLED", "1")
     monkeypatch.setenv("A4T_REQUIRE_LLM_AGENTS", "1")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
 
     req = CollectorRequest(gene_symbol="EGFR")
     items = normalize_evidence_items(

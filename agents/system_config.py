@@ -27,7 +27,7 @@ def apply_system_defaults() -> None:
     - Prefer a single place to configure provider/models for the whole system.
 
     Supported non-secret knobs:
-    - A4T_SYSTEM_LLM_PROVIDER=openai|google|auto
+    - A4T_SYSTEM_LLM_PROVIDER=openai|auto
     - A4T_SYSTEM_REASONING_MODEL=<model>
     - A4T_SYSTEM_FAST_MODEL=<model>
     - A4T_ENV_PROFILE=dev|test|staging|prod (baseline via config_profiles.py)
@@ -39,7 +39,7 @@ def apply_system_defaults() -> None:
 
     system_provider_raw = _nonempty(os.getenv("A4T_SYSTEM_LLM_PROVIDER"))
     system_provider = system_provider_raw.lower() if system_provider_raw else None
-    if system_provider in {"openai", "google", "auto"}:
+    if system_provider in {"openai", "auto"}:
         _setdefault_if_nonempty("A4T_LLM_PROVIDER", system_provider)
 
     # Allow a single pair of system-wide model names, then map them into provider-specific defaults.
@@ -56,7 +56,5 @@ def apply_system_defaults() -> None:
     # Provider-specific model defaults (used by llm_policy.default_*_model()).
     if system_reasoning:
         _setdefault_if_nonempty("A4T_OPENAI_REASONING_MODEL", system_reasoning)
-        _setdefault_if_nonempty("A4T_GOOGLE_REASONING_MODEL", system_reasoning)
     if system_fast:
         _setdefault_if_nonempty("A4T_OPENAI_FAST_MODEL", system_fast)
-        _setdefault_if_nonempty("A4T_GOOGLE_FAST_MODEL", system_fast)

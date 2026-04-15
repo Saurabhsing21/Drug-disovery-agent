@@ -479,8 +479,8 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
         if isinstance(query, dict):
             query = CollectorRequest.model_validate(query)
             
-        # Sanitize model_override: if it contains 'gpt-', nullify it so get_llm uses the system default (Gemini).
-        if query.model_override and "gpt-" in query.model_override.lower():
+        # Sanitize any non-OpenAI override so the runtime falls back to the configured OpenAI default.
+        if query.model_override and not query.model_override.lower().startswith(("gpt-", "o")):
             query = query.model_copy(update={"model_override": None})
             
         # Episodic memory is primarily gene-target centric. Always load the gene-level history

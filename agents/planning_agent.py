@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 from .llm_policy import (
     default_reasoning_model,
     ensure_llm_available,
-    google_api_key,
     llm_calls_enabled,
     openai_api_key,
     require_llm_planner,
@@ -110,7 +109,7 @@ class PlanningAgent:
         if not llm_calls_enabled():
             return fallback, "deterministic_fallback", None
 
-        if not openai_api_key() and not google_api_key():
+        if not openai_api_key():
             ensure_llm_available("planning_agent")
             return fallback, "deterministic_fallback", None
 
