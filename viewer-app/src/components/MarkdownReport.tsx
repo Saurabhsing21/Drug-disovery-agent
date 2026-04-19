@@ -6,12 +6,14 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { Check, Copy } from "lucide-react";
 import { EvidenceDashboardFrame } from "@/components/EvidenceDashboardFrame";
+import { EvidenceContributionDashboard } from "@/components/EvidenceContributionDashboard";
 import { normalizeMarkdownReport } from "@/lib/markdown";
 
 export function MarkdownReport({
   markdown,
   defaultMode = "rendered",
   dashboardUrl,
+  dashboardData,
   onSave,
   saveStatus = "idle",
   saveDisabled = false,
@@ -19,6 +21,7 @@ export function MarkdownReport({
   markdown: string;
   defaultMode?: "rendered" | "raw" | "dashboard";
   dashboardUrl?: string | null;
+  dashboardData?: Record<string, unknown> | null;
   onSave?: () => Promise<void> | void;
   saveStatus?: "idle" | "saving" | "saved";
   saveDisabled?: boolean;
@@ -30,6 +33,7 @@ export function MarkdownReport({
   const content = useMemo(() => normalizeMarkdownReport(markdown), [markdown]);
   const dashboardToken = "[[EVIDENCE_DASHBOARD]]";
   const parts = useMemo(() => content.split(dashboardToken), [content]);
+  const hasDashboard = Boolean(dashboardUrl || dashboardData);
 
   useEffect(() => {
     return () => {
@@ -89,8 +93,8 @@ export function MarkdownReport({
           className={`rounded-full border px-3 py-1 text-xs ${
             mode === "dashboard" ? "border-white/20 bg-white/10 text-neutral-100" : "border-white/10 text-neutral-400 hover:bg-white/5"
           }`}
-          disabled={!dashboardUrl}
-          title={dashboardUrl ? "Evidence contribution dashboard" : "Dashboard not available for this run"}
+          disabled={!hasDashboard}
+          title={hasDashboard ? "Evidence contribution dashboard" : "Dashboard not available for this run"}
         >
           Evidence
         </button>
@@ -119,7 +123,9 @@ export function MarkdownReport({
 
       {mode === "dashboard" ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-0">
-          {dashboardUrl ? (
+          {dashboardData ? (
+            <EvidenceContributionDashboard scoredTarget={dashboardData} />
+          ) : dashboardUrl ? (
             <EvidenceDashboardFrame src={dashboardUrl} className="min-h-[480px] w-full rounded-xl bg-transparent" />
           ) : (
             <div className="p-4 text-sm text-neutral-400">Dashboard not available for this run.</div>
@@ -167,9 +173,13 @@ export function MarkdownReport({
               >
                 {part}
               </ReactMarkdown>
-              {idx < parts.length - 1 && dashboardUrl ? (
+              {idx < parts.length - 1 && hasDashboard ? (
                 <div className="my-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-                  <EvidenceDashboardFrame src={dashboardUrl} className="min-h-[480px] w-full bg-transparent" />
+                  {dashboardData ? (
+                    <EvidenceContributionDashboard scoredTarget={dashboardData} />
+                  ) : dashboardUrl ? (
+                    <EvidenceDashboardFrame src={dashboardUrl} className="min-h-[480px] w-full bg-transparent" />
+                  ) : null}
                 </div>
               ) : null}
             </div>

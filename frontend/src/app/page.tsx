@@ -11,8 +11,21 @@ import { SourcesGrid } from "@/components/SourcesGrid";
 import { PlanApprovalPanel } from "@/components/PlanApprovalPanel";
 import { ReviewDecisionPanel } from "@/components/ReviewDecisionPanel";
 import { useRunEvents } from "@/hooks/useRunEvents";
-import { cancelRun, createRun, createRunFromText, deleteSavedRun, evidenceDashboardUrl, getSavedRun, listSavedRuns, postFollowup, renameSavedRun, saveRun } from "@/lib/api";
-import type { SavedRunDetail, SavedRunSummary, SourceName } from "@/lib/types";
+import {
+  cancelRun,
+  createRun,
+  createRunFromText,
+  deleteSavedRun,
+  evidenceDashboardUrl,
+  getSavedComparison,
+  getSavedRun,
+  listSavedComparisons,
+  listSavedRuns,
+  postFollowup,
+  renameSavedRun,
+  saveRun,
+} from "@/lib/api";
+import type { SavedComparisonDetail, SavedComparisonSummary, SavedRunDetail, SavedRunSummary, SourceName } from "@/lib/types";
 import { Github } from "lucide-react";
 
 const ALL_SOURCES: { key: SourceName; label: string }[] = [
@@ -231,12 +244,19 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [savedRuns, setSavedRuns] = useState<SavedRunSummary[]>([]);
   const [savedError, setSavedError] = useState<string | null>(null);
+  const [savedComparisons, setSavedComparisons] = useState<SavedComparisonSummary[]>([]);
+  const [savedComparisonsError, setSavedComparisonsError] = useState<string | null>(null);
   const [editingSavedId, setEditingSavedId] = useState<string | null>(null);
   const [editingSavedTitle, setEditingSavedTitle] = useState<string>("");
   const [compareAId, setCompareAId] = useState<string | null>(null);
   const [compareBId, setCompareBId] = useState<string | null>(null);
   const [compareA, setCompareA] = useState<SavedRunDetail | null>(null);
   const [compareB, setCompareB] = useState<SavedRunDetail | null>(null);
+  const [compareView, setCompareView] = useState<"new" | "saved">("new");
+  const [selectedComparisonId, setSelectedComparisonId] = useState<string | null>(null);
+  const [selectedComparison, setSelectedComparison] = useState<SavedComparisonDetail | null>(null);
+  const [selectedComparisonRunA, setSelectedComparisonRunA] = useState<SavedRunDetail | null>(null);
+  const [selectedComparisonRunB, setSelectedComparisonRunB] = useState<SavedRunDetail | null>(null);
 
   const { log, paused, failed, cancelled, completed, snapshot } = useRunEvents(runId);
 
@@ -247,6 +267,16 @@ export default function Page() {
       setSavedError(null);
     } catch (err) {
       setSavedError(err instanceof Error ? err.message : "Failed to load saved runs");
+    }
+  };
+
+  const refreshSavedComparisons = async () => {
+    try {
+      const items = await listSavedComparisons();
+      setSavedComparisons(items);
+      setSavedComparisonsError(null);
+    } catch (err) {
+      setSavedComparisonsError(err instanceof Error ? err.message : "Failed to load saved comparisons");
     }
   };
 
@@ -267,6 +297,7 @@ export default function Page() {
     if (compare.a) setCompareAId(compare.a);
     if (compare.b) setCompareBId(compare.b);
     void refreshSavedRuns();
+    void refreshSavedComparisons();
   }, []);
 
   const isActiveSaved = useMemo(() => {
@@ -315,6 +346,42 @@ export default function Page() {
       active = false;
     };
   }, [compareBId]);
+
+  useEffect(() => {
+    if (!selectedComparisonId) {
+      setSelectedComparison(null);
+      setSelectedComparisonRunA(null);
+      setSelectedComparisonRunB(null);
+      return;
+    }
+    let active = true;
+    getSavedComparison(selectedComparisonId)
+      .then(async (comparison) => {
+        if (!active) return;
+        setSelectedComparison(comparison);
+        const runASummary = savedRuns.find((item) => item.run_id === comparison.run_a_id);
+        const runBSummary = savedRuns.find((item) => item.run_id === comparison.run_b_id);
+        if (!runASummary || !runBSummary) {
+          throw new Error("Saved runs for this comparison are no longer available.");
+        }
+        const [runAData, runBData] = await Promise.all([
+          getSavedRun(runASummary.id),
+          getSavedRun(runBSummary.id),
+        ]);
+        if (!active) return;
+        setSelectedComparisonRunA(runAData);
+        setSelectedComparisonRunB(runBData);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSelectedComparison(null);
+        setSelectedComparisonRunA(null);
+        setSelectedComparisonRunB(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedComparisonId, savedRuns]);
 
   // Persist history for thread continuity across refresh.
   useEffect(() => {
@@ -666,12 +733,24 @@ export default function Page() {
             }}
             isSaved={isActiveSaved}
             savedRuns={savedRuns}
+            savedComparisons={savedComparisons}
+            savedComparisonsError={savedComparisonsError}
             compareAId={compareAId}
             compareBId={compareBId}
             onSelectCompareA={setCompareAId}
             onSelectCompareB={setCompareBId}
             compareA={compareA}
             compareB={compareB}
+            compareView={compareView}
+            onSelectCompareView={setCompareView}
+            selectedComparisonId={selectedComparisonId}
+            onSelectSavedComparison={setSelectedComparisonId}
+            selectedComparison={selectedComparison}
+            selectedComparisonRunA={selectedComparisonRunA}
+            selectedComparisonRunB={selectedComparisonRunB}
+            onComparisonSaved={() => {
+              void refreshSavedComparisons();
+            }}
           />
         )}
       </main>
@@ -892,12 +971,22 @@ function RunView({
   onSaveRun,
   isSaved,
   savedRuns,
+  savedComparisons,
+  savedComparisonsError,
   compareAId,
   compareBId,
   onSelectCompareA,
   onSelectCompareB,
   compareA,
   compareB,
+  compareView,
+  onSelectCompareView,
+  selectedComparisonId,
+  onSelectSavedComparison,
+  selectedComparison,
+  selectedComparisonRunA,
+  selectedComparisonRunB,
+  onComparisonSaved,
 }: {
   runId: string;
   activeTab: "answer" | "links" | "images" | "compare";
@@ -920,12 +1009,22 @@ function RunView({
   onSaveRun: (runId: string, title?: string) => Promise<void>;
   isSaved: boolean;
   savedRuns: SavedRunSummary[];
+  savedComparisons: SavedComparisonSummary[];
+  savedComparisonsError: string | null;
   compareAId: string | null;
   compareBId: string | null;
   onSelectCompareA: (id: string | null) => void;
   onSelectCompareB: (id: string | null) => void;
   compareA: SavedRunDetail | null;
   compareB: SavedRunDetail | null;
+  compareView: "new" | "saved";
+  onSelectCompareView: (view: "new" | "saved") => void;
+  selectedComparisonId: string | null;
+  onSelectSavedComparison: (id: string | null) => void;
+  selectedComparison: SavedComparisonDetail | null;
+  selectedComparisonRunA: SavedRunDetail | null;
+  selectedComparisonRunB: SavedRunDetail | null;
+  onComparisonSaved: () => void;
 }) {
   const [followupBusy, setFollowupBusy] = useState(false);
   const [followups, setFollowups] = useState<Array<{ q: string; a: string }>>([]);
@@ -1142,43 +1241,115 @@ function RunView({
                   </button>
                 ) : null}
               </div>
-              {savedRuns.length < 2 ? (
-                <div className="mt-2 text-xs text-neutral-400">Save your results first for comparing.</div>
-              ) : null}
-              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold text-neutral-500">Run A</span>
-                  <select
-                    className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
-                    value={compareAId ?? ""}
-                    onChange={(e) => onSelectCompareA(e.target.value || null)}
-                  >
-                    <option value="">Select a saved run</option>
-                    {savedRuns.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold text-neutral-500">Run B</span>
-                  <select
-                    className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
-                    value={compareBId ?? ""}
-                    onChange={(e) => onSelectCompareB(e.target.value || null)}
-                  >
-                    <option value="">Select a saved run</option>
-                    {savedRuns.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <div className="mt-4 flex space-x-2 border-b border-white/10">
+                <button
+                  className={`px-4 py-2 border-b-2 text-xs font-medium transition ${
+                    compareView === "new" ? "border-pink-500 text-white" : "border-transparent text-neutral-400 hover:text-neutral-200"
+                  }`}
+                  onClick={() => onSelectCompareView("new")}
+                >
+                  New Comparison
+                </button>
+                <button
+                  className={`px-4 py-2 border-b-2 text-xs font-medium transition ${
+                    compareView === "saved" ? "border-pink-500 text-white" : "border-transparent text-neutral-400 hover:text-neutral-200"
+                  }`}
+                  onClick={() => onSelectCompareView("saved")}
+                >
+                  Saved Comparisons
+                </button>
               </div>
 
-              <CompareReportPanel runA={compareA} runB={compareB} />
+              {compareView === "new" ? (
+                <>
+                  {savedRuns.length < 2 ? (
+                    <div className="mt-2 text-xs text-neutral-400">Save your results first for comparing.</div>
+                  ) : null}
+                  <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] font-semibold text-neutral-500">Run A</span>
+                      <select
+                        className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
+                        value={compareAId ?? ""}
+                        onChange={(e) => onSelectCompareA(e.target.value || null)}
+                      >
+                        <option value="">Select a saved run</option>
+                        {savedRuns.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] font-semibold text-neutral-500">Run B</span>
+                      <select
+                        className="rounded-xl border border-white/10 bg-neutral-950/40 px-3 py-2 text-sm text-neutral-100"
+                        value={compareBId ?? ""}
+                        onChange={(e) => onSelectCompareB(e.target.value || null)}
+                      >
+                        <option value="">Select a saved run</option>
+                        {savedRuns.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <CompareReportPanel
+                    runA={compareA}
+                    runB={compareB}
+                    onComparisonSaved={(comparison) => {
+                      onComparisonSaved();
+                      onSelectSavedComparison(comparison.id);
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  {savedComparisonsError ? <div className="mt-3 text-xs text-amber-300">{savedComparisonsError}</div> : null}
+                  {savedComparisons.length === 0 ? (
+                    <div className="mt-3 text-xs text-neutral-400">No saved comparisons yet.</div>
+                  ) : (
+                    <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[320px_minmax(0,1fr)]">
+                      <div className="space-y-2">
+                        {savedComparisons.map((comp) => (
+                          <button
+                            key={comp.id}
+                            type="button"
+                            onClick={() => onSelectSavedComparison(comp.id)}
+                            className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                              selectedComparisonId === comp.id
+                                ? "border-pink-500/50 bg-pink-500/10"
+                                : "border-white/10 bg-white/5 hover:bg-white/10"
+                            }`}
+                          >
+                            <div className="text-sm font-medium text-neutral-100">{comp.title}</div>
+                            <div className="mt-1 text-[11px] text-neutral-400">{new Date(comp.created_at).toLocaleString()}</div>
+                          </button>
+                        ))}
+                      </div>
+                      <div>
+                        {selectedComparison && selectedComparisonRunA && selectedComparisonRunB ? (
+                          <CompareReportPanel
+                            runA={selectedComparisonRunA}
+                            runB={selectedComparisonRunB}
+                            initialMarkdown={selectedComparison.compare_markdown || "> No saved comparison content."}
+                            dataSnapshot={selectedComparison.data_snapshot || null}
+                            readOnly
+                          />
+                        ) : (
+                          <div className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-neutral-400">
+                            Select a saved comparison to view it without regenerating.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           ) : null}
 

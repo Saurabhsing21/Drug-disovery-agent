@@ -50,3 +50,16 @@ export type SavedRunDetail = SavedRunSummary & {
   evidence_graph?: Record<string, unknown> | null;
   updated_at?: string;
 };
+
+export type SavedComparisonSummary = {
+  id: string;
+  run_a_id: string;
+  run_b_id: string;
+  title: string;
+  created_at: string;
+};
+
+export type SavedComparisonDetail = SavedComparisonSummary & {
+  compare_markdown?: string | null;
+  data_snapshot?: Record<string, unknown> | null;
+};

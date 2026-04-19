@@ -216,9 +216,6 @@ export function normalizeMarkdownReport(markdown: string | null | undefined): st
   if (!markdown) return "";
 
   const normalized = unwrapStructuredValue(markdown);
-  if (typeof normalized === "string" && normalized.length > 0) {
-    return convertListTables(normalized.trim()).trim();
-  }
-
-  return convertListTables(markdown.trim()).trim();
+  const base = typeof normalized === "string" && normalized.length > 0 ? normalized.trim() : markdown.trim();
+  return convertListTables(base).trim();
 }

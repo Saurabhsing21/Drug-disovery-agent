@@ -1,6 +1,7 @@
 "use client";
 
 import type { Snapshot } from "@/lib/types";
+import { MarkdownReport } from "@/components/MarkdownReport";
 
 function readString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
@@ -26,7 +27,7 @@ export function ChatOutputArea({ snapshot }: { snapshot: Snapshot | null }) {
             <div className="text-xs font-semibold text-neutral-100">Assistant</div>
             <div className="mt-2 rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-neutral-100">
               {markdown ? (
-                <pre className="whitespace-pre-wrap break-words text-neutral-100/90">{markdown}</pre>
+                <MarkdownReport markdown={markdown} defaultMode="rendered" />
               ) : (
                 <div className="text-neutral-400">(Waiting for generated output…)</div>
               )}

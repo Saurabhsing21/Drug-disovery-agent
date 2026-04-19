@@ -15,9 +15,9 @@ import {
 } from "chart.js";
 import { Bar, Radar } from "react-chartjs-2";
 
-import type { SavedRunDetail } from "@/lib/types";
+import type { SavedComparisonDetail, SavedRunDetail } from "@/lib/types";
 import { MarkdownReport } from "@/components/MarkdownReport";
-import { postCompareReport, saveComparison } from "@/lib/api";
+import { getSavedComparison, listSavedComparisons, postCompareReport, saveComparison } from "@/lib/api";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Filler, Tooltip, Legend);
 
@@ -27,6 +27,12 @@ const SOURCE_LABELS: Record<string, string> = {
   depmap: "DepMap",
   open_targets: "Open Targets",
   literature: "Literature",
+};
+
+type CompareSnapshot = {
+  scoresA?: Record<string, unknown>;
+  scoresB?: Record<string, unknown>;
+  metrics?: Record<string, unknown>;
 };
 
 function readScore(obj: Record<string, unknown> | null | undefined, key: string): number {
@@ -91,17 +97,187 @@ function diffValue(a: number, b: number): string {
   return `${sign}${delta.toFixed(2)}`;
 }
 
-export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null; runB: SavedRunDetail | null }) {
-  const [compareMarkdown, setCompareMarkdown] = useState<string | null>(null);
+function matchesPair(comp: { run_a_id: string; run_b_id: string }, runAId: string, runBId: string): boolean {
+  return (
+    (comp.run_a_id === runAId && comp.run_b_id === runBId) ||
+    (comp.run_a_id === runBId && comp.run_b_id === runAId)
+  );
+}
+
+export function CompareReportPanel({
+  runA,
+  runB,
+  initialMarkdown = null,
+  dataSnapshot = null,
+  readOnly = false,
+  onComparisonSaved,
+}: {
+  runA: SavedRunDetail | null;
+  runB: SavedRunDetail | null;
+  initialMarkdown?: string | null;
+  dataSnapshot?: Record<string, unknown> | null;
+  readOnly?: boolean;
+  onComparisonSaved?: (comparison: SavedComparisonDetail) => void;
+}) {
+  const [compareMarkdown, setCompareMarkdown] = useState<string | null>(initialMarkdown);
+  const [compareSnapshot, setCompareSnapshot] = useState<CompareSnapshot | null>((dataSnapshot as CompareSnapshot | null) ?? null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const scoredA = scoredTargetFrom(runA);
-  const scoredB = scoredTargetFrom(runB);
+  const [compareStatus, setCompareStatus] = useState<string | null>(readOnly && initialMarkdown ? "Loaded saved comparison report." : null);
 
-  const scoresA = sourceScores(scoredA);
-  const scoresB = sourceScores(scoredB);
+  const scoredA = useMemo(() => scoredTargetFrom(runA), [runA]);
+  const scoredB = useMemo(() => scoredTargetFrom(runB), [runB]);
+  const computedScoresA = useMemo(() => sourceScores(scoredA), [scoredA]);
+  const computedScoresB = useMemo(() => sourceScores(scoredB), [scoredB]);
+
+  const computedMetrics = useMemo(
+    () => ({
+      scoreA: summaryNumber(runA, "target_score"),
+      scoreB: summaryNumber(runB, "target_score"),
+      confA: summaryNumber(runA, "evidence_confidence"),
+      confB: summaryNumber(runB, "evidence_confidence"),
+      graphA: graphCounts(runA),
+      graphB: graphCounts(runB),
+      missingA: missingSources(runA),
+      missingB: missingSources(runB),
+      conflictA: conflictFlag(runA),
+      conflictB: conflictFlag(runB),
+    }),
+    [runA, runB],
+  );
+
+  const effectiveSnapshot = (compareSnapshot ?? (dataSnapshot as CompareSnapshot | null)) || null;
+  const scoresA = (effectiveSnapshot?.scoresA as ReturnType<typeof sourceScores> | undefined) ?? computedScoresA;
+  const scoresB = (effectiveSnapshot?.scoresB as ReturnType<typeof sourceScores> | undefined) ?? computedScoresB;
+  const metrics = (effectiveSnapshot?.metrics as typeof computedMetrics | undefined) ?? computedMetrics;
+
+  const scoreA = metrics.scoreA ?? computedMetrics.scoreA;
+  const scoreB = metrics.scoreB ?? computedMetrics.scoreB;
+  const confA = metrics.confA ?? computedMetrics.confA;
+  const confB = metrics.confB ?? computedMetrics.confB;
+  const graphA = metrics.graphA ?? computedMetrics.graphA;
+  const graphB = metrics.graphB ?? computedMetrics.graphB;
+  const missingA = metrics.missingA ?? computedMetrics.missingA;
+  const missingB = metrics.missingB ?? computedMetrics.missingB;
+  const conflictA = metrics.conflictA ?? computedMetrics.conflictA;
+  const conflictB = metrics.conflictB ?? computedMetrics.conflictB;
+
+  const comparisonSnapshot: CompareSnapshot = useMemo(
+    () => ({
+      scoresA: computedScoresA,
+      scoresB: computedScoresB,
+      metrics: computedMetrics,
+    }),
+    [computedScoresA, computedScoresB, computedMetrics],
+  );
+
+  useEffect(() => {
+    if (!readOnly) return;
+    setCompareMarkdown(initialMarkdown);
+    setCompareSnapshot((dataSnapshot as CompareSnapshot | null) ?? null);
+    setCompareError(null);
+    setCompareLoading(false);
+    setCompareStatus(initialMarkdown ? "Loaded saved comparison report." : null);
+  }, [readOnly, initialMarkdown, dataSnapshot]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (readOnly) {
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!runA || !runB) {
+      setCompareMarkdown(null);
+      setCompareSnapshot(null);
+      setCompareError(null);
+      setCompareStatus(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    const reportA = runA.summary_markdown || "";
+    const reportB = runB.summary_markdown || "";
+    if (!reportA.trim() || !reportB.trim()) {
+      setCompareMarkdown(null);
+      setCompareSnapshot(null);
+      setCompareError("Missing report text for one of the runs.");
+      setCompareStatus(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    const runAId = runA.run_id;
+    const runBId = runB.run_id;
+    const title = `${runA.title} vs ${runB.title}`;
+
+    setCompareLoading(true);
+    setCompareError(null);
+    setCompareStatus("Checking saved comparisons…");
+
+    (async () => {
+      let existing: SavedComparisonDetail | null = null;
+      try {
+        const comparisons = await listSavedComparisons();
+        const match = comparisons.find((item) => matchesPair(item, runAId, runBId));
+        if (match) {
+          existing = await getSavedComparison(match.id);
+        }
+      } catch {
+        existing = null;
+      }
+
+      if (existing) {
+        if (!active) return;
+        if (existing.compare_markdown && existing.compare_markdown.trim()) {
+          setCompareMarkdown(existing.compare_markdown);
+          setCompareSnapshot((existing.data_snapshot as CompareSnapshot | null) ?? null);
+          setCompareStatus("Loaded saved comparison from database.");
+          setCompareLoading(false);
+          return;
+        }
+      }
+
+      setCompareStatus("Generating comparison report…");
+      const generated = await postCompareReport({
+        title_a: runA.title,
+        title_b: runB.title,
+        report_a: reportA,
+        report_b: reportB,
+      });
+      if (!active) return;
+
+      const saved = await saveComparison({
+        title,
+        run_a_id: runAId,
+        run_b_id: runBId,
+        compare_markdown: generated.markdown,
+        data_snapshot: comparisonSnapshot as unknown as Record<string, unknown>,
+      });
+      if (!active) return;
+
+      setCompareMarkdown(generated.markdown);
+      setCompareSnapshot((saved.data_snapshot as CompareSnapshot | null) ?? comparisonSnapshot);
+      setCompareStatus(existing ? "Regenerated and updated saved comparison." : "Generated and saved comparison.");
+      onComparisonSaved?.(saved);
+      setCompareLoading(false);
+    })().catch((err) => {
+      if (!active) return;
+      setCompareMarkdown(null);
+      setCompareSnapshot(null);
+      setCompareStatus(null);
+      setCompareError(err instanceof Error ? err.message : "Failed to generate comparison report");
+      setCompareLoading(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [runA, runB, readOnly, comparisonSnapshot, onComparisonSaved]);
 
   const barData = useMemo(
     () => ({
@@ -123,7 +299,7 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
         },
       ],
     }),
-    [runA?.title, runB?.title, scoresA.weighted, scoresB.weighted]
+    [runA?.title, runB?.title, scoresA.weighted, scoresB.weighted],
   );
 
   const radarData = useMemo(
@@ -146,101 +322,26 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
         },
       ],
     }),
-    [runA?.title, runB?.title, scoresA.normalized, scoresB.normalized]
+    [runA?.title, runB?.title, scoresA.normalized, scoresB.normalized],
   );
 
-  const scoreA = summaryNumber(runA, "target_score");
-  const scoreB = summaryNumber(runB, "target_score");
-  const confA = summaryNumber(runA, "evidence_confidence");
-  const confB = summaryNumber(runB, "evidence_confidence");
-  const graphA = graphCounts(runA);
-  const graphB = graphCounts(runB);
-
-  const missingA = missingSources(runA);
-  const missingB = missingSources(runB);
   const showAgentReport = Boolean(compareMarkdown) && !compareLoading && !compareError;
 
-  useEffect(() => {
-    let active = true;
-    if (!runA || !runB) {
-      setCompareMarkdown(null);
-      setCompareError(null);
-      setSaveSuccess(false);
-      return () => {};
-    }
-    const reportA = runA.summary_markdown || "";
-    const reportB = runB.summary_markdown || "";
-    if (!reportA.trim() || !reportB.trim()) {
-      setCompareMarkdown(null);
-      setCompareError("Missing report text for one of the runs.");
-      return () => {};
-    }
-    setCompareLoading(true);
-    setCompareError(null);
-    postCompareReport({
-      title_a: runA.title,
-      title_b: runB.title,
-      report_a: reportA,
-      report_b: reportB,
-    })
-      .then((resp) => {
-        if (!active) return;
-        setCompareMarkdown(resp.markdown);
-      })
-      .catch((err) => {
-        if (!active) return;
-        setCompareError(err instanceof Error ? err.message : "Failed to generate comparison report");
-      })
-      .finally(() => {
-        if (active) setCompareLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [runA, runB]);
-
   if (!runA || !runB) {
-    return <div className="mt-4 text-sm text-neutral-400">Select two saved runs to generate a compare report.</div>;
+    return <div className="mt-4 text-sm text-neutral-400">Select two saved runs to compare.</div>;
   }
-
-  const handleSave = async () => {
-    if (!compareMarkdown || isSaving) return;
-    setIsSaving(true);
-    try {
-      await saveComparison({
-        title: `${runA.title} vs ${runB.title}`,
-        run_a_id: runA.run_id,
-        run_b_id: runB.run_id,
-        compare_markdown: compareMarkdown,
-        data_snapshot: {
-          scoresA,
-          scoresB,
-          metrics: {
-            scoreA,
-            scoreB,
-            confA,
-            confB,
-            graphA,
-            graphB,
-            missingA,
-            missingB,
-            conflictA: conflictFlag(runA),
-            conflictB: conflictFlag(runB),
-          },
-        },
-      });
-      setSaveSuccess(true);
-    } catch (err) {
-      setCompareError(err instanceof Error ? err.message : "Failed to save comparison.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className="mt-4 space-y-5">
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <div className="text-sm font-semibold text-neutral-100">Compare Report: {runA.title} vs {runB.title}</div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm font-semibold text-neutral-100">Compare Report: {runA.title} vs {runB.title}</div>
+          {compareStatus ? (
+            <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-300">
+              {compareStatus}
+            </div>
+          ) : null}
+        </div>
         <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <div className="text-xs text-neutral-400">Run A</div>
@@ -288,8 +389,8 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
               </tr>
               <tr>
                 <td className="py-2 pr-3">Conflict flag</td>
-                <td className="py-2 pr-3">{conflictFlag(runA) ? "yes" : "no"}</td>
-                <td className="py-2 pr-3">{conflictFlag(runB) ? "yes" : "no"}</td>
+                <td className="py-2 pr-3">{conflictA ? "yes" : "no"}</td>
+                <td className="py-2 pr-3">{conflictB ? "yes" : "no"}</td>
                 <td className="py-2">—</td>
               </tr>
               <tr>
@@ -349,9 +450,7 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
               {SOURCE_ORDER.map((key) => {
                 const aConf = String(scoresA.confidences?.[key] ?? "missing");
                 const bConf = String(scoresB.confidences?.[key] ?? "missing");
-                const missing = [aConf === "missing" ? "A" : null, bConf === "missing" ? "B" : null]
-                  .filter(Boolean)
-                  .join(",");
+                const missing = [aConf === "missing" ? "A" : null, bConf === "missing" ? "B" : null].filter(Boolean).join(",");
                 return (
                   <tr key={`conf-${key}`}>
                     <td className="py-2 pr-3">{SOURCE_LABELS[key] ?? key}</td>
@@ -431,8 +530,8 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
             const aVal = scoresA.weighted[idx] ?? 0;
             const bVal = scoresB.weighted[idx] ?? 0;
             const maxVal = Math.max(aVal, bVal, 1);
-            const confA = String(scoresA.confidences?.[key] ?? "missing");
-            const confB = String(scoresB.confidences?.[key] ?? "missing");
+            const confALabel = String(scoresA.confidences?.[key] ?? "missing");
+            const confBLabel = String(scoresB.confidences?.[key] ?? "missing");
             return (
               <div key={key} className="flex items-center gap-3">
                 <div className="w-28 text-xs font-semibold text-neutral-200">{SOURCE_LABELS[key] ?? key}</div>
@@ -440,24 +539,18 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
                   <div className="flex items-center gap-2">
                     <div className="w-12 text-[11px] text-neutral-400">{runA?.title ?? "Run A"}</div>
                     <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full rounded-full bg-sky-400/70"
-                        style={{ width: `${(aVal / maxVal) * 100}%` }}
-                      />
+                      <div className="h-full rounded-full bg-sky-400/70" style={{ width: `${(aVal / maxVal) * 100}%` }} />
                     </div>
                     <div className="w-14 text-right text-[11px] text-neutral-300">{aVal.toFixed(1)}</div>
-                    <div className="w-16 text-right text-[10px] text-neutral-500">{confA}</div>
+                    <div className="w-16 text-right text-[10px] text-neutral-500">{confALabel}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-12 text-[11px] text-neutral-400">{runB?.title ?? "Run B"}</div>
                     <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full rounded-full bg-pink-400/70"
-                        style={{ width: `${(bVal / maxVal) * 100}%` }}
-                      />
+                      <div className="h-full rounded-full bg-pink-400/70" style={{ width: `${(bVal / maxVal) * 100}%` }} />
                     </div>
                     <div className="w-14 text-right text-[11px] text-neutral-300">{bVal.toFixed(1)}</div>
-                    <div className="w-16 text-right text-[10px] text-neutral-500">{confB}</div>
+                    <div className="w-16 text-right text-[10px] text-neutral-500">{confBLabel}</div>
                   </div>
                 </div>
               </div>
@@ -469,22 +562,10 @@ export function CompareReportPanel({ runA, runB }: { runA: SavedRunDetail | null
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold text-neutral-300">Comparison report</div>
-          {showAgentReport && (
-            <button
-              onClick={handleSave}
-              disabled={isSaving || saveSuccess}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-                saveSuccess
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
-                  : "bg-pink-500 hover:bg-pink-600 text-white shadow-sm"
-              }`}
-            >
-              {saveSuccess ? "✓ Saved to Database" : isSaving ? "Saving..." : "Save Comparison"}
-            </button>
-          )}
+          {!readOnly && compareStatus ? <div className="text-[11px] text-neutral-400">{compareStatus}</div> : null}
         </div>
         <div className="mt-3 text-xs text-neutral-400">
-          {compareLoading ? "Generating expert comparison report..." : null}
+          {compareLoading ? "Generating detailed comparison report..." : null}
           {compareError ? compareError : null}
         </div>
         {showAgentReport ? (

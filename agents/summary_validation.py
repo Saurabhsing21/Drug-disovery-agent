@@ -111,16 +111,22 @@ def validate_summary_markdown(markdown: str, items: list[EvidenceRecord]) -> tup
             if len(missing) > len(positive_refs) - threshold:
                 return False, f"Missing evidence ids in compiled report: {missing[:3]}"
 
-        # Check that the narrative contains INLINE traceability citations.
-        # The new prompt (RULE 1) requires format: (evidence_id: <id>; source: <source>)
+        # Check that the narrative contains human-readable inline traceability citations.
+        # Accept the new narrative format:
+        #   (Source: <source>; trace: <record description>, Appendix <section>)
+        # and retain backward compatibility with older evidence_id-based reports.
         # Check only the narrative portion (before the Appendix A tables, if present).
         narrative_part = markdown.split("# Appendix A")[0] if "# Appendix A" in markdown else markdown
-        inline_cite_count = narrative_part.count("evidence_id:")
+        inline_cite_count = (
+            narrative_part.count("Source:")
+            + narrative_part.count("source:")
+            + narrative_part.count("evidence_id:")
+        )
         if items and inline_cite_count < 3:
             return False, (
                 f"Insufficient inline traceability: found {inline_cite_count} "
-                "'evidence_id:' citations in narrative (minimum 3 required). "
-                "Every key claim must cite its evidence_id inline."
+                "inline source traces in narrative (minimum 3 required). "
+                "Every key claim must cite a readable source trace inline."
             )
     else:
         # Concise format: require at least one evidence id reference if any items exist.

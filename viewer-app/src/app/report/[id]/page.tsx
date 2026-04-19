@@ -23,6 +23,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   if (!run) notFound();
 
   const reportMarkdown = run.summary_markdown || "No report content available.";
+  const scoredTarget = (run.scored_target as Record<string, unknown> | null | undefined) ?? null;
 
   return (
     <div className="flex h-screen bg-neutral-950 text-neutral-100 flex-col overflow-auto">
@@ -52,7 +53,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       <main className="flex-1 max-w-5xl mx-auto w-full p-8 space-y-8">
         <div className="bg-neutral-950/50 rounded-3xl border border-white/10 p-6 shadow-xl">
           <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">Analysis Report</h2>
-          <MarkdownReport markdown={reportMarkdown} defaultMode="rendered" />
+          <MarkdownReport markdown={reportMarkdown} defaultMode="rendered" dashboardData={scoredTarget} />
         </div>
       </main>
     </div>

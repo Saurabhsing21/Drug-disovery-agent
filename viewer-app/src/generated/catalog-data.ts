@@ -5,6 +5,3864 @@ import type { SavedComparisonDetail, SavedRunDetail } from "@/lib/types";
 
 export const savedRuns: SavedRunDetail[] = [
   {
+    "id": "b6fd230e-43ab-4719-98c6-90bbd11691d6",
+    "run_id": "run-76ada2136f55",
+    "title": "kras2",
+    "gene_symbol": "KRAS",
+    "disease_id": null,
+    "objective": null,
+    "summary_markdown": "# THERAPEUTIC TARGET EVIDENCE SUMMARY REPORT\n\nGene: KRAS | Run ID: run-76ada2136f55\n\n## Evidence Contribution Dashboard\n[[EVIDENCE_DASHBOARD]]\n\n## 1. Executive Summary\nKRAS is a small GTPase (Ras family) that binds GDP/GTP and regulates cell proliferation; this molecular role positions KRAS upstream of MAPK signaling and aligns with oncogenic driver behavior in specific contexts (curated biological context). Functional genomics show context-dependent essentiality: across 1,208 cell lines, the average CRISPR gene effect is −0.7249 and 52.4% of lines meet a moderate-to-strong dependency threshold (≤ −0.5), indicating many—but not all—models rely on KRAS for viability (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap). Open Targets reports high association scores with both oncologic diseases (e.g., non-small cell lung carcinoma score 0.809) and RASopathies (e.g., Noonan syndrome 3 score 0.826), reflecting combined genetic, somatic, and clinical signals (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; source: Open Targets). PHAROS classifies KRAS as Tclin with 223 ligands, which means FDA-approved drugs exist for this target class despite GTPases historically being challenging for direct small-molecule inhibition (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS). Representative literature highlights pathway vulnerabilities in KRAS-driven cancers, such as TBK1 dependence, supporting the therapeutic relevance of the KRAS signaling axis (evidence_id: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; source: Literature).\n\n## 2. Target Annotation — PHAROS\nExplanation\n- PHAROS categorizes KRAS as Tclin, indicating that approved therapeutics exist for this target; this supports tractability at the protein or pathway level (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- KRAS is annotated as “GTPase KRas,” an enzyme within the small GTPase/Ras family; 223 ligands are cataloged, reflecting substantial pharmacological engagement with the target class (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Multiple PHAROS entries link KRAS to oncology and RASopathies, consistent with disease associations reported by Open Targets (see Section 4) (evidence_ids: pharos:KRAS:MONDO:0018997:...; pharos:KRAS:MONDO:0011908:...; pharos:KRAS:MONDO:0015280:...; pharos:KRAS:MONDO:0018874:...; pharos:KRAS:MONDO:0001056:...; pharos:KRAS:MONDO:0004992:...; pharos:KRAS:MONDO:0012371:...; pharos:KRAS:MONDO:0019087:...; pharos:KRAS:MONDO:0009026:...; pharos:KRAS:MONDO:0015459:...; source: PHAROS).\n\nSummary table\n| Evidence ID | TDL | Family | Ligand Total | Associated Disease |\n| --- | --- | --- | --- | --- |\n| pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 | Tclin | Enzyme (GTPase KRas) | 223 | Noonan syndrome 3 |\n| pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28 | Tclin | Enzyme (GTPase KRas) | 223 | juvenile myelomonocytic leukemia |\n| pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53 | Tclin | Enzyme (GTPase KRas) | 223 | cardiofaciocutaneous syndrome |\n| pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f | Tclin | Enzyme (GTPase KRas) | 223 | acute myeloid leukemia |\n| pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f | Tclin | Enzyme (GTPase KRas) | 223 | gastric cancer |\n| pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67 | Tclin | Enzyme (GTPase KRas) | 223 | cancer |\n| pharos:KRAS:MONDO:0012371:target_annotation:a045752120 | Tclin | Enzyme (GTPase KRas) | 223 | Noonan syndrome 3 |\n| pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef | Tclin | Enzyme (GTPase KRas) | 223 | cholangiocarcinoma |\n| pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b | Tclin | Enzyme (GTPase KRas) | 223 | Costello syndrome |\n| pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8 | Tclin | Enzyme (GTPase KRas) | 223 | nasopharyngeal carcinoma |\n\n## 3. Genetic Dependency — DepMap\n### Global Dependency Analysis\nExplanation\n- Across 1,208 cell lines, KRAS shows an average CRISPR gene effect of −0.7249 and a median of −0.5169; 633 cell lines (52.4%) meet a dependency threshold of ≤ −0.5, indicating moderate, context-dependent essentiality across many models rather than universal pan-essential behavior (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Biologically, a CERES of ~−0.5 reflects intermediate dependency, while values < −1 indicate strong essentiality; the average ~−0.72 suggests KRAS dependence is common but not ubiquitous, consistent with oncogene-driven subsets (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n\nMetrics table\n| Metric | Value |\n| --- | --- |\n| Cell lines screened | 1,208 |\n| Average gene effect (CERES) | −0.7249 |\n| Median gene effect (CERES) | −0.5169 |\n| Strong dependency count (≤ −0.5) | 633 |\n| Strong dependency fraction | 0.524 |\n| Screen/data release | CRISPRGeneEffect, DepMap 25Q3 |\n| Evidence ID | depmap:KRAS:NA:genetic_dependency:7f3b898e07 |\n\n### Top Dependent Cell Lines\nExplanation\n- Several cell lines exhibit extreme dependency (CERES much less than −1), consistent with strong requirement for KRAS function in those specific genetic backgrounds (evidence_ids listed per row; source: DepMap).\n\nRanked table\n| Rank | Cell line ID | Gene effect (CERES) | Data release | Evidence ID |\n| --- | --- | --- | --- | --- |\n| 1 | ACH-000222 | −4.461 | DepMap 25Q3 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 |\n| 2 | ACH-000417 | −3.968 | DepMap 25Q3 | depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7 |\n| 3 | ACH-000505 | −3.923 | DepMap 25Q3 | depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d |\n| 4 | ACH-000235 | −3.664 | DepMap 25Q3 | depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce |\n| 5 | ACH-001494 | −3.567 | DepMap 25Q3 | depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f |\n| 6 | ACH-000264 | −3.496 | DepMap 25Q3 | depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a |\n| 7 | ACH-000517 | −3.364 | DepMap 25Q3 | depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324 |\n| 8 | ACH-000114 | −3.346 | DepMap 25Q3 | depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80 |\n| 9 | ACH-000532 | −3.334 | DepMap 25Q3 | depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562 |\n\n## 4. Disease Associations — Open Targets\nExplanation\n- Open Targets scores above 0.7 indicate strong multi-evidence associations. KRAS shows high scores with both cancers (e.g., non-small cell lung carcinoma 0.809) and RASopathy syndromes (e.g., Noonan syndrome 3 0.826; cardiofaciocutaneous syndrome 2 0.814), consistent with its role in growth signaling and development (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; opentargets:ENSG00000133703:MONDO_0014112:...; source: Open Targets).\n- Oncology-relevant associations also include gastric cancer (0.768) and acute myeloid leukemia (0.755), reflecting somatic and genetic links in solid and hematologic malignancies (evidence_ids: opentargets:ENSG00000133703:MONDO_0001056:...; opentargets:ENSG00000133703:EFO_0000222:...; source: Open Targets).\n\nAssociation table\n| Disease | Association score | Evidence ID |\n| --- | --- | --- |\n| Noonan syndrome 3 | 0.826 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 |\n| cardiofaciocutaneous syndrome 2 | 0.814 | opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464 |\n| Noonan syndrome | 0.813 | opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e |\n| non-small cell lung carcinoma | 0.809 | opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e |\n| cardiofaciocutaneous syndrome | 0.794 | opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160 |\n| gastric cancer | 0.768 | opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc |\n| acute myeloid leukemia | 0.755 | opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372 |\n| linear nevus sebaceous syndrome | 0.742 | opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b |\n| Toriello-Lacassie-Droste syndrome | 0.740 | opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc |\n| Linear nevus sebaceus syndrome | 0.734 | opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69 |\n\n## 5. Literature\nExplanation\n- Appendix A5 lists additional literature records beyond the lead example highlighted in this section.\n- Filtered to KRAS-centric or therapeutically relevant studies. The TBK1 study explicitly interrogates KRAS-driven cancers and identifies a pathway vulnerability; large-scale cancer characterizations include KRAS within disease-relevant genomic landscapes. These entries serve as anchors but do not outweigh functional and association datasets (evidence_ids below; source: Literature).\n\nLiterature table\n| PMID | Year | Title | Relevance note | Evidence ID |\n| --- | --- | --- | --- | --- |\n| 19847166 | 2009 | Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1. | Identifies TBK1 as a vulnerability in KRAS-driven contexts, underscoring therapeutic targeting within KRAS signaling networks. | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 |\n| 22810696 | 2012 | Comprehensive molecular characterization of human colon and rectal cancer. | Disease-scale genomics where KRAS features within CRC molecular landscapes. | literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b |\n| 23636398 | 2013 | Integrated genomic characterization of endometrial carcinoma. | Cancer cohort genomics including KRAS within somatic driver frameworks. | literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0 |\n\n## 6. Integrated Interpretation\nKRAS is a small GTPase (Ras family) that binds GDP/GTP, activates MAPK1/MAPK3, and regulates cell proliferation, providing a mechanistic basis for oncogenic signaling and developmental phenotypes when dysregulated (curated biological context). In cancer cell models, KRAS shows moderate average dependency with pronounced essentiality in specific lines, indicating oncogene-addicted subsets (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap). Open Targets reports strong associations with both cancers (e.g., non-small cell lung carcinoma 0.809) and RASopathies (e.g., Noonan syndrome 3 0.826), matching the dual oncologic and developmental roles of the Ras pathway (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; source: Open Targets). PHAROS designates Tclin with 223 ligands, indicating approved therapeutic engagement at the target class level, despite GTPases typically lacking deep, druggable pockets like kinases (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n\nCross-referencing curated disease associations with Open Targets:\n- Matches observed: Noonan syndrome 3, gastric cancer, and cardiofaciocutaneous syndrome 2 appear in both curated context and Open Targets associations, indicating UniProt-curated context aligns with disease scoring (evidence_ids: opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc; opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464; source: Open Targets; curated biological context).\n- Partial mismatch: “Leukemia, juvenile myelomonocytic” is present in curated context but not listed among the provided Open Targets top associations here; this likely reflects dataset truncation rather than absence of association (curated biological context; Open Targets table scope).\n\nComparative context:\n- Unlike kinase targets with well-defined ATP-binding pockets, KRAS is a GTPase with a smooth nucleotide-binding surface, historically making direct small-molecule inhibition challenging; the Tclin classification indicates that this barrier has been overcome at least for specific clinical settings (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; curated biological context).\n\nConflict/tension traceability:\n- An expected cross-source tension is observed between:\n  - PHAROS (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; TDL=Tclin with 223 ligands implying clinical tractability)\n  - DepMap (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; average CERES ~−0.72 with 52.4% lines showing dependency ≤ −0.5)\n  This likely reflects lineage- and genotype-specific KRAS dependence: Tclin denotes approved therapeutics for the target class, whereas DepMap averages include both KRAS-dependent and -independent models, yielding moderate global essentiality rather than uniform lethality, which is biologically expected for a context-specific oncogene in the Ras/MAPK pathway (curated biological context).\n\n### Evidence Contribution (Interpretation)\n- Strongest: DepMap functional genomics, as it measures viability impact; the average CERES of −0.7249 across 1,208 lines and 52.4% dependency highlight context-specific essentiality (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Moderate: Open Targets disease associations, with scores ~0.8 for non-small cell lung carcinoma and Noonan syndrome 3, indicating robust multi-modal evidence linking KRAS to disease phenotypes (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; source: Open Targets).\n- Moderate-to-supportive: PHAROS target annotation, with TDL=Tclin and 223 ligands, confirming clinical tractability of the KRAS target class but not resolving context-specific essentiality (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Weakest: Literature, used as contextual anchors; the TBK1 study supports pathway-level vulnerabilities in KRAS-driven cancers but does not on its own establish KRAS as a universal dependency (evidence_id: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; source: Literature).\n\n## 7. Evidence Strength Assessment\n- Functional dependency (DepMap): High interpretability for target essentiality; average −0.7249 with many strongly dependent lines indicates meaningful but context-specific viability effects. Limitation: cell-line models mix KRAS-mutant and wild-type contexts, so global averages can underestimate genotype-specific dependencies (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Disease association (Open Targets): Strong scores (~0.8) in both oncology (e.g., NSCLC) and RASopathies support clinical relevance. Limitation: disease context is undefined here; presented associations are not exhaustive of all KRAS-linked diseases, and variant-level specificity is not detailed in this dataset slice (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; source: Open Targets).\n- Target annotation (PHAROS): Tclin with extensive ligand catalog supports tractability. Limitation: Tclin does not specify which KRAS alleles or contexts are clinically addressed (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Literature: Provides mechanistic and cohort-level context (e.g., TBK1 dependence in KRAS-driven tumors; large-scale cancer characterizations). Limitation: heterogeneous scope; not a quantitative measure of KRAS essentiality across lineages (evidence_ids: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b; source: Literature).\n- Dataset limitation note: Only a subset of Open Targets associations is shown here; absence of a disease in this table does not imply lack of association (evidence_ids as listed in Section 4; source: Open Targets).\n\n## 8. Overall Assessment\nKRAS demonstrates tractable therapeutic engagement (Tclin; 223 ligands) alongside non-uniform, context-specific essentiality across cancer models, with extreme dependencies in defined subsets and moderate average dependency globally. High disease association scores span both cancers (e.g., NSCLC) and developmental RASopathies, aligning with KRAS’s role in Ras/MAPK signaling and cell proliferation. In the absence of a specified indication, oncology contexts with strong association scores and evidence of strong cell-line dependency represent the most plausible therapeutic settings captured in this dataset slice (evidence_ids: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; depmap:KRAS:NA:genetic_dependency:7f3b898e07; opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; source: PHAROS, DepMap, Open Targets).\n\n## 9. Final Conclusion\nKRAS is a clinically engaged, biologically central GTPase with strong disease associations and context-dependent essentiality that becomes pronounced in specific cellular backgrounds; these features support KRAS as a viable therapeutic target, particularly in oncology indications with high association scores and demonstrated cellular dependence, while recognizing lineage and genotype stratification will be critical for efficacy (evidence_ids: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; depmap:KRAS:NA:genetic_dependency:7f3b898e07; opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; source: PHAROS, DepMap, Open Targets).\n\n---\n\n# Appendix A — Raw Evidence Tables\n\nThese tables are compiled directly from the verified evidence payload to make the report scannable.\n- `evidence_id` is the canonical identifier used for traceability.\n- `normalized_score` and `confidence` are copied from the payload (they are not re-computed here).\n- If the narrative report above contains non-table lists, use these tables as the authoritative tabular view.\n\n## A0. Scoring Summary\n| # | category | strength | category_score | top_evidence_id | main_limitation |\n| --- | --- | --- | --- | --- | --- |\n| 1 | annotation | strong | 0.94 | pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 |  |\n| 2 | dependency | strong | 0.98 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 |  |\n| 3 | disease_association | strong | 0.848938 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 | disease context unspecified; association may be non-specific |\n| 4 | literature | strong | 0.93 | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 | literature is supportive and can be noisy |\n\n## A0.1 Source Contribution Weights\n| # | source | source_score | weight_used | confidence_label |\n| --- | --- | --- | --- | --- |\n| 1 | pharos | 1 | 0.3 | high |\n| 2 | depmap | 0.3624 | 0.3 | high |\n| 3 | open_targets | 0.82637 | 0.25 | high |\n| 4 | literature | 0.2594 | 0.15 | low |\n\n## A1. Source Coverage\n| # | source | status | records | duration_ms | error |\n| --- | --- | --- | --- | --- | --- |\n| 1 | opentargets | success | 10 | 6422 |  |\n| 2 | depmap | success | 10 | 19976 |  |\n| 3 | pharos | success | 10 | 1460 |  |\n| 4 | literature | success | 5 | 5773 |  |\n\n## A2. Target Annotation (PHAROS)\n| # | evidence_id | source | tdl | family | ligand_total | novelty | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Noonan syndrome (TDL=Tclin, ligands=223). |\n| 2 | pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to juvenile myelomonocytic leukemia (TDL=Tclin, ligands=223). |\n| 3 | pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cardiofaciocutaneous syndrome (TDL=Tclin, ligands=223). |\n| 4 | pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to acute myeloid leukemia (TDL=Tclin, ligands=223). |\n| 5 | pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to gastric cancer (TDL=Tclin, ligands=223). |\n| 6 | pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cancer (TDL=Tclin, ligands=223). |\n| 7 | pharos:KRAS:MONDO:0012371:target_annotation:a045752120 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Noonan syndrome 3 (TDL=Tclin, ligands=223). |\n| 8 | pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cholangiocarcinoma (TDL=Tclin, ligands=223). |\n| 9 | pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Costello syndrome (TDL=Tclin, ligands=223). |\n| 10 | pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to nasopharyngeal carcinoma (TDL=Tclin, ligands=223). |\n\n## A3. Genetic Dependency (DepMap)\n### A3.1 Global metrics\n| # | evidence_id | source | average_gene_effect | cell_line_count | strong_dependency_count | strong_dependency_fraction | data_release | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | depmap:KRAS:NA:genetic_dependency:7f3b898e07 | depmap | -0.724902 | 1208 | 633 | 0.524 | DepMap 25Q3 | 0.950 | 0.362451 | DepMap CRISPR gene effect for KRAS: -0.725 avg across 1208 cell lines (633 show strong dependency ≤ −0.5). |\n\n### A3.2 Top dependent cell lines\n| # | evidence_id | cell_line_id | gene_effect | rank_within_gene | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 | ACH-000222 | -4.46066 | 1 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000222: gene_effect=-4.461 (rank 1). |\n| 2 | depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7 | ACH-000417 | -3.96775 | 2 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000417: gene_effect=-3.968 (rank 2). |\n| 3 | depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d | ACH-000505 | -3.92275 | 3 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000505: gene_effect=-3.923 (rank 3). |\n| 4 | depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce | ACH-000235 | -3.66389 | 4 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000235: gene_effect=-3.664 (rank 4). |\n| 5 | depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f | ACH-001494 | -3.5669 | 5 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-001494: gene_effect=-3.567 (rank 5). |\n| 6 | depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a | ACH-000264 | -3.49597 | 6 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000264: gene_effect=-3.496 (rank 6). |\n| 7 | depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324 | ACH-000517 | -3.36438 | 7 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000517: gene_effect=-3.364 (rank 7). |\n| 8 | depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80 | ACH-000114 | -3.34564 | 8 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000114: gene_effect=-3.346 (rank 8). |\n| 9 | depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562 | ACH-000532 | -3.3343 | 9 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000532: gene_effect=-3.334 (rank 9). |\n\n## A4. Disease Associations (Open Targets)\n| # | evidence_id | source | disease_name | disease_id | score | evidence_count | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 | opentargets | Noonan syndrome 3 | MONDO_0012371 | 0.82637 | 1815 | 0.898 | 0.82637 | Open Targets association score for KRAS and Noonan syndrome 3 is 0.826. |\n| 2 | opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464 | opentargets | cardiofaciocutaneous syndrome 2 | MONDO_0014112 | 0.814412 | 1815 | 0.894 | 0.814412 | Open Targets association score for KRAS and cardiofaciocutaneous syndrome 2 is 0.814. |\n| 3 | opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e | opentargets | Noonan syndrome | MONDO_0018997 | 0.813127 | 1815 | 0.894 | 0.813127 | Open Targets association score for KRAS and Noonan syndrome is 0.813. |\n| 4 | opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e | opentargets | non-small cell lung carcinoma | EFO_0003060 | 0.809177 | 1815 | 0.893 | 0.809177 | Open Targets association score for KRAS and non-small cell lung carcinoma is 0.809. |\n| 5 | opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160 | opentargets | cardiofaciocutaneous syndrome | MONDO_0015280 | 0.794482 | 1815 | 0.888 | 0.794482 | Open Targets association score for KRAS and cardiofaciocutaneous syndrome is 0.794. |\n| 6 | opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc | opentargets | gastric cancer | MONDO_0001056 | 0.768241 | 1815 | 0.880 | 0.768241 | Open Targets association score for KRAS and gastric cancer is 0.768. |\n| 7 | opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372 | opentargets | acute myeloid leukemia | EFO_0000222 | 0.754902 | 1815 | 0.876 | 0.754902 | Open Targets association score for KRAS and acute myeloid leukemia is 0.755. |\n| 8 | opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b | opentargets | linear nevus sebaceous syndrome | MONDO_0008097 | 0.741919 | 1815 | 0.873 | 0.741919 | Open Targets association score for KRAS and linear nevus sebaceous syndrome is 0.742. |\n| 9 | opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc | opentargets | Toriello-Lacassie-Droste syndrome | MONDO_0010854 | 0.739748 | 1815 | 0.872 | 0.739748 | Open Targets association score for KRAS and Toriello-Lacassie-Droste syndrome is 0.740. |\n| 10 | opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69 | opentargets | Linear nevus sebaceus syndrome | Orphanet_2612 | 0.734425 | 1815 | 0.870 | 0.734425 | Open Targets association score for KRAS and Linear nevus sebaceus syndrome is 0.734. |\n\n## A5. Literature (Europe PMC)\n| # | evidence_id | pmid | year | cited_by | title | confidence | normalized_score |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b | 22810696 | 2012 | 6682 | Comprehensive molecular characterization of human colon and rectal cancer. | 0.850 | 1 |\n| 2 | literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0 | 23636398 | 2013 | 4161 | Integrated genomic characterization of endometrial carcinoma. | 0.850 | 0.95 |\n| 3 | literature:KRAS:PMID:24553385:NA:literature_article:1648950075 | 24553385 | 2014 | 3594 | Detection of circulating tumor DNA in early- and late-stage human malignancies. | 0.850 | 0.9 |\n| 4 | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 | 19847166 | 2009 | 3042 | Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1. | 0.850 | 1 |\n| 5 | literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48 | 15466206 | 2004 | 3013 | BAY 43-9006 exhibits broad spectrum oral antitumor activity and targets the RAF/MEK/ERK pathway and receptor tyrosine kinases involved in tumor progression and angiogenesis. | 0.800 | 0.85 |",
+    "scored_target": {
+      "conflict_detail": "PHAROS (1.00) vs DEPMAP (0.36): High tractability but low genetic essentiality — may be relevant in different tissue or disease context than DepMap cell lines tested.",
+      "conflict_flag": true,
+      "evidence_confidence": 0.895,
+      "gene": "KRAS",
+      "missing_sources": [],
+      "notes": [
+        "Sources with sparse data: ['literature'].",
+        "Inter-source conflict detected — see detail for stratification needs."
+      ],
+      "score_version": "1.0",
+      "source_confidences": {
+        "depmap": "high",
+        "literature": "low",
+        "open_targets": "high",
+        "pharos": "high"
+      },
+      "source_scores": {
+        "depmap": 0.3624,
+        "literature": 0.2594,
+        "open_targets": 0.8263697027313498,
+        "pharos": 1
+      },
+      "sparse_sources": [
+        "literature"
+      ],
+      "target_score": 0.6542,
+      "weights_used": {
+        "depmap": 0.3,
+        "literature": 0.15,
+        "open_targets": 0.25,
+        "pharos": 0.3
+      }
+    },
+    "final_dossier": {
+      "artifact_path": "/data/artifacts/dossiers/run-76ada2136f55.evidence_dossier.json",
+      "artifacts": {
+        "evidence_dashboard": "/data/artifacts/evidence_dashboards/run-76ada2136f55.evidence_dashboard.html",
+        "graph": "/data/artifacts/graphs/run-76ada2136f55.evidence_graph.json",
+        "plan": "/data/artifacts/plans/run-76ada2136f55.collection_plan.json"
+      },
+      "conflicts": [],
+      "emitted_at": "2026-04-15T16:36:44.403139Z",
+      "errors": [],
+      "graph_snapshot": {
+        "artifact_path": "/data/artifacts/graphs/run-76ada2136f55.evidence_graph.json",
+        "edges": [
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+            "target_id": "source:depmap"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_publication",
+            "source_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+            "target_id": "publication:pmid:15466206"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+            "target_id": "source:literature"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_publication",
+            "source_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+            "target_id": "publication:pmid:19847166"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+            "target_id": "source:literature"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_publication",
+            "source_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+            "target_id": "publication:pmid:22810696"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+            "target_id": "source:literature"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_publication",
+            "source_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+            "target_id": "publication:pmid:23636398"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+            "target_id": "source:literature"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_publication",
+            "source_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+            "target_id": "publication:pmid:24553385"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+            "target_id": "source:literature"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+            "target_id": "source:opentargets"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "evidence_source",
+            "source_id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+            "target_id": "source:pharos"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:EFO_0000222"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:EFO_0003060"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0001056"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0004992"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0009026"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0011908"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0012371"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0015280"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0015459"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0018874"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0018997"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO:0019087"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0001056"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0008097"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0010854"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0012371"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0014112"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0015280"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:MONDO_0018997"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_disease",
+            "source_id": "target:KRAS",
+            "target_id": "disease:Orphanet_2612"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105"
+          },
+          {
+            "attributes": {},
+            "edge_type": "target_evidence",
+            "source_id": "target:KRAS",
+            "target_id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef"
+          }
+        ],
+        "generated_at": "2026-04-15T16:34:40.955800Z",
+        "graph_format": "json",
+        "nodes": [
+          {
+            "attributes": {},
+            "id": "disease:EFO_0000222",
+            "label": "EFO_0000222",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:EFO_0003060",
+            "label": "EFO_0003060",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0001056",
+            "label": "MONDO:0001056",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0004992",
+            "label": "MONDO:0004992",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0009026",
+            "label": "MONDO:0009026",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0011908",
+            "label": "MONDO:0011908",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0012371",
+            "label": "MONDO:0012371",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0015280",
+            "label": "MONDO:0015280",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0015459",
+            "label": "MONDO:0015459",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0018874",
+            "label": "MONDO:0018874",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0018997",
+            "label": "MONDO:0018997",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO:0019087",
+            "label": "MONDO:0019087",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0001056",
+            "label": "MONDO_0001056",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0008097",
+            "label": "MONDO_0008097",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0010854",
+            "label": "MONDO_0010854",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0012371",
+            "label": "MONDO_0012371",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0014112",
+            "label": "MONDO_0014112",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0015280",
+            "label": "MONDO_0015280",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:MONDO_0018997",
+            "label": "MONDO_0018997",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {},
+            "id": "disease:Orphanet_2612",
+            "label": "Orphanet_2612",
+            "node_type": "disease"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+              "normalized_score": 1,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+            "label": "genetic_dependency_cell_line",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.95,
+              "conflict_severity": null,
+              "evidence_id": "depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+              "normalized_score": 0.36245080859964507,
+              "source": "depmap"
+            },
+            "id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+            "label": "genetic_dependency",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8,
+              "conflict_severity": null,
+              "evidence_id": "literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+              "normalized_score": 0.8500000000000001,
+              "source": "literature"
+            },
+            "id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+            "label": "literature_article",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+              "normalized_score": 1,
+              "source": "literature"
+            },
+            "id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+            "label": "literature_article",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+              "normalized_score": 1,
+              "source": "literature"
+            },
+            "id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+            "label": "literature_article",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+              "normalized_score": 0.9500000000000001,
+              "source": "literature"
+            },
+            "id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+            "label": "literature_article",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+              "normalized_score": 0.9,
+              "source": "literature"
+            },
+            "id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+            "label": "literature_article",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8764705594716844,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+              "normalized_score": 0.7549018649056145,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.89275320519801,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+              "normalized_score": 0.8091773506600335,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8804721791934171,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+              "normalized_score": 0.7682405973113904,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8725755685748319,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+              "normalized_score": 0.7419185619161062,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8719244547184876,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+              "normalized_score": 0.7397481823949587,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8979109108194049,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+              "normalized_score": 0.8263697027313498,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8943234896706429,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+              "normalized_score": 0.8144116322354762,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8883445975496039,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+              "normalized_score": 0.7944819918320131,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8939379521341774,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+              "normalized_score": 0.8131265071139245,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.8703275926361106,
+              "conflict_severity": null,
+              "evidence_id": "opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+              "normalized_score": 0.734425308787035,
+              "source": "opentargets"
+            },
+            "id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+            "label": "disease_association",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "confidence": 0.85,
+              "conflict_severity": null,
+              "evidence_id": "pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+              "normalized_score": 1,
+              "source": "pharos"
+            },
+            "id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+            "label": "target_annotation",
+            "node_type": "evidence"
+          },
+          {
+            "attributes": {
+              "identifier_type": "pmid"
+            },
+            "id": "publication:pmid:15466206",
+            "label": "15466206",
+            "node_type": "publication"
+          },
+          {
+            "attributes": {
+              "identifier_type": "pmid"
+            },
+            "id": "publication:pmid:19847166",
+            "label": "19847166",
+            "node_type": "publication"
+          },
+          {
+            "attributes": {
+              "identifier_type": "pmid"
+            },
+            "id": "publication:pmid:22810696",
+            "label": "22810696",
+            "node_type": "publication"
+          },
+          {
+            "attributes": {
+              "identifier_type": "pmid"
+            },
+            "id": "publication:pmid:23636398",
+            "label": "23636398",
+            "node_type": "publication"
+          },
+          {
+            "attributes": {
+              "identifier_type": "pmid"
+            },
+            "id": "publication:pmid:24553385",
+            "label": "24553385",
+            "node_type": "publication"
+          },
+          {
+            "attributes": {
+              "provider": "DepMap (Broad Institute)"
+            },
+            "id": "source:depmap",
+            "label": "depmap",
+            "node_type": "source"
+          },
+          {
+            "attributes": {
+              "provider": "Europe PMC"
+            },
+            "id": "source:literature",
+            "label": "literature",
+            "node_type": "source"
+          },
+          {
+            "attributes": {
+              "provider": "Open Targets"
+            },
+            "id": "source:opentargets",
+            "label": "opentargets",
+            "node_type": "source"
+          },
+          {
+            "attributes": {
+              "provider": "PHAROS"
+            },
+            "id": "source:pharos",
+            "label": "pharos",
+            "node_type": "source"
+          },
+          {
+            "attributes": {
+              "target_id": "ENSG00000133703"
+            },
+            "id": "target:KRAS",
+            "label": "KRAS",
+            "node_type": "target"
+          }
+        ]
+      },
+      "handoff_payload": {
+        "blocking_issues": [],
+        "conflict_count": 0,
+        "dossier_artifact_path": "/data/artifacts/dossiers/run-76ada2136f55.evidence_dossier.json",
+        "evidence_count": 35,
+        "graph_artifact_path": "/data/artifacts/graphs/run-76ada2136f55.evidence_graph.json",
+        "handoff_version": "phase2.v1",
+        "phase": "phase2",
+        "ready": false,
+        "reason": "awaiting_human_review",
+        "requested_source_count": 4,
+        "review_required": true,
+        "run_id": "run-76ada2136f55",
+        "successful_source_count": 4,
+        "warning_issues": [
+          "ontology_id_format"
+        ]
+      },
+      "plan": {
+        "artifact_path": "/data/artifacts/plans/run-76ada2136f55.collection_plan.json",
+        "created_at": "2026-04-15T16:34:01.708616Z",
+        "execution_notes": [
+          "Found 4 prior episodic match(es) for this query.",
+          "Latest related run `run-392fe4be0af4` has no recorded review decision."
+        ],
+        "expected_outputs": {
+          "depmap": [
+            "evidence_records",
+            "source_status"
+          ],
+          "literature": [
+            "evidence_records",
+            "source_status"
+          ],
+          "opentargets": [
+            "evidence_records",
+            "source_status"
+          ],
+          "pharos": [
+            "evidence_records",
+            "source_status"
+          ]
+        },
+        "memory_context": {
+          "latest_evidence_count": 35,
+          "latest_review_decision": null,
+          "latest_run_id": "run-392fe4be0af4",
+          "match_count": 4,
+          "recent_run_ids": [
+            "run-15d46d2a1b94",
+            "run-6f54c3fb49a3",
+            "run-392fe4be0af4"
+          ]
+        },
+        "plan_version": "phase1.v1",
+        "planner_model_used": null,
+        "planning_mode": "cached_planner",
+        "query_intent": "Collect Phase-1 evidence for target KRAS. Memory-informed planning enabled from 4 prior run(s).",
+        "query_variants": [
+          "KRAS",
+          "K-RAS"
+        ],
+        "retry_policy": {
+          "base_delay_ms": 100,
+          "fallback": "emit_partial_result",
+          "max_attempts": 3,
+          "max_delay_ms": 400,
+          "retryable_error_codes": [
+            "timeout",
+            "rate_limit",
+            "upstream_error"
+          ],
+          "strategy": "bounded_exponential_backoff"
+        },
+        "run_id": "run-76ada2136f55",
+        "selected_sources": [
+          "opentargets",
+          "depmap",
+          "pharos",
+          "literature"
+        ],
+        "source_directives": {
+          "depmap": "Extract KRAS dependency metrics (CRISPR/RNAi), lineage/context-specific dependencies, expression and mutation prevalence across cell lines, co-dependencies/synthetic-lethal signals, and any correlated vulnerabilities for KRAS-mutant contexts.",
+          "literature": "Survey recent reviews and primary studies on KRAS biology and therapeutics: isoforms (KRAS4A/4B), hotspot mutations (e.g., G12C/G12D), direct inhibitors, resistance mechanisms, and promising combinations; prioritize the last 3–5 years and high-impact journals.",
+          "opentargets": "Pull KRAS gene profile: disease associations (pan-cancer), evidence scores by modality (genetic, somatic, pathways), known drugs/clinical trials (e.g., KRAS G12C/G12D inhibitors), tractability, safety/target safety annotations, and pathways.",
+          "pharos": "Summarize target development level (TDL), target class/family (small GTPase/RAS), known ligands/chemotypes, approved/clinical agents acting on KRAS or pathway-relevant targets, and basic tractability/druggability notes."
+        }
+      },
+      "query": {
+        "disease_id": null,
+        "gene_symbol": "KRAS",
+        "max_literature_articles": 5,
+        "model_override": null,
+        "objective": null,
+        "per_source_top_k": 10,
+        "run_id": "run-76ada2136f55",
+        "sources": [
+          "depmap",
+          "pharos",
+          "opentargets",
+          "literature"
+        ],
+        "species": "Homo sapiens"
+      },
+      "review_decision": null,
+      "run_id": "run-76ada2136f55",
+      "run_metadata": {
+        "collector_node_sequence": [
+          "validate_input",
+          "plan_collection",
+          "plan_review_gate",
+          "collect_sources_parallel",
+          "normalize_evidence",
+          "verify_evidence",
+          "analyze_conflicts",
+          "score_evidence",
+          "assess_sufficiency",
+          "build_evidence_graph",
+          "generate_explanation",
+          "supervisor_decide",
+          "prepare_review_brief",
+          "human_review_gate",
+          "emit_dossier"
+        ],
+        "model_override": null,
+        "requested_sources": 4,
+        "review_iteration_count": 0
+      },
+      "schema_version": "0.1.0",
+      "source_status": [
+        {
+          "duration_ms": 6422,
+          "error_code": null,
+          "error_message": null,
+          "record_count": 10,
+          "source": "opentargets",
+          "status": "success"
+        },
+        {
+          "duration_ms": 19976,
+          "error_code": null,
+          "error_message": null,
+          "record_count": 10,
+          "source": "depmap",
+          "status": "success"
+        },
+        {
+          "duration_ms": 1460,
+          "error_code": null,
+          "error_message": null,
+          "record_count": 10,
+          "source": "pharos",
+          "status": "success"
+        },
+        {
+          "duration_ms": 5773,
+          "error_code": null,
+          "error_message": null,
+          "record_count": 5,
+          "source": "literature",
+          "status": "success"
+        }
+      ],
+      "summary_markdown": "# THERAPEUTIC TARGET EVIDENCE SUMMARY REPORT\n\nGene: KRAS | Run ID: run-76ada2136f55\n\n## Evidence Contribution Dashboard\n[[EVIDENCE_DASHBOARD]]\n\n## 1. Executive Summary\nKRAS is a small GTPase (Ras family) that binds GDP/GTP and regulates cell proliferation; this molecular role positions KRAS upstream of MAPK signaling and aligns with oncogenic driver behavior in specific contexts (curated biological context). Functional genomics show context-dependent essentiality: across 1,208 cell lines, the average CRISPR gene effect is −0.7249 and 52.4% of lines meet a moderate-to-strong dependency threshold (≤ −0.5), indicating many—but not all—models rely on KRAS for viability (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap). Open Targets reports high association scores with both oncologic diseases (e.g., non-small cell lung carcinoma score 0.809) and RASopathies (e.g., Noonan syndrome 3 score 0.826), reflecting combined genetic, somatic, and clinical signals (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; source: Open Targets). PHAROS classifies KRAS as Tclin with 223 ligands, which means FDA-approved drugs exist for this target class despite GTPases historically being challenging for direct small-molecule inhibition (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS). Representative literature highlights pathway vulnerabilities in KRAS-driven cancers, such as TBK1 dependence, supporting the therapeutic relevance of the KRAS signaling axis (evidence_id: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; source: Literature).\n\n## 2. Target Annotation — PHAROS\nExplanation\n- PHAROS categorizes KRAS as Tclin, indicating that approved therapeutics exist for this target; this supports tractability at the protein or pathway level (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- KRAS is annotated as “GTPase KRas,” an enzyme within the small GTPase/Ras family; 223 ligands are cataloged, reflecting substantial pharmacological engagement with the target class (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Multiple PHAROS entries link KRAS to oncology and RASopathies, consistent with disease associations reported by Open Targets (see Section 4) (evidence_ids: pharos:KRAS:MONDO:0018997:...; pharos:KRAS:MONDO:0011908:...; pharos:KRAS:MONDO:0015280:...; pharos:KRAS:MONDO:0018874:...; pharos:KRAS:MONDO:0001056:...; pharos:KRAS:MONDO:0004992:...; pharos:KRAS:MONDO:0012371:...; pharos:KRAS:MONDO:0019087:...; pharos:KRAS:MONDO:0009026:...; pharos:KRAS:MONDO:0015459:...; source: PHAROS).\n\nSummary table\n| Evidence ID | TDL | Family | Ligand Total | Associated Disease |\n| --- | --- | --- | --- | --- |\n| pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 | Tclin | Enzyme (GTPase KRas) | 223 | Noonan syndrome 3 |\n| pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28 | Tclin | Enzyme (GTPase KRas) | 223 | juvenile myelomonocytic leukemia |\n| pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53 | Tclin | Enzyme (GTPase KRas) | 223 | cardiofaciocutaneous syndrome |\n| pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f | Tclin | Enzyme (GTPase KRas) | 223 | acute myeloid leukemia |\n| pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f | Tclin | Enzyme (GTPase KRas) | 223 | gastric cancer |\n| pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67 | Tclin | Enzyme (GTPase KRas) | 223 | cancer |\n| pharos:KRAS:MONDO:0012371:target_annotation:a045752120 | Tclin | Enzyme (GTPase KRas) | 223 | Noonan syndrome 3 |\n| pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef | Tclin | Enzyme (GTPase KRas) | 223 | cholangiocarcinoma |\n| pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b | Tclin | Enzyme (GTPase KRas) | 223 | Costello syndrome |\n| pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8 | Tclin | Enzyme (GTPase KRas) | 223 | nasopharyngeal carcinoma |\n\n## 3. Genetic Dependency — DepMap\n### Global Dependency Analysis\nExplanation\n- Across 1,208 cell lines, KRAS shows an average CRISPR gene effect of −0.7249 and a median of −0.5169; 633 cell lines (52.4%) meet a dependency threshold of ≤ −0.5, indicating moderate, context-dependent essentiality across many models rather than universal pan-essential behavior (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Biologically, a CERES of ~−0.5 reflects intermediate dependency, while values < −1 indicate strong essentiality; the average ~−0.72 suggests KRAS dependence is common but not ubiquitous, consistent with oncogene-driven subsets (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n\nMetrics table\n| Metric | Value |\n| --- | --- |\n| Cell lines screened | 1,208 |\n| Average gene effect (CERES) | −0.7249 |\n| Median gene effect (CERES) | −0.5169 |\n| Strong dependency count (≤ −0.5) | 633 |\n| Strong dependency fraction | 0.524 |\n| Screen/data release | CRISPRGeneEffect, DepMap 25Q3 |\n| Evidence ID | depmap:KRAS:NA:genetic_dependency:7f3b898e07 |\n\n### Top Dependent Cell Lines\nExplanation\n- Several cell lines exhibit extreme dependency (CERES much less than −1), consistent with strong requirement for KRAS function in those specific genetic backgrounds (evidence_ids listed per row; source: DepMap).\n\nRanked table\n| Rank | Cell line ID | Gene effect (CERES) | Data release | Evidence ID |\n| --- | --- | --- | --- | --- |\n| 1 | ACH-000222 | −4.461 | DepMap 25Q3 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 |\n| 2 | ACH-000417 | −3.968 | DepMap 25Q3 | depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7 |\n| 3 | ACH-000505 | −3.923 | DepMap 25Q3 | depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d |\n| 4 | ACH-000235 | −3.664 | DepMap 25Q3 | depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce |\n| 5 | ACH-001494 | −3.567 | DepMap 25Q3 | depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f |\n| 6 | ACH-000264 | −3.496 | DepMap 25Q3 | depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a |\n| 7 | ACH-000517 | −3.364 | DepMap 25Q3 | depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324 |\n| 8 | ACH-000114 | −3.346 | DepMap 25Q3 | depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80 |\n| 9 | ACH-000532 | −3.334 | DepMap 25Q3 | depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562 |\n\n## 4. Disease Associations — Open Targets\nExplanation\n- Open Targets scores above 0.7 indicate strong multi-evidence associations. KRAS shows high scores with both cancers (e.g., non-small cell lung carcinoma 0.809) and RASopathy syndromes (e.g., Noonan syndrome 3 0.826; cardiofaciocutaneous syndrome 2 0.814), consistent with its role in growth signaling and development (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; opentargets:ENSG00000133703:MONDO_0014112:...; source: Open Targets).\n- Oncology-relevant associations also include gastric cancer (0.768) and acute myeloid leukemia (0.755), reflecting somatic and genetic links in solid and hematologic malignancies (evidence_ids: opentargets:ENSG00000133703:MONDO_0001056:...; opentargets:ENSG00000133703:EFO_0000222:...; source: Open Targets).\n\nAssociation table\n| Disease | Association score | Evidence ID |\n| --- | --- | --- |\n| Noonan syndrome 3 | 0.826 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 |\n| cardiofaciocutaneous syndrome 2 | 0.814 | opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464 |\n| Noonan syndrome | 0.813 | opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e |\n| non-small cell lung carcinoma | 0.809 | opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e |\n| cardiofaciocutaneous syndrome | 0.794 | opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160 |\n| gastric cancer | 0.768 | opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc |\n| acute myeloid leukemia | 0.755 | opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372 |\n| linear nevus sebaceous syndrome | 0.742 | opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b |\n| Toriello-Lacassie-Droste syndrome | 0.740 | opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc |\n| Linear nevus sebaceus syndrome | 0.734 | opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69 |\n\n## 5. Literature\nExplanation\n- Appendix A5 lists additional literature records beyond the lead example highlighted in this section.\n- Filtered to KRAS-centric or therapeutically relevant studies. The TBK1 study explicitly interrogates KRAS-driven cancers and identifies a pathway vulnerability; large-scale cancer characterizations include KRAS within disease-relevant genomic landscapes. These entries serve as anchors but do not outweigh functional and association datasets (evidence_ids below; source: Literature).\n\nLiterature table\n| PMID | Year | Title | Relevance note | Evidence ID |\n| --- | --- | --- | --- | --- |\n| 19847166 | 2009 | Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1. | Identifies TBK1 as a vulnerability in KRAS-driven contexts, underscoring therapeutic targeting within KRAS signaling networks. | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 |\n| 22810696 | 2012 | Comprehensive molecular characterization of human colon and rectal cancer. | Disease-scale genomics where KRAS features within CRC molecular landscapes. | literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b |\n| 23636398 | 2013 | Integrated genomic characterization of endometrial carcinoma. | Cancer cohort genomics including KRAS within somatic driver frameworks. | literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0 |\n\n## 6. Integrated Interpretation\nKRAS is a small GTPase (Ras family) that binds GDP/GTP, activates MAPK1/MAPK3, and regulates cell proliferation, providing a mechanistic basis for oncogenic signaling and developmental phenotypes when dysregulated (curated biological context). In cancer cell models, KRAS shows moderate average dependency with pronounced essentiality in specific lines, indicating oncogene-addicted subsets (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap). Open Targets reports strong associations with both cancers (e.g., non-small cell lung carcinoma 0.809) and RASopathies (e.g., Noonan syndrome 3 0.826), matching the dual oncologic and developmental roles of the Ras pathway (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; source: Open Targets). PHAROS designates Tclin with 223 ligands, indicating approved therapeutic engagement at the target class level, despite GTPases typically lacking deep, druggable pockets like kinases (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n\nCross-referencing curated disease associations with Open Targets:\n- Matches observed: Noonan syndrome 3, gastric cancer, and cardiofaciocutaneous syndrome 2 appear in both curated context and Open Targets associations, indicating UniProt-curated context aligns with disease scoring (evidence_ids: opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc; opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464; source: Open Targets; curated biological context).\n- Partial mismatch: “Leukemia, juvenile myelomonocytic” is present in curated context but not listed among the provided Open Targets top associations here; this likely reflects dataset truncation rather than absence of association (curated biological context; Open Targets table scope).\n\nComparative context:\n- Unlike kinase targets with well-defined ATP-binding pockets, KRAS is a GTPase with a smooth nucleotide-binding surface, historically making direct small-molecule inhibition challenging; the Tclin classification indicates that this barrier has been overcome at least for specific clinical settings (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; curated biological context).\n\nConflict/tension traceability:\n- An expected cross-source tension is observed between:\n  - PHAROS (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; TDL=Tclin with 223 ligands implying clinical tractability)\n  - DepMap (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; average CERES ~−0.72 with 52.4% lines showing dependency ≤ −0.5)\n  This likely reflects lineage- and genotype-specific KRAS dependence: Tclin denotes approved therapeutics for the target class, whereas DepMap averages include both KRAS-dependent and -independent models, yielding moderate global essentiality rather than uniform lethality, which is biologically expected for a context-specific oncogene in the Ras/MAPK pathway (curated biological context).\n\n### Evidence Contribution (Interpretation)\n- Strongest: DepMap functional genomics, as it measures viability impact; the average CERES of −0.7249 across 1,208 lines and 52.4% dependency highlight context-specific essentiality (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Moderate: Open Targets disease associations, with scores ~0.8 for non-small cell lung carcinoma and Noonan syndrome 3, indicating robust multi-modal evidence linking KRAS to disease phenotypes (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025; source: Open Targets).\n- Moderate-to-supportive: PHAROS target annotation, with TDL=Tclin and 223 ligands, confirming clinical tractability of the KRAS target class but not resolving context-specific essentiality (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Weakest: Literature, used as contextual anchors; the TBK1 study supports pathway-level vulnerabilities in KRAS-driven cancers but does not on its own establish KRAS as a universal dependency (evidence_id: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; source: Literature).\n\n## 7. Evidence Strength Assessment\n- Functional dependency (DepMap): High interpretability for target essentiality; average −0.7249 with many strongly dependent lines indicates meaningful but context-specific viability effects. Limitation: cell-line models mix KRAS-mutant and wild-type contexts, so global averages can underestimate genotype-specific dependencies (evidence_id: depmap:KRAS:NA:genetic_dependency:7f3b898e07; source: DepMap).\n- Disease association (Open Targets): Strong scores (~0.8) in both oncology (e.g., NSCLC) and RASopathies support clinical relevance. Limitation: disease context is undefined here; presented associations are not exhaustive of all KRAS-linked diseases, and variant-level specificity is not detailed in this dataset slice (evidence_ids: opentargets:ENSG00000133703:EFO_0003060:...; opentargets:ENSG00000133703:MONDO_0012371:...; source: Open Targets).\n- Target annotation (PHAROS): Tclin with extensive ligand catalog supports tractability. Limitation: Tclin does not specify which KRAS alleles or contexts are clinically addressed (evidence_id: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; source: PHAROS).\n- Literature: Provides mechanistic and cohort-level context (e.g., TBK1 dependence in KRAS-driven tumors; large-scale cancer characterizations). Limitation: heterogeneous scope; not a quantitative measure of KRAS essentiality across lineages (evidence_ids: literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099; literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b; source: Literature).\n- Dataset limitation note: Only a subset of Open Targets associations is shown here; absence of a disease in this table does not imply lack of association (evidence_ids as listed in Section 4; source: Open Targets).\n\n## 8. Overall Assessment\nKRAS demonstrates tractable therapeutic engagement (Tclin; 223 ligands) alongside non-uniform, context-specific essentiality across cancer models, with extreme dependencies in defined subsets and moderate average dependency globally. High disease association scores span both cancers (e.g., NSCLC) and developmental RASopathies, aligning with KRAS’s role in Ras/MAPK signaling and cell proliferation. In the absence of a specified indication, oncology contexts with strong association scores and evidence of strong cell-line dependency represent the most plausible therapeutic settings captured in this dataset slice (evidence_ids: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; depmap:KRAS:NA:genetic_dependency:7f3b898e07; opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; source: PHAROS, DepMap, Open Targets).\n\n## 9. Final Conclusion\nKRAS is a clinically engaged, biologically central GTPase with strong disease associations and context-dependent essentiality that becomes pronounced in specific cellular backgrounds; these features support KRAS as a viable therapeutic target, particularly in oncology indications with high association scores and demonstrated cellular dependence, while recognizing lineage and genotype stratification will be critical for efficacy (evidence_ids: pharos:KRAS:MONDO:0018997:target_annotation:6021aed105; depmap:KRAS:NA:genetic_dependency:7f3b898e07; opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e; source: PHAROS, DepMap, Open Targets).\n\n---\n\n# Appendix A — Raw Evidence Tables\n\nThese tables are compiled directly from the verified evidence payload to make the report scannable.\n- `evidence_id` is the canonical identifier used for traceability.\n- `normalized_score` and `confidence` are copied from the payload (they are not re-computed here).\n- If the narrative report above contains non-table lists, use these tables as the authoritative tabular view.\n\n## A0. Scoring Summary\n| # | category | strength | category_score | top_evidence_id | main_limitation |\n| --- | --- | --- | --- | --- | --- |\n| 1 | annotation | strong | 0.94 | pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 |  |\n| 2 | dependency | strong | 0.98 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 |  |\n| 3 | disease_association | strong | 0.848938 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 | disease context unspecified; association may be non-specific |\n| 4 | literature | strong | 0.93 | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 | literature is supportive and can be noisy |\n\n## A0.1 Source Contribution Weights\n| # | source | source_score | weight_used | confidence_label |\n| --- | --- | --- | --- | --- |\n| 1 | pharos | 1 | 0.3 | high |\n| 2 | depmap | 0.3624 | 0.3 | high |\n| 3 | open_targets | 0.82637 | 0.25 | high |\n| 4 | literature | 0.2594 | 0.15 | low |\n\n## A1. Source Coverage\n| # | source | status | records | duration_ms | error |\n| --- | --- | --- | --- | --- | --- |\n| 1 | opentargets | success | 10 | 6422 |  |\n| 2 | depmap | success | 10 | 19976 |  |\n| 3 | pharos | success | 10 | 1460 |  |\n| 4 | literature | success | 5 | 5773 |  |\n\n## A2. Target Annotation (PHAROS)\n| # | evidence_id | source | tdl | family | ligand_total | novelty | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | pharos:KRAS:MONDO:0018997:target_annotation:6021aed105 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Noonan syndrome (TDL=Tclin, ligands=223). |\n| 2 | pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to juvenile myelomonocytic leukemia (TDL=Tclin, ligands=223). |\n| 3 | pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cardiofaciocutaneous syndrome (TDL=Tclin, ligands=223). |\n| 4 | pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to acute myeloid leukemia (TDL=Tclin, ligands=223). |\n| 5 | pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to gastric cancer (TDL=Tclin, ligands=223). |\n| 6 | pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cancer (TDL=Tclin, ligands=223). |\n| 7 | pharos:KRAS:MONDO:0012371:target_annotation:a045752120 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Noonan syndrome 3 (TDL=Tclin, ligands=223). |\n| 8 | pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to cholangiocarcinoma (TDL=Tclin, ligands=223). |\n| 9 | pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to Costello syndrome (TDL=Tclin, ligands=223). |\n| 10 | pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8 | pharos | Tclin | Enzyme | 223 | 0.00013856 | 0.850 | 1 | PHAROS annotations for KRAS relating to nasopharyngeal carcinoma (TDL=Tclin, ligands=223). |\n\n## A3. Genetic Dependency (DepMap)\n### A3.1 Global metrics\n| # | evidence_id | source | average_gene_effect | cell_line_count | strong_dependency_count | strong_dependency_fraction | data_release | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | depmap:KRAS:NA:genetic_dependency:7f3b898e07 | depmap | -0.724902 | 1208 | 633 | 0.524 | DepMap 25Q3 | 0.950 | 0.362451 | DepMap CRISPR gene effect for KRAS: -0.725 avg across 1208 cell lines (633 show strong dependency ≤ −0.5). |\n\n### A3.2 Top dependent cell lines\n| # | evidence_id | cell_line_id | gene_effect | rank_within_gene | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07 | ACH-000222 | -4.46066 | 1 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000222: gene_effect=-4.461 (rank 1). |\n| 2 | depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7 | ACH-000417 | -3.96775 | 2 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000417: gene_effect=-3.968 (rank 2). |\n| 3 | depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d | ACH-000505 | -3.92275 | 3 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000505: gene_effect=-3.923 (rank 3). |\n| 4 | depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce | ACH-000235 | -3.66389 | 4 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000235: gene_effect=-3.664 (rank 4). |\n| 5 | depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f | ACH-001494 | -3.5669 | 5 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-001494: gene_effect=-3.567 (rank 5). |\n| 6 | depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a | ACH-000264 | -3.49597 | 6 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000264: gene_effect=-3.496 (rank 6). |\n| 7 | depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324 | ACH-000517 | -3.36438 | 7 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000517: gene_effect=-3.364 (rank 7). |\n| 8 | depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80 | ACH-000114 | -3.34564 | 8 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000114: gene_effect=-3.346 (rank 8). |\n| 9 | depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562 | ACH-000532 | -3.3343 | 9 | 0.950 | 1 | Cell-line dependency for KRAS in ACH-000532: gene_effect=-3.334 (rank 9). |\n\n## A4. Disease Associations (Open Targets)\n| # | evidence_id | source | disease_name | disease_id | score | evidence_count | confidence | normalized_score | summary |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025 | opentargets | Noonan syndrome 3 | MONDO_0012371 | 0.82637 | 1815 | 0.898 | 0.82637 | Open Targets association score for KRAS and Noonan syndrome 3 is 0.826. |\n| 2 | opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464 | opentargets | cardiofaciocutaneous syndrome 2 | MONDO_0014112 | 0.814412 | 1815 | 0.894 | 0.814412 | Open Targets association score for KRAS and cardiofaciocutaneous syndrome 2 is 0.814. |\n| 3 | opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e | opentargets | Noonan syndrome | MONDO_0018997 | 0.813127 | 1815 | 0.894 | 0.813127 | Open Targets association score for KRAS and Noonan syndrome is 0.813. |\n| 4 | opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e | opentargets | non-small cell lung carcinoma | EFO_0003060 | 0.809177 | 1815 | 0.893 | 0.809177 | Open Targets association score for KRAS and non-small cell lung carcinoma is 0.809. |\n| 5 | opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160 | opentargets | cardiofaciocutaneous syndrome | MONDO_0015280 | 0.794482 | 1815 | 0.888 | 0.794482 | Open Targets association score for KRAS and cardiofaciocutaneous syndrome is 0.794. |\n| 6 | opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc | opentargets | gastric cancer | MONDO_0001056 | 0.768241 | 1815 | 0.880 | 0.768241 | Open Targets association score for KRAS and gastric cancer is 0.768. |\n| 7 | opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372 | opentargets | acute myeloid leukemia | EFO_0000222 | 0.754902 | 1815 | 0.876 | 0.754902 | Open Targets association score for KRAS and acute myeloid leukemia is 0.755. |\n| 8 | opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b | opentargets | linear nevus sebaceous syndrome | MONDO_0008097 | 0.741919 | 1815 | 0.873 | 0.741919 | Open Targets association score for KRAS and linear nevus sebaceous syndrome is 0.742. |\n| 9 | opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc | opentargets | Toriello-Lacassie-Droste syndrome | MONDO_0010854 | 0.739748 | 1815 | 0.872 | 0.739748 | Open Targets association score for KRAS and Toriello-Lacassie-Droste syndrome is 0.740. |\n| 10 | opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69 | opentargets | Linear nevus sebaceus syndrome | Orphanet_2612 | 0.734425 | 1815 | 0.870 | 0.734425 | Open Targets association score for KRAS and Linear nevus sebaceus syndrome is 0.734. |\n\n## A5. Literature (Europe PMC)\n| # | evidence_id | pmid | year | cited_by | title | confidence | normalized_score |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b | 22810696 | 2012 | 6682 | Comprehensive molecular characterization of human colon and rectal cancer. | 0.850 | 1 |\n| 2 | literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0 | 23636398 | 2013 | 4161 | Integrated genomic characterization of endometrial carcinoma. | 0.850 | 0.95 |\n| 3 | literature:KRAS:PMID:24553385:NA:literature_article:1648950075 | 24553385 | 2014 | 3594 | Detection of circulating tumor DNA in early- and late-stage human malignancies. | 0.850 | 0.9 |\n| 4 | literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099 | 19847166 | 2009 | 3042 | Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1. | 0.850 | 1 |\n| 5 | literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48 | 15466206 | 2004 | 3013 | BAY 43-9006 exhibits broad spectrum oral antitumor activity and targets the RAF/MEK/ERK pathway and receptor tyrosine kinases involved in tumor progression and angiogenesis. | 0.800 | 0.85 |",
+      "verification_report": {
+        "affected_evidence_ids": [
+          "opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69"
+        ],
+        "blocked": false,
+        "blocking_issue_count": 0,
+        "blocking_issues": [],
+        "fail_count": 1,
+        "generated_at": "2026-04-15T16:34:40.857008Z",
+        "pass_count": 7,
+        "rule_outcomes": [
+          {
+            "blocking": true,
+            "evidence_ids": [],
+            "message": "All evidence records validate against the canonical schema.",
+            "passed": true,
+            "rule_name": "schema_validity"
+          },
+          {
+            "blocking": true,
+            "evidence_ids": [],
+            "message": "All evidence records include required provenance fields.",
+            "passed": true,
+            "rule_name": "provenance_completeness"
+          },
+          {
+            "blocking": true,
+            "evidence_ids": [],
+            "message": "All evidence records include a canonical evidence_id.",
+            "passed": true,
+            "rule_name": "evidence_id_presence"
+          },
+          {
+            "blocking": false,
+            "evidence_ids": [],
+            "message": "No duplicate evidence fingerprints detected.",
+            "passed": true,
+            "rule_name": "duplicate_detection"
+          },
+          {
+            "blocking": true,
+            "evidence_ids": [],
+            "message": "All evidence records match the requested gene symbol.",
+            "passed": true,
+            "rule_name": "gene_mapping_consistency"
+          },
+          {
+            "blocking": false,
+            "evidence_ids": [],
+            "message": "All evidence records match the requested disease context.",
+            "passed": true,
+            "rule_name": "disease_mapping_consistency"
+          },
+          {
+            "blocking": false,
+            "evidence_ids": [],
+            "message": "All literature evidence includes a PMID or PMCID.",
+            "passed": true,
+            "rule_name": "citation_presence"
+          },
+          {
+            "blocking": false,
+            "evidence_ids": [
+              "opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69"
+            ],
+            "message": "Invalid disease identifier format detected.",
+            "passed": false,
+            "rule_name": "ontology_id_format"
+          }
+        ],
+        "total_rules": 8,
+        "verification_policy_version": "phase1.v1",
+        "warning_count": 1,
+        "warning_issues": [
+          "ontology_id_format"
+        ]
+      },
+      "verified_evidence": [
+        {
+          "confidence": 0.8979109108194049,
+          "disease_id": "MONDO_0012371",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.8263697027313498,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.145357Z"
+          },
+          "raw_value": 0.8263697027313498,
+          "retrieved_at": "2026-04-15T16:34:09.146143Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and Noonan syndrome 3 is 0.826.",
+          "support": {
+            "disease_name": "Noonan syndrome 3",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8943234896706429,
+          "disease_id": "MONDO_0014112",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.8144116322354762,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146175Z"
+          },
+          "raw_value": 0.8144116322354762,
+          "retrieved_at": "2026-04-15T16:34:09.146188Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and cardiofaciocutaneous syndrome 2 is 0.814.",
+          "support": {
+            "disease_name": "cardiofaciocutaneous syndrome 2",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8939379521341774,
+          "disease_id": "MONDO_0018997",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.8131265071139245,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146216Z"
+          },
+          "raw_value": 0.8131265071139245,
+          "retrieved_at": "2026-04-15T16:34:09.146223Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and Noonan syndrome is 0.813.",
+          "support": {
+            "disease_name": "Noonan syndrome",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.89275320519801,
+          "disease_id": "EFO_0003060",
+          "evidence_id": "opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.8091773506600335,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146249Z"
+          },
+          "raw_value": 0.8091773506600335,
+          "retrieved_at": "2026-04-15T16:34:09.146260Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and non-small cell lung carcinoma is 0.809.",
+          "support": {
+            "disease_name": "non-small cell lung carcinoma",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8883445975496039,
+          "disease_id": "MONDO_0015280",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.7944819918320131,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146269Z"
+          },
+          "raw_value": 0.7944819918320131,
+          "retrieved_at": "2026-04-15T16:34:09.146275Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and cardiofaciocutaneous syndrome is 0.794.",
+          "support": {
+            "disease_name": "cardiofaciocutaneous syndrome",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8804721791934171,
+          "disease_id": "MONDO_0001056",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.7682405973113904,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146292Z"
+          },
+          "raw_value": 0.7682405973113904,
+          "retrieved_at": "2026-04-15T16:34:09.146298Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and gastric cancer is 0.768.",
+          "support": {
+            "disease_name": "gastric cancer",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8764705594716844,
+          "disease_id": "EFO_0000222",
+          "evidence_id": "opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.7549018649056145,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146304Z"
+          },
+          "raw_value": 0.7549018649056145,
+          "retrieved_at": "2026-04-15T16:34:09.146310Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and acute myeloid leukemia is 0.755.",
+          "support": {
+            "disease_name": "acute myeloid leukemia",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8725755685748319,
+          "disease_id": "MONDO_0008097",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.7419185619161062,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146325Z"
+          },
+          "raw_value": 0.7419185619161062,
+          "retrieved_at": "2026-04-15T16:34:09.146339Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and linear nevus sebaceous syndrome is 0.742.",
+          "support": {
+            "disease_name": "linear nevus sebaceous syndrome",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8719244547184876,
+          "disease_id": "MONDO_0010854",
+          "evidence_id": "opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.7397481823949587,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146349Z"
+          },
+          "raw_value": 0.7397481823949587,
+          "retrieved_at": "2026-04-15T16:34:09.146354Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and Toriello-Lacassie-Droste syndrome is 0.740.",
+          "support": {
+            "disease_name": "Toriello-Lacassie-Droste syndrome",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8703275926361106,
+          "disease_id": "Orphanet_2612",
+          "evidence_id": "opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+          "evidence_type": "disease_association",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.734425308787035,
+          "provenance": {
+            "endpoint": "https://api.platform.opentargets.org/api/v4/graphql",
+            "provider": "Open Targets",
+            "query": {
+              "disease_id": null,
+              "ensembl_id": "ENSG00000133703",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:09.146361Z"
+          },
+          "raw_value": 0.734425308787035,
+          "retrieved_at": "2026-04-15T16:34:09.146367Z",
+          "source": "opentargets",
+          "summary": "Open Targets association score for KRAS and Linear nevus sebaceus syndrome is 0.734.",
+          "support": {
+            "disease_name": "Linear nevus sebaceus syndrome",
+            "evidence_count": 1815,
+            "requested_disease": null
+          },
+          "target_id": "ENSG00000133703",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+          "evidence_type": "genetic_dependency",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.36245080859964507,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.452623Z"
+          },
+          "raw_value": -0.7249016171992901,
+          "retrieved_at": "2026-04-15T16:34:30.452862Z",
+          "source": "depmap",
+          "summary": "DepMap CRISPR gene effect for KRAS: -0.725 avg across 1208 cell lines (633 show strong dependency ≤ −0.5).",
+          "support": {
+            "average_gene_effect": -0.7249,
+            "cell_line_count": 1208,
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "median_gene_effect": -0.5169,
+            "screen_type": "CRISPRGeneEffect",
+            "strong_dependency_count": 633,
+            "strong_dependency_fraction": 0.524
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000222",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.454958Z"
+          },
+          "raw_value": -4.460656621974225,
+          "retrieved_at": "2026-04-15T16:34:30.455003Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000222: gene_effect=-4.461 (rank 1).",
+          "support": {
+            "cell_line_id": "ACH-000222",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -4.460656621974225,
+            "rank_within_gene": 1,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000222",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000417",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455027Z"
+          },
+          "raw_value": -3.967747228826036,
+          "retrieved_at": "2026-04-15T16:34:30.455036Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000417: gene_effect=-3.968 (rank 2).",
+          "support": {
+            "cell_line_id": "ACH-000417",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.967747228826036,
+            "rank_within_gene": 2,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000417",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000505",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455044Z"
+          },
+          "raw_value": -3.922754552933352,
+          "retrieved_at": "2026-04-15T16:34:30.455064Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000505: gene_effect=-3.923 (rank 3).",
+          "support": {
+            "cell_line_id": "ACH-000505",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.922754552933352,
+            "rank_within_gene": 3,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000505",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000235",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455077Z"
+          },
+          "raw_value": -3.663893170595823,
+          "retrieved_at": "2026-04-15T16:34:30.455083Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000235: gene_effect=-3.664 (rank 4).",
+          "support": {
+            "cell_line_id": "ACH-000235",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.663893170595823,
+            "rank_within_gene": 4,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000235",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-001494",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455089Z"
+          },
+          "raw_value": -3.5668984636567096,
+          "retrieved_at": "2026-04-15T16:34:30.455093Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-001494: gene_effect=-3.567 (rank 5).",
+          "support": {
+            "cell_line_id": "ACH-001494",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.5668984636567096,
+            "rank_within_gene": 5,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-001494",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000264",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455099Z"
+          },
+          "raw_value": -3.4959707202720933,
+          "retrieved_at": "2026-04-15T16:34:30.455104Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000264: gene_effect=-3.496 (rank 6).",
+          "support": {
+            "cell_line_id": "ACH-000264",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.4959707202720933,
+            "rank_within_gene": 6,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000264",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000517",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455138Z"
+          },
+          "raw_value": -3.364375596912133,
+          "retrieved_at": "2026-04-15T16:34:30.455154Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000517: gene_effect=-3.364 (rank 7).",
+          "support": {
+            "cell_line_id": "ACH-000517",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.364375596912133,
+            "rank_within_gene": 7,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000517",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000114",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455192Z"
+          },
+          "raw_value": -3.3456443020802125,
+          "retrieved_at": "2026-04-15T16:34:30.455200Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000114: gene_effect=-3.346 (rank 8).",
+          "support": {
+            "cell_line_id": "ACH-000114",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.3456443020802125,
+            "rank_within_gene": 8,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000114",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.95,
+          "disease_id": null,
+          "evidence_id": "depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+          "evidence_type": "genetic_dependency_cell_line",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "/app/mcps/connectors/.depmap_cache/CRISPRGeneEffect.csv",
+            "provider": "DepMap (Broad Institute)",
+            "query": {
+              "cell_line_id": "ACH-000532",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:30.455208Z"
+          },
+          "raw_value": -3.3342966588035163,
+          "retrieved_at": "2026-04-15T16:34:30.455212Z",
+          "source": "depmap",
+          "summary": "Cell-line dependency for KRAS in ACH-000532: gene_effect=-3.334 (rank 9).",
+          "support": {
+            "cell_line_id": "ACH-000532",
+            "column_name": "KRAS (3845)",
+            "data_release": "DepMap 25Q3",
+            "gene_effect": -3.3342966588035163,
+            "rank_within_gene": 9,
+            "screen_type": "CRISPRGeneEffect"
+          },
+          "target_id": "KRAS:ACH-000532",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0018997",
+          "evidence_id": "pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "Noonan syndrome",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508323Z"
+          },
+          "raw_value": {
+            "disease_name": "Noonan syndrome",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508501Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to Noonan syndrome (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "Noonan syndrome",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0011908",
+          "evidence_id": "pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "juvenile myelomonocytic leukemia",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508525Z"
+          },
+          "raw_value": {
+            "disease_name": "juvenile myelomonocytic leukemia",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508544Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to juvenile myelomonocytic leukemia (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "juvenile myelomonocytic leukemia",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0015280",
+          "evidence_id": "pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "cardiofaciocutaneous syndrome",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508553Z"
+          },
+          "raw_value": {
+            "disease_name": "cardiofaciocutaneous syndrome",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508564Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to cardiofaciocutaneous syndrome (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "cardiofaciocutaneous syndrome",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0018874",
+          "evidence_id": "pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "acute myeloid leukemia",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508572Z"
+          },
+          "raw_value": {
+            "disease_name": "acute myeloid leukemia",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508583Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to acute myeloid leukemia (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "acute myeloid leukemia",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0001056",
+          "evidence_id": "pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "gastric cancer",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508590Z"
+          },
+          "raw_value": {
+            "disease_name": "gastric cancer",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508601Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to gastric cancer (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "gastric cancer",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0004992",
+          "evidence_id": "pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "cancer",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508609Z"
+          },
+          "raw_value": {
+            "disease_name": "cancer",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508620Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to cancer (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "cancer",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0012371",
+          "evidence_id": "pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "Noonan syndrome 3",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508627Z"
+          },
+          "raw_value": {
+            "disease_name": "Noonan syndrome 3",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508637Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to Noonan syndrome 3 (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "Noonan syndrome 3",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0019087",
+          "evidence_id": "pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "cholangiocarcinoma",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508645Z"
+          },
+          "raw_value": {
+            "disease_name": "cholangiocarcinoma",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508655Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to cholangiocarcinoma (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "cholangiocarcinoma",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0009026",
+          "evidence_id": "pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "Costello syndrome",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508663Z"
+          },
+          "raw_value": {
+            "disease_name": "Costello syndrome",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508673Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to Costello syndrome (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "Costello syndrome",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": "MONDO:0015459",
+          "evidence_id": "pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+          "evidence_type": "target_annotation",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://pharos-api.ncats.io/graphql",
+            "provider": "PHAROS",
+            "query": {
+              "disease": "nasopharyngeal carcinoma",
+              "gene_symbol": "KRAS"
+            },
+            "retrieved_at": "2026-04-15T16:34:33.508679Z"
+          },
+          "raw_value": {
+            "disease_name": "nasopharyngeal carcinoma",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "tdl": "Tclin"
+          },
+          "retrieved_at": "2026-04-15T16:34:33.508689Z",
+          "source": "pharos",
+          "summary": "PHAROS annotations for KRAS relating to nasopharyngeal carcinoma (TDL=Tclin, ligands=223).",
+          "support": {
+            "associated_disease": "nasopharyngeal carcinoma",
+            "family": "Enzyme",
+            "ligand_total": 223,
+            "novelty": 0.00013856,
+            "target_name": "GTPase KRas",
+            "tdl": "Tclin"
+          },
+          "target_id": "KRAS",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": null,
+          "evidence_id": "literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+          "evidence_type": "literature_article",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "provider": "Europe PMC",
+            "query": {
+              "disease_id": null,
+              "pmid": "19847166",
+              "query": "\"KRAS\""
+            },
+            "retrieved_at": "2026-04-15T16:34:40.546654Z"
+          },
+          "raw_value": 3042,
+          "retrieved_at": "2026-04-15T16:34:40.547306Z",
+          "source": "literature",
+          "summary": "Europe PMC article rank 1/5 for KRAS: Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1. (PMID=19847166, citations=3042).",
+          "support": {
+            "article_count_returned": 5,
+            "cited_by_count": 3042,
+            "eligible_hit_count": 5,
+            "fetch_page_size": 50,
+            "gene_in_abstract": true,
+            "gene_in_title": true,
+            "journal": null,
+            "original_rank_by_cited_sort": 4,
+            "pmid": "19847166",
+            "pub_year": "2009",
+            "query": "\"KRAS\"",
+            "rank": 1,
+            "title": "Systematic RNA interference reveals that oncogenic KRAS-driven cancers require TBK1.",
+            "total_hit_count": 124038
+          },
+          "target_id": "KRAS:PMID:19847166",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": null,
+          "evidence_id": "literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+          "evidence_type": "literature_article",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 1,
+          "provenance": {
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "provider": "Europe PMC",
+            "query": {
+              "disease_id": null,
+              "pmid": "22810696",
+              "query": "\"KRAS\""
+            },
+            "retrieved_at": "2026-04-15T16:34:40.547360Z"
+          },
+          "raw_value": 6682,
+          "retrieved_at": "2026-04-15T16:34:40.547369Z",
+          "source": "literature",
+          "summary": "Europe PMC article rank 2/5 for KRAS: Comprehensive molecular characterization of human colon and rectal cancer. (PMID=22810696, citations=6682).",
+          "support": {
+            "article_count_returned": 5,
+            "cited_by_count": 6682,
+            "eligible_hit_count": 5,
+            "fetch_page_size": 50,
+            "gene_in_abstract": true,
+            "gene_in_title": false,
+            "journal": null,
+            "original_rank_by_cited_sort": 1,
+            "pmid": "22810696",
+            "pub_year": "2012",
+            "query": "\"KRAS\"",
+            "rank": 2,
+            "title": "Comprehensive molecular characterization of human colon and rectal cancer.",
+            "total_hit_count": 124038
+          },
+          "target_id": "KRAS:PMID:22810696",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": null,
+          "evidence_id": "literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+          "evidence_type": "literature_article",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.9500000000000001,
+          "provenance": {
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "provider": "Europe PMC",
+            "query": {
+              "disease_id": null,
+              "pmid": "23636398",
+              "query": "\"KRAS\""
+            },
+            "retrieved_at": "2026-04-15T16:34:40.547389Z"
+          },
+          "raw_value": 4161,
+          "retrieved_at": "2026-04-15T16:34:40.547394Z",
+          "source": "literature",
+          "summary": "Europe PMC article rank 3/5 for KRAS: Integrated genomic characterization of endometrial carcinoma. (PMID=23636398, citations=4161).",
+          "support": {
+            "article_count_returned": 5,
+            "cited_by_count": 4161,
+            "eligible_hit_count": 5,
+            "fetch_page_size": 50,
+            "gene_in_abstract": true,
+            "gene_in_title": false,
+            "journal": null,
+            "original_rank_by_cited_sort": 2,
+            "pmid": "23636398",
+            "pub_year": "2013",
+            "query": "\"KRAS\"",
+            "rank": 3,
+            "title": "Integrated genomic characterization of endometrial carcinoma.",
+            "total_hit_count": 124038
+          },
+          "target_id": "KRAS:PMID:23636398",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.85,
+          "disease_id": null,
+          "evidence_id": "literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+          "evidence_type": "literature_article",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.9,
+          "provenance": {
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "provider": "Europe PMC",
+            "query": {
+              "disease_id": null,
+              "pmid": "24553385",
+              "query": "\"KRAS\""
+            },
+            "retrieved_at": "2026-04-15T16:34:40.547431Z"
+          },
+          "raw_value": 3594,
+          "retrieved_at": "2026-04-15T16:34:40.547439Z",
+          "source": "literature",
+          "summary": "Europe PMC article rank 4/5 for KRAS: Detection of circulating tumor DNA in early- and late-stage human malignancies. (PMID=24553385, citations=3594).",
+          "support": {
+            "article_count_returned": 5,
+            "cited_by_count": 3594,
+            "eligible_hit_count": 5,
+            "fetch_page_size": 50,
+            "gene_in_abstract": true,
+            "gene_in_title": false,
+            "journal": null,
+            "original_rank_by_cited_sort": 3,
+            "pmid": "24553385",
+            "pub_year": "2014",
+            "query": "\"KRAS\"",
+            "rank": 4,
+            "title": "Detection of circulating tumor DNA in early- and late-stage human malignancies.",
+            "total_hit_count": 124038
+          },
+          "target_id": "KRAS:PMID:24553385",
+          "target_symbol": "KRAS"
+        },
+        {
+          "confidence": 0.8,
+          "disease_id": null,
+          "evidence_id": "literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+          "evidence_type": "literature_article",
+          "normalization_policy_version": "phase1.v1",
+          "normalized_score": 0.8500000000000001,
+          "provenance": {
+            "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            "provider": "Europe PMC",
+            "query": {
+              "disease_id": null,
+              "pmid": "15466206",
+              "query": "\"KRAS\""
+            },
+            "retrieved_at": "2026-04-15T16:34:40.547463Z"
+          },
+          "raw_value": 3013,
+          "retrieved_at": "2026-04-15T16:34:40.547474Z",
+          "source": "literature",
+          "summary": "Europe PMC article rank 5/5 for KRAS: BAY 43-9006 exhibits broad spectrum oral antitumor activity and targets the RAF/MEK/ERK pathway and receptor tyrosine kinases involved in tumor progression and angiogenesis. (PMID=15466206, citations=3013).",
+          "support": {
+            "article_count_returned": 5,
+            "cited_by_count": 3013,
+            "eligible_hit_count": 5,
+            "fetch_page_size": 50,
+            "gene_in_abstract": true,
+            "gene_in_title": false,
+            "journal": null,
+            "original_rank_by_cited_sort": 5,
+            "pmid": "15466206",
+            "pub_year": "2004",
+            "query": "\"KRAS\"",
+            "rank": 5,
+            "title": "BAY 43-9006 exhibits broad spectrum oral antitumor activity and targets the RAF/MEK/ERK pathway and receptor tyrosine kinases involved in tumor progression and angiogenesis.",
+            "total_hit_count": 124038
+          },
+          "target_id": "KRAS:PMID:15466206",
+          "target_symbol": "KRAS"
+        }
+      ]
+    },
+    "evidence_graph": {
+      "artifact_path": "/data/artifacts/graphs/run-76ada2136f55.evidence_graph.json",
+      "edges": [
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+          "target_id": "source:depmap"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_publication",
+          "source_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+          "target_id": "publication:pmid:15466206"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+          "target_id": "source:literature"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_publication",
+          "source_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+          "target_id": "publication:pmid:19847166"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+          "target_id": "source:literature"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_publication",
+          "source_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+          "target_id": "publication:pmid:22810696"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+          "target_id": "source:literature"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_publication",
+          "source_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+          "target_id": "publication:pmid:23636398"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+          "target_id": "source:literature"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_publication",
+          "source_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+          "target_id": "publication:pmid:24553385"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+          "target_id": "source:literature"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+          "target_id": "source:opentargets"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "evidence_source",
+          "source_id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+          "target_id": "source:pharos"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:EFO_0000222"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:EFO_0003060"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0001056"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0004992"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0009026"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0011908"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0012371"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0015280"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0015459"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0018874"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0018997"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO:0019087"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0001056"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0008097"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0010854"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0012371"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0014112"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0015280"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:MONDO_0018997"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_disease",
+          "source_id": "target:KRAS",
+          "target_id": "disease:Orphanet_2612"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105"
+        },
+        {
+          "attributes": {},
+          "edge_type": "target_evidence",
+          "source_id": "target:KRAS",
+          "target_id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef"
+        }
+      ],
+      "generated_at": "2026-04-15T16:34:40.955800Z",
+      "graph_format": "json",
+      "nodes": [
+        {
+          "attributes": {},
+          "id": "disease:EFO_0000222",
+          "label": "EFO_0000222",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:EFO_0003060",
+          "label": "EFO_0003060",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0001056",
+          "label": "MONDO:0001056",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0004992",
+          "label": "MONDO:0004992",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0009026",
+          "label": "MONDO:0009026",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0011908",
+          "label": "MONDO:0011908",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0012371",
+          "label": "MONDO:0012371",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0015280",
+          "label": "MONDO:0015280",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0015459",
+          "label": "MONDO:0015459",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0018874",
+          "label": "MONDO:0018874",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0018997",
+          "label": "MONDO:0018997",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO:0019087",
+          "label": "MONDO:0019087",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0001056",
+          "label": "MONDO_0001056",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0008097",
+          "label": "MONDO_0008097",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0010854",
+          "label": "MONDO_0010854",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0012371",
+          "label": "MONDO_0012371",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0014112",
+          "label": "MONDO_0014112",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0015280",
+          "label": "MONDO_0015280",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:MONDO_0018997",
+          "label": "MONDO_0018997",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {},
+          "id": "disease:Orphanet_2612",
+          "label": "Orphanet_2612",
+          "node_type": "disease"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000114:NA:genetic_dependency_cell_line:56fbb03e80",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000222:NA:genetic_dependency_cell_line:c0ff371d07",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000235:NA:genetic_dependency_cell_line:fdd780d1ce",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000264:NA:genetic_dependency_cell_line:089a2a789a",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000417:NA:genetic_dependency_cell_line:a0a6eb2ad7",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000505:NA:genetic_dependency_cell_line:c0b309515d",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000517:NA:genetic_dependency_cell_line:48f950d324",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-000532:NA:genetic_dependency_cell_line:afc7313562",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+            "normalized_score": 1,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:ACH-001494:NA:genetic_dependency_cell_line:58db74d57f",
+          "label": "genetic_dependency_cell_line",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.95,
+            "conflict_severity": null,
+            "evidence_id": "depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+            "normalized_score": 0.36245080859964507,
+            "source": "depmap"
+          },
+          "id": "evidence:depmap:KRAS:NA:genetic_dependency:7f3b898e07",
+          "label": "genetic_dependency",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8,
+            "conflict_severity": null,
+            "evidence_id": "literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+            "normalized_score": 0.8500000000000001,
+            "source": "literature"
+          },
+          "id": "evidence:literature:KRAS:PMID:15466206:NA:literature_article:4e1e28ed48",
+          "label": "literature_article",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+            "normalized_score": 1,
+            "source": "literature"
+          },
+          "id": "evidence:literature:KRAS:PMID:19847166:NA:literature_article:9ad68a0099",
+          "label": "literature_article",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+            "normalized_score": 1,
+            "source": "literature"
+          },
+          "id": "evidence:literature:KRAS:PMID:22810696:NA:literature_article:c91b17ff1b",
+          "label": "literature_article",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+            "normalized_score": 0.9500000000000001,
+            "source": "literature"
+          },
+          "id": "evidence:literature:KRAS:PMID:23636398:NA:literature_article:30688f1eb0",
+          "label": "literature_article",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+            "normalized_score": 0.9,
+            "source": "literature"
+          },
+          "id": "evidence:literature:KRAS:PMID:24553385:NA:literature_article:1648950075",
+          "label": "literature_article",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8764705594716844,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+            "normalized_score": 0.7549018649056145,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:EFO_0000222:disease_association:db0da82372",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.89275320519801,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+            "normalized_score": 0.8091773506600335,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:EFO_0003060:disease_association:558aeecd9e",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8804721791934171,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+            "normalized_score": 0.7682405973113904,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0001056:disease_association:ef560580cc",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8725755685748319,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+            "normalized_score": 0.7419185619161062,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0008097:disease_association:0c7fbd051b",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8719244547184876,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+            "normalized_score": 0.7397481823949587,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0010854:disease_association:7219814dfc",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8979109108194049,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+            "normalized_score": 0.8263697027313498,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0012371:disease_association:e3ee023025",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8943234896706429,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+            "normalized_score": 0.8144116322354762,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0014112:disease_association:5863504464",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8883445975496039,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+            "normalized_score": 0.7944819918320131,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0015280:disease_association:58a0242160",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8939379521341774,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+            "normalized_score": 0.8131265071139245,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:MONDO_0018997:disease_association:1b3edde35e",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.8703275926361106,
+            "conflict_severity": null,
+            "evidence_id": "opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+            "normalized_score": 0.734425308787035,
+            "source": "opentargets"
+          },
+          "id": "evidence:opentargets:ENSG00000133703:Orphanet_2612:disease_association:2af42a5e69",
+          "label": "disease_association",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0001056:target_annotation:a6fa38b52f",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0004992:target_annotation:a1980f1d67",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0009026:target_annotation:fe746cee1b",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0011908:target_annotation:88cebb9f28",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0012371:target_annotation:a045752120",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0015280:target_annotation:805fc9bf53",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0015459:target_annotation:567e6d34a8",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0018874:target_annotation:3ebc14f03f",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0018997:target_annotation:6021aed105",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "confidence": 0.85,
+            "conflict_severity": null,
+            "evidence_id": "pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+            "normalized_score": 1,
+            "source": "pharos"
+          },
+          "id": "evidence:pharos:KRAS:MONDO:0019087:target_annotation:a36df957ef",
+          "label": "target_annotation",
+          "node_type": "evidence"
+        },
+        {
+          "attributes": {
+            "identifier_type": "pmid"
+          },
+          "id": "publication:pmid:15466206",
+          "label": "15466206",
+          "node_type": "publication"
+        },
+        {
+          "attributes": {
+            "identifier_type": "pmid"
+          },
+          "id": "publication:pmid:19847166",
+          "label": "19847166",
+          "node_type": "publication"
+        },
+        {
+          "attributes": {
+            "identifier_type": "pmid"
+          },
+          "id": "publication:pmid:22810696",
+          "label": "22810696",
+          "node_type": "publication"
+        },
+        {
+          "attributes": {
+            "identifier_type": "pmid"
+          },
+          "id": "publication:pmid:23636398",
+          "label": "23636398",
+          "node_type": "publication"
+        },
+        {
+          "attributes": {
+            "identifier_type": "pmid"
+          },
+          "id": "publication:pmid:24553385",
+          "label": "24553385",
+          "node_type": "publication"
+        },
+        {
+          "attributes": {
+            "provider": "DepMap (Broad Institute)"
+          },
+          "id": "source:depmap",
+          "label": "depmap",
+          "node_type": "source"
+        },
+        {
+          "attributes": {
+            "provider": "Europe PMC"
+          },
+          "id": "source:literature",
+          "label": "literature",
+          "node_type": "source"
+        },
+        {
+          "attributes": {
+            "provider": "Open Targets"
+          },
+          "id": "source:opentargets",
+          "label": "opentargets",
+          "node_type": "source"
+        },
+        {
+          "attributes": {
+            "provider": "PHAROS"
+          },
+          "id": "source:pharos",
+          "label": "pharos",
+          "node_type": "source"
+        },
+        {
+          "attributes": {
+            "target_id": "ENSG00000133703"
+          },
+          "id": "target:KRAS",
+          "label": "KRAS",
+          "node_type": "target"
+        }
+      ]
+    },
+    "created_at": "2026-04-15T17:36:28.020Z",
+    "updated_at": "2026-04-15T17:36:28.020Z"
+  },
+  {
     "id": "d82faeaf04f04c38864e964c22a4356e",
     "run_id": "test-kras-123",
     "title": "Research: KRAS",

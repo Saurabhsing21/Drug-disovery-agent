@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from typing import Iterable
 
 from .llm_policy import default_fast_model, ensure_llm_available, require_llm_agents
@@ -224,6 +225,292 @@ class SummaryAgent:
                 f"score={item.normalized_score if item.normalized_score is not None else 'n/a'})"
             )
         return findings or ["No verified evidence records available."]
+
+    @staticmethod
+    def _pipe_cells(text: str) -> list[str]:
+        return [part.strip() for part in text.split("|")]
+
+    def _appendix_anchor_for_item(self, item: EvidenceRecord) -> str:
+        if item.evidence_type == "target_annotation":
+            return "A2"
+        if item.evidence_type == "genetic_dependency":
+            return "A3.1"
+        if item.evidence_type == "genetic_dependency_cell_line":
+            return "A3.2"
+        if item.evidence_type == "disease_association":
+            return "A4"
+        if item.evidence_type == "literature_article":
+            return "A5"
+        return "Appendix A"
+
+    def _trace_label_for_item(self, item: EvidenceRecord) -> str:
+        support = item.support if isinstance(item.support, dict) else {}
+        if item.evidence_type == "target_annotation":
+            disease_name = support.get("disease_name") or item.disease_id or "target annotation"
+            return f"{disease_name} target annotation"
+        if item.evidence_type == "genetic_dependency":
+            return "global dependency metrics"
+        if item.evidence_type == "genetic_dependency_cell_line":
+            cell_line_id = support.get("cell_line_id") or item.target_id.split(":")[-1]
+            return f"cell-line dependency ({cell_line_id})"
+        if item.evidence_type == "disease_association":
+            disease_name = support.get("disease_name") or item.disease_id or "disease association"
+            return f"{disease_name} association"
+        if item.evidence_type == "literature_article":
+            pmid = support.get("pmid") or support.get("PMID")
+            if pmid:
+                return f"PMID {pmid}"
+            title = str(support.get("title") or "").strip()
+            if title:
+                return title[:80]
+            return "literature record"
+        return item.evidence_type or "supporting record"
+
+    def _source_display_for_item(self, item: EvidenceRecord) -> str:
+        source = self._enum_value(item.source)
+        return {
+            "opentargets": "Open Targets",
+            "depmap": "DepMap",
+            "pharos": "PHAROS",
+            "literature": "Literature",
+        }.get(source.lower(), source)
+
+    def _rewrite_inline_traceability(self, markdown: str, items: list[EvidenceRecord]) -> str:
+        evidence_lookup = {
+            (item.evidence_id or "").strip(): item
+            for item in items
+            if (item.evidence_id or "").strip()
+        }
+
+        def _replace_known_row_refs(match: re.Match[str]) -> str:
+            source = match.group("source").strip()
+            source_lower = source.lower()
+            appendix = {
+                "depmap": "A3.2",
+                "open targets": "A4",
+                "opentargets": "A4",
+                "pharos": "A2",
+                "literature": "A5",
+            }.get(source_lower, "Appendix A")
+            return f"(Source: {source}; trace: detailed records in Appendix {appendix})"
+
+        text = re.sub(
+            r"\((?:evidence_ids? listed per row|evidence_ids? as above);\s*source:\s*(?P<source>[^)]+)\)",
+            _replace_known_row_refs,
+            markdown,
+            flags=re.IGNORECASE,
+        )
+
+        cite_pattern = re.compile(
+            r"\((?P<body>[^()]*(?:evidence_ids?:\s*.+?\s*;\s*source(?:s)?:\s*[^)]+))\)",
+            re.IGNORECASE,
+        )
+
+        def _replace_citation(match: re.Match[str]) -> str:
+            body = match.group("body")
+            source_match = re.search(r"source(?:s)?:\s*(?P<source>.+)$", body, flags=re.IGNORECASE)
+            source_name = source_match.group("source").strip() if source_match else ""
+            ids_match = re.search(r"evidence_ids?:\s*(?P<ids>.+?)\s*;\s*source(?:s)?:", body, flags=re.IGNORECASE)
+            raw_ids = ids_match.group("ids").strip() if ids_match else ""
+            ids = [part.strip() for part in raw_ids.split(";") if part.strip()]
+
+            matched_items = [evidence_lookup[eid] for eid in ids if eid in evidence_lookup]
+            if not matched_items:
+                if source_name:
+                    return f"(Source: {source_name})"
+                return match.group(0)
+
+            source_display = source_name or self._source_display_for_item(matched_items[0])
+            anchors = []
+            labels = []
+            for item in matched_items:
+                anchor = self._appendix_anchor_for_item(item)
+                label = self._trace_label_for_item(item)
+                if anchor not in anchors:
+                    anchors.append(anchor)
+                if label not in labels:
+                    labels.append(label)
+
+            if len(matched_items) == 1:
+                return f"(Source: {source_display}; trace: {labels[0]}, Appendix {anchors[0]})"
+
+            if len(labels) <= 2:
+                trace_text = "; ".join(labels)
+            else:
+                trace_text = "detailed records"
+
+            appendix_text = " and ".join(f"Appendix {anchor}" for anchor in anchors)
+            return f"(Source: {source_display}; trace: {trace_text}, {appendix_text})"
+
+        return cite_pattern.sub(_replace_citation, text)
+
+    def _strip_narrative_evidence_id_columns(self, markdown: str) -> str:
+        if "# Appendix A" in markdown:
+            narrative, appendix = markdown.split("# Appendix A", 1)
+            suffix = "# Appendix A" + appendix
+        else:
+            narrative, suffix = markdown, ""
+
+        lines = narrative.splitlines()
+        out: list[str] = []
+        i = 0
+
+        while i < len(lines):
+            if i + 1 < len(lines) and lines[i].lstrip().startswith("|") and lines[i + 1].lstrip().startswith("|"):
+                table_lines = [lines[i], lines[i + 1]]
+                j = i + 2
+                while j < len(lines) and lines[j].lstrip().startswith("|"):
+                    table_lines.append(lines[j])
+                    j += 1
+
+                header_cells = self._pipe_cells(table_lines[0].strip().strip("|"))
+                drop_indexes = [
+                    idx for idx, cell in enumerate(header_cells)
+                    if cell.strip().lower().replace(" ", "_") in {"evidence_id", "evidence_ids"}
+                ]
+                if drop_indexes:
+                    rebuilt: list[str] = []
+                    for row in table_lines:
+                        cells = self._pipe_cells(row.strip().strip("|"))
+                        kept = [cell for idx, cell in enumerate(cells) if idx not in drop_indexes]
+                        rebuilt.append(f"| {' | '.join(kept)} |")
+                    out.extend(rebuilt)
+                else:
+                    out.extend(table_lines)
+                i = j
+                continue
+
+            out.append(lines[i])
+            i += 1
+
+        return "\n".join(out) + (("\n" + suffix) if suffix else "")
+
+    def _normalize_list_tables(self, markdown: str) -> str:
+        lines = markdown.splitlines()
+        out: list[str] = []
+        i = 0
+
+        table_labels = {
+            "Summary table",
+            "Metrics table",
+            "Ranked table",
+            "Association table",
+            "Literature table",
+        }
+
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+            if stripped not in table_labels:
+                out.append(line)
+                i += 1
+                continue
+
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j >= len(lines):
+                out.append(line)
+                i += 1
+                continue
+
+            header_cells: list[str] | None = None
+            row_start = j
+            next_line = lines[j].strip()
+
+            if next_line.startswith("- Columns:"):
+                header_cells = self._pipe_cells(next_line[len("- Columns:"):].strip())
+                row_start = j + 1
+                if row_start < len(lines) and lines[row_start].strip() == "- Rows:":
+                    row_start += 1
+            elif next_line.startswith("- ") and "|" in next_line:
+                header_cells = self._pipe_cells(next_line[2:].strip())
+                row_start = j + 1
+
+            if not header_cells or not all(header_cells):
+                out.append(line)
+                i += 1
+                continue
+
+            rows: list[list[str]] = []
+            k = row_start
+            while k < len(lines):
+                row_line = lines[k].strip()
+                if not row_line:
+                    break
+                if row_line.startswith(("## ", "### ")):
+                    break
+                if not row_line.startswith("- "):
+                    break
+                row_text = row_line[2:].strip()
+                if "|" not in row_text:
+                    break
+                row_cells = self._pipe_cells(row_text)
+                if len(row_cells) == len(header_cells):
+                    rows.append(row_cells)
+                    k += 1
+                    continue
+                break
+
+            if not rows:
+                out.append(line)
+                i += 1
+                continue
+
+            out.append(line)
+            out.append(f"| {' | '.join(header_cells)} |")
+            out.append(f"| {' | '.join(['---'] * len(header_cells))} |")
+            for row in rows:
+                out.append(f"| {' | '.join(row)} |")
+            i = k
+            continue
+
+        return "\n".join(out)
+
+    def _normalize_report_consistency(self, markdown: str, items: list[EvidenceRecord]) -> str:
+        text = markdown
+        literature_count = sum(1 for item in items if item.evidence_type == "literature_article")
+
+        text = text.replace(
+            "A conflict is observed between:",
+            "An expected cross-source tension is observed between:",
+        )
+        text = text.replace(
+            "UniProt-curated disease concepts",
+            "Curated biological-context disease concepts",
+        )
+        text = text.replace(
+            "provided context (e.g.,",
+            "provided biological context (e.g.,",
+        )
+
+        if "An expected cross-source tension is observed between:" in text:
+            text = re.sub(
+                r"No explicit contradictions detected[^.]*\.",
+                (
+                    "No formal contradiction is recorded in the structured conflict list, "
+                    "but an expected cross-source tension exists between clinical tractability "
+                    "and non-universal functional essentiality."
+                ),
+                text,
+                count=1,
+            )
+
+        if literature_count > 1 and "## 5. Literature" in text and "Appendix A5 lists additional literature records." not in text:
+            text = text.replace(
+                "## 5. Literature\nExplanation\n",
+                "## 5. Literature\nExplanation\n- Appendix A5 lists additional literature records beyond the lead example highlighted in this section.\n",
+                1,
+            )
+
+        return text
+
+    def _postprocess_report_markdown(self, markdown: str, items: list[EvidenceRecord]) -> str:
+        text = self._normalize_list_tables(markdown)
+        text = self._normalize_report_consistency(text, items)
+        text = self._rewrite_inline_traceability(text, items)
+        text = self._strip_narrative_evidence_id_columns(text)
+        return text
 
     def _build_concise_report(
         self,
@@ -953,6 +1240,8 @@ class SummaryAgent:
         request: CollectorRequest,
         items: list[EvidenceRecord],
         source_status: list[SourceStatus],
+        decision: ScoredDecision | None = None,
+        scored_target: ScoredTarget | None = None,
         evidence_dashboard_path: str | None = None,
     ) -> str:
         """Appendix with machine-compiled Markdown tables for UI readability.
@@ -1095,6 +1384,57 @@ class SummaryAgent:
         )
         lines.append("")
 
+        if decision is not None:
+            score_rows: list[list[str]] = []
+            for row in decision.summary_rows:
+                score_rows.append(
+                    [
+                        row.category,
+                        row.strength,
+                        _fmt(row.category_score),
+                        row.top_evidence_id or "",
+                        row.main_limitation or "",
+                    ]
+                )
+            lines.append("## A0. Scoring Summary")
+            lines.append(
+                self._compiler_table(
+                    ["category", "strength", "category_score", "top_evidence_id", "main_limitation"],
+                    score_rows or [["", "", "", "", "No scoring summary available."]],
+                )
+            )
+            lines.append("")
+
+        if scored_target is not None:
+            source_rows: list[list[str]] = []
+            source_scores = dict(scored_target.source_scores or {})
+            source_confidences = dict(scored_target.source_confidences or {})
+            weights_used = dict(scored_target.weights_used or {})
+            for source in ("pharos", "depmap", "open_targets", "literature"):
+                score_value = source_scores.get(source)
+                confidence_value = source_confidences.get(source)
+                weight_value = weights_used.get(source)
+                if source == "open_targets":
+                    score_value = source_scores.get(source, source_scores.get("opentargets"))
+                    confidence_value = source_confidences.get(source, source_confidences.get("opentargets"))
+                    weight_value = weights_used.get(source, weights_used.get("opentargets"))
+                source_rows.append(
+                    [
+                        source,
+                        _fmt(score_value),
+                        _fmt(weight_value),
+                        _fmt(confidence_value),
+                    ]
+                )
+            lines.append("## A0.1 Source Contribution Weights")
+            lines.append(
+                self._compiler_table(
+                    ["source", "source_score", "weight_used", "confidence_label"],
+                    source_rows,
+                )
+            )
+            lines.append("")
+
         lines.append("## A1. Source Coverage")
         lines.append(self._compiler_table(["source", "status", "records", "duration_ms", "error"], coverage_rows))
         lines.append("")
@@ -1210,20 +1550,20 @@ class SummaryAgent:
     ) -> LLMSummary:
         item_list = list(items)
         status_list = list(source_status)
+        decision_for_appendix = score_evidence(
+            request=request,
+            items=item_list,
+            conflicts=list(conflicts or []),
+            verification_report=verification_report,
+        )
 
         fmt = self._report_format()
 
         # Default "structured" report is deterministic and does not require an LLM.
         if fmt == "structured":
-            decision = score_evidence(
-                request=request,
-                items=item_list,
-                conflicts=list(conflicts or []),
-                verification_report=verification_report,
-            )
             markdown_report = self._build_concise_report(
                 request=request,
-                decision=decision,
+                decision=decision_for_appendix,
                 items=item_list,
                 source_status=status_list,
                 verification_report=verification_report,
@@ -1365,12 +1705,14 @@ class SummaryAgent:
             if "\\n" in raw_text and "\n" not in raw_text:
                 raw_text = raw_text.replace("\\n", "\n")
 
-            combined_text = raw_text.strip()
+            combined_text = self._postprocess_report_markdown(raw_text.strip(), item_list)
             if os.getenv("A4T_SUMMARY_APPENDIX_TABLES", "1").strip().lower() not in {"0", "false", "no"}:
                 appendix = self._build_compiler_tables_appendix(
                     request=request,
                     items=item_list,
                     source_status=status_list,
+                    decision=decision_for_appendix,
+                    scored_target=scored_target,
                     evidence_dashboard_path=evidence_dashboard_path,
                 )
                 combined_text = combined_text + "\n\n---\n\n" + appendix

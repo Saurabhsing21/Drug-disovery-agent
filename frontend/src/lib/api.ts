@@ -1,4 +1,13 @@
-import type { PlanDecisionStatus, ReviewDecisionStatus, SavedRunDetail, SavedRunSummary, Snapshot, SourceName } from "@/lib/types";
+import type {
+  PlanDecisionStatus,
+  ReviewDecisionStatus,
+  SavedComparisonDetail,
+  SavedComparisonSummary,
+  SavedRunDetail,
+  SavedRunSummary,
+  Snapshot,
+  SourceName,
+} from "@/lib/types";
 
 const ENV_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_BASE =
@@ -194,12 +203,24 @@ export async function saveComparison(input: {
   run_b_id: string;
   compare_markdown: string;
   data_snapshot?: Record<string, unknown>;
-}): Promise<unknown> {
+}): Promise<SavedComparisonDetail> {
   const res = await fetch(`${API_BASE}/saved-comparisons/`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
   });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function listSavedComparisons(): Promise<SavedComparisonSummary[]> {
+  const res = await fetch(`${API_BASE}/saved-comparisons/`, { cache: "no-store" });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function getSavedComparison(savedId: string): Promise<SavedComparisonDetail> {
+  const res = await fetch(`${API_BASE}/saved-comparisons/${encodeURIComponent(savedId)}`, { cache: "no-store" });
   if (!res.ok) throw new Error(await readApiError(res));
   return res.json();
 }

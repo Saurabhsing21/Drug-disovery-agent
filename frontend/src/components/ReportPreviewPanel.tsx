@@ -1,6 +1,7 @@
 "use client";
 
 import type { Snapshot } from "@/lib/types";
+import { MarkdownReport } from "@/components/MarkdownReport";
 
 function readString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
@@ -23,9 +24,8 @@ export function ReportPreviewPanel({ snapshot }: { snapshot: Snapshot | null }) 
         This is the generated report text. If the run is paused for review, approve/reject to continue to dossier emission.
       </p>
       <div className="max-h-[50vh] overflow-auto rounded-md border border-slate-100 bg-slate-50 p-3 text-xs text-slate-800">
-        <pre className="whitespace-pre-wrap break-words">{markdown}</pre>
+        <MarkdownReport markdown={markdown} defaultMode="rendered" />
       </div>
     </div>
   );
 }
-

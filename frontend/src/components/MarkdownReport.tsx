@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { Check, Copy } from "lucide-react";
 import { EvidenceDashboardFrame } from "@/components/EvidenceDashboardFrame";
+import { normalizeMarkdownReport } from "@/lib/markdown";
 
 export function MarkdownReport({
   markdown,
@@ -26,7 +27,7 @@ export function MarkdownReport({
   const [copied, setCopied] = useState(false);
   const copyTimeout = useRef<number | null>(null);
 
-  const content = useMemo(() => markdown ?? "", [markdown]);
+  const content = useMemo(() => normalizeMarkdownReport(markdown), [markdown]);
   const dashboardToken = "[[EVIDENCE_DASHBOARD]]";
   const parts = useMemo(() => content.split(dashboardToken), [content]);
 

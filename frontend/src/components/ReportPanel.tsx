@@ -1,6 +1,7 @@
 "use client";
 
 import type { Snapshot } from "@/lib/types";
+import { MarkdownReport } from "@/components/MarkdownReport";
 
 export function ReportPanel({ snapshot }: { snapshot: Snapshot | null }) {
   const dossier = (snapshot?.values?.final_dossier as unknown) ?? null;
@@ -17,7 +18,7 @@ export function ReportPanel({ snapshot }: { snapshot: Snapshot | null }) {
         {typeof markdown === "string" && markdown.trim().length ? (
           <div className="rounded-md border border-slate-100 bg-slate-50 p-3 text-xs">
             <div className="mb-2 text-slate-700">Report</div>
-            <pre className="whitespace-pre-wrap break-words text-slate-700">{markdown}</pre>
+            <MarkdownReport markdown={markdown} defaultMode="rendered" />
           </div>
         ) : null}
         <div className="rounded-md border border-slate-100 bg-slate-50 p-3 text-xs">
