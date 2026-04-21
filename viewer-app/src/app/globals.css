@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-neutral-950 text-neutral-100;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-2rem); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-in {
+  animation-duration: 700ms;
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-left-8 {
+  animation-name: slideInLeft;
+}
+
 html,
 body {
   height: 100%;

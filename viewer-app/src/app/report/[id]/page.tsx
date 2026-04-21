@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarkdownReport } from "@/components/MarkdownReport";
-import { JudgeScorecardPanel, type JudgeScore } from "@/components/JudgeScorecardPanel";
+
 import { listSavedRuns, getSavedRun } from "@/lib/api";
 
 export const dynamicParams = false;
@@ -25,7 +25,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   const reportMarkdown = run.summary_markdown || "No report content available.";
   const scoredTarget = (run.scored_target as Record<string, unknown> | null | undefined) ?? null;
-  const judgeScore = (run.judge_score as JudgeScore | null | undefined) ?? null;
+
 
   return (
     <div className="flex h-screen bg-neutral-950 text-neutral-100 flex-col overflow-auto">
@@ -53,7 +53,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full p-8 space-y-8">
-        <JudgeScorecardPanel score={judgeScore} />
+
         <div className="bg-neutral-950/50 rounded-3xl border border-white/10 p-6 shadow-xl">
           <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">Analysis Report</h2>
           <MarkdownReport markdown={reportMarkdown} defaultMode="rendered" dashboardData={scoredTarget} />

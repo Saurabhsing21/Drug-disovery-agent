@@ -1,4 +1,5 @@
 import React from "react";
+import { Tooltip } from "@/components/Tooltip";
 
 export interface JudgeScore {
   overall_score: number;
@@ -20,6 +21,10 @@ export function JudgeScorecardPanel({ score }: { score: JudgeScore | null | unde
         <div>
           <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             AI Judge Evaluation
+            <Tooltip 
+              title="AI Judge Evaluation"
+              content="An automated semantic review of the generated report performed by an LLM-based judge to ensure quality, accuracy, and structure." 
+            />
             {score.passed ? (
               <span className="inline-flex items-center rounded-full bg-emerald-400/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-400/20">
                 Passed
@@ -47,7 +52,13 @@ export function JudgeScorecardPanel({ score }: { score: JudgeScore | null | unde
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-black/20 rounded-xl p-4 border border-white/5">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-neutral-300">Faithfulness</span>
+            <span className="text-sm font-medium text-neutral-300 flex items-center">
+              Faithfulness
+              <Tooltip 
+                title="Faithfulness Score"
+                content="Measures how accurately the report represents the raw evidence without introducing hallucinations or external biological knowledge not present in the data." 
+              />
+            </span>
             <span className="text-lg font-bold text-white">{score.faithfulness_score}<span className="text-xs font-normal text-neutral-500 ml-1">/10</span></span>
           </div>
           <div className="w-full bg-neutral-800 rounded-full h-2 overflow-hidden">
@@ -61,7 +72,13 @@ export function JudgeScorecardPanel({ score }: { score: JudgeScore | null | unde
 
         <div className="bg-black/20 rounded-xl p-4 border border-white/5">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-neutral-300">Formatting</span>
+            <span className="text-sm font-medium text-neutral-300 flex items-center">
+              Formatting
+              <Tooltip 
+                title="Formatting Score"
+                content="Measures how strictly the report adheres to the required 9-section narrative structure and stylistic guidelines." 
+              />
+            </span>
             <span className="text-lg font-bold text-white">{score.formatting_score}<span className="text-xs font-normal text-neutral-500 ml-1">/10</span></span>
           </div>
           <div className="w-full bg-neutral-800 rounded-full h-2 overflow-hidden">

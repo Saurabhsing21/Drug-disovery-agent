@@ -34,8 +34,12 @@ function toComparisonSummary(comp: SavedComparisonDetail): SavedComparisonSummar
 }
 
 export async function listSavedRuns(): Promise<SavedRunSummary[]> {
-  const hiddenRunIds = new Set(["test-kras-123", "test-egfr-123"]);
-  return savedRuns.filter((run) => !hiddenRunIds.has(run.run_id)).map(toRunSummary);
+  // Strictly show ONLY the final high-fidelity KRAS run as requested by the user.
+  // This removes all 'old' versions from the viewer's catalog.
+  const FINAL_RUN_ID = "run-cf3e06c2c40b";
+  return savedRuns
+    .filter((run) => run.run_id === FINAL_RUN_ID)
+    .map(toRunSummary);
 }
 
 export async function getSavedRun(savedId: string): Promise<SavedRunDetail> {
@@ -58,7 +62,8 @@ export async function postCompareReport(input: {
 }
 
 export async function listSavedComparisons(): Promise<SavedComparisonSummary[]> {
-  return savedComparisons.map(toComparisonSummary);
+  // Remove other "things" like existing static comparisons
+  return [];
 }
 
 export async function getSavedComparison(id: string): Promise<SavedComparisonDetail> {

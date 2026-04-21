@@ -17,6 +17,7 @@ import { Bar, Radar } from "react-chartjs-2";
 
 import type { SavedRunDetail } from "@/lib/types";
 import { MarkdownReport } from "@/components/MarkdownReport";
+import { Tooltip as MetricTooltip } from "@/components/Tooltip";
 // Removed postCompareReport import as viewer is read-only
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, RadialLinearScale, Filler, Tooltip, Legend);
@@ -184,12 +185,22 @@ export function CompareReportPanel({
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <div className="text-xs text-neutral-400">Run A</div>
             <div className="text-sm font-medium text-neutral-100">{runA.title}</div>
-            <div className="mt-1 text-xs text-neutral-400">Score: {(scoreA * 100).toFixed(1)} · Confidence: {(confA * 100).toFixed(1)}</div>
+            <div className="mt-1 text-xs text-neutral-400 flex items-center gap-1">
+              Score: {(scoreA * 100).toFixed(1)} 
+              <MetricTooltip title="Target Score" content="A composite metric (0-100%) quantifying the therapeutic potential." />
+              · Confidence: {(confA * 100).toFixed(1)}
+              <MetricTooltip title="Evidence Confidence" content="Reflects the robustness and agreement of evidence across sources." />
+            </div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <div className="text-xs text-neutral-400">Run B</div>
             <div className="text-sm font-medium text-neutral-100">{runB.title}</div>
-            <div className="mt-1 text-xs text-neutral-400">Score: {(scoreB * 100).toFixed(1)} · Confidence: {(confB * 100).toFixed(1)}</div>
+            <div className="mt-1 text-xs text-neutral-400 flex items-center gap-1">
+              Score: {(scoreB * 100).toFixed(1)}
+              <MetricTooltip title="Target Score" content="A composite metric (0-100%) quantifying the therapeutic potential." />
+              · Confidence: {(confB * 100).toFixed(1)}
+              <MetricTooltip title="Evidence Confidence" content="Reflects the robustness and agreement of evidence across sources." />
+            </div>
           </div>
         </div>
       </div>
@@ -208,13 +219,19 @@ export function CompareReportPanel({
             </thead>
             <tbody className="divide-y divide-white/5">
               <tr>
-                <td className="py-2 pr-3">Target score</td>
+                <td className="py-2 pr-3 flex items-center gap-1">
+                  Target score
+                  <MetricTooltip title="Target Score" content="A composite metric quantifying the therapeutic potential of a target." />
+                </td>
                 <td className="py-2 pr-3">{scoreA.toFixed(2)}</td>
                 <td className="py-2 pr-3">{scoreB.toFixed(2)}</td>
                 <td className="py-2">{diffValue(scoreA, scoreB)}</td>
               </tr>
               <tr>
-                <td className="py-2 pr-3">Evidence confidence</td>
+                <td className="py-2 pr-3 flex items-center gap-1">
+                  Evidence confidence
+                  <MetricTooltip title="Evidence Confidence" content="Reflects the robustness and agreement of evidence across independent sources." />
+                </td>
                 <td className="py-2 pr-3">{confA.toFixed(2)}</td>
                 <td className="py-2 pr-3">{confB.toFixed(2)}</td>
                 <td className="py-2">{diffValue(confA, confB)}</td>
@@ -226,19 +243,28 @@ export function CompareReportPanel({
                 <td className="py-2">{diffValue(missingA.length, missingB.length)}</td>
               </tr>
               <tr>
-                <td className="py-2 pr-3">Conflict flag</td>
+                <td className="py-2 pr-3 flex items-center gap-1">
+                  Conflict flag
+                  <MetricTooltip title="Conflict Signal" content="Indicates contradictory findings (e.g., inhibition vs. activation) between sources." />
+                </td>
                 <td className="py-2 pr-3">{conflictA ? "yes" : "no"}</td>
                 <td className="py-2 pr-3">{conflictB ? "yes" : "no"}</td>
                 <td className="py-2">—</td>
               </tr>
-              <tr>
-                <td className="py-2 pr-3">Graph nodes</td>
+               <tr>
+                <td className="py-2 pr-3 flex items-center gap-1">
+                  Graph nodes
+                  <MetricTooltip title="Graph Nodes" content="Represents the number of unique biological entities in the evidence graph." />
+                </td>
                 <td className="py-2 pr-3">{graphA.nodes}</td>
                 <td className="py-2 pr-3">{graphB.nodes}</td>
                 <td className="py-2">{diffValue(graphA.nodes, graphB.nodes)}</td>
               </tr>
               <tr>
-                <td className="py-2 pr-3">Graph edges</td>
+                <td className="py-2 pr-3 flex items-center gap-1">
+                  Graph edges
+                  <MetricTooltip title="Graph Edges" content="Represents the number of semantic relations between biological entities." />
+                </td>
                 <td className="py-2 pr-3">{graphA.edges}</td>
                 <td className="py-2 pr-3">{graphB.edges}</td>
                 <td className="py-2">{diffValue(graphA.edges, graphB.edges)}</td>

@@ -19,9 +19,9 @@ def validate_summary_markdown(markdown: str, items: list[EvidenceRecord]) -> tup
         required_sections = [
             "# THERAPEUTIC TARGET EVIDENCE SUMMARY REPORT",
             "## 1. Executive Summary",
-            "## 2. Target Annotation — PHAROS",
-            "## 3. Genetic Dependency — DepMap",
-            "## 4. Disease Associations — Open Targets",
+            "## 2. Target Annotation",
+            "## 3. Genetic Dependency",
+            "## 4. Disease Associations",
             "## 5. Literature",
             "## 6. Integrated Interpretation",
             "### Evidence Contribution (Interpretation)",

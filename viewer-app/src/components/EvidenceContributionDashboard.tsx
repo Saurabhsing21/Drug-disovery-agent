@@ -1,6 +1,7 @@
 "use client";
 
 const SOURCE_ORDER = ["pharos", "depmap", "open_targets", "literature"] as const;
+import { Tooltip } from "@/components/Tooltip";
 
 const SOURCE_LABELS: Record<string, string> = {
   pharos: "PHAROS",
@@ -15,6 +16,13 @@ const SOURCE_ACCENTS: Record<string, string> = {
   depmap: "bg-emerald-400",
   open_targets: "bg-amber-400",
   literature: "bg-fuchsia-400",
+};
+
+const SOURCE_URLS: Record<string, string> = {
+  pharos: "https://pharos.nih.gov/targets/KRAS",
+  depmap: "https://depmap.org/portal/gene/KRAS",
+  open_targets: "https://platform.opentargets.org/target/ENSG00000133703",
+  literature: "https://pubmed.ncbi.nlm.nih.gov/",
 };
 
 function asNumber(value: unknown): number | null {
@@ -98,15 +106,33 @@ export function EvidenceContributionDashboard({
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-neutral-950/70 p-4">
-          <div className="text-[11px] uppercase tracking-wide text-neutral-400">Overall Target Score</div>
+          <div className="text-[11px] uppercase tracking-wide text-neutral-400 flex items-center">
+            Overall Target Score
+            <Tooltip 
+              title="Overall Target Score"
+              content="A composite metric (0-100%) quantifying the therapeutic potential of a target based on weighted evidence from all sources." 
+            />
+          </div>
           <div className="mt-2 text-3xl font-semibold text-white">{pct(targetScore)}</div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-neutral-950/70 p-4">
-          <div className="text-[11px] uppercase tracking-wide text-neutral-400">Evidence Confidence</div>
+          <div className="text-[11px] uppercase tracking-wide text-neutral-400 flex items-center">
+            Evidence Confidence
+            <Tooltip 
+              title="Evidence Confidence"
+              content="Reflects the robustness and agreement of evidence across independent sources. High confidence indicates consistent findings." 
+            />
+          </div>
           <div className="mt-2 text-3xl font-semibold text-white">{pct(evidenceConfidence)}</div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-neutral-950/70 p-4">
-          <div className="text-[11px] uppercase tracking-wide text-neutral-400">Conflict Signal</div>
+          <div className="text-[11px] uppercase tracking-wide text-neutral-400 flex items-center">
+            Conflict Signal
+            <Tooltip 
+              title="Conflict Signal"
+              content="Indicates contradictory findings (e.g., inhibition vs. activation) between sources. 'None' means sources are aligned." 
+            />
+          </div>
           <div className={`mt-2 text-3xl font-semibold ${conflictFlag ? "text-amber-300" : "text-emerald-300"}`}>
             {conflictFlag ? "Present" : "None"}
           </div>
@@ -127,27 +153,61 @@ export function EvidenceContributionDashboard({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className={`h-2.5 w-2.5 rounded-full ${SOURCE_ACCENTS[row.source] ?? "bg-white"}`} />
-                  <div className="text-sm font-medium text-neutral-100">{row.label}</div>
+                  <a 
+                    href={SOURCE_URLS[row.source]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-neutral-100 hover:text-sky-400 hover:underline transition-colors flex items-center gap-1"
+                  >
+                    {row.label}
+                    <svg className="h-3 w-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                   {row.sparse ? (
                     <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-amber-200">
                       Sparse
                     </span>
                   ) : null}
                 </div>
-                <div className="text-xs text-neutral-400">Confidence: {row.confidence}</div>
+                <div className="text-xs text-neutral-400 flex items-center">
+                  Confidence Score: {row.confidence}
+                  <Tooltip 
+                    title="Source Confidence"
+                    content="The qualitative reliability level of the evidence specifically from this source (e.g. High, Medium, Low)." 
+                  />
+                </div>
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-3 text-xs text-neutral-300 md:grid-cols-3">
                 <div>
-                  <div className="text-neutral-500">Source score</div>
+                  <div className="text-neutral-500 flex items-center">
+                    Source score
+                    <Tooltip 
+                      title="Source Score"
+                      content="The raw therapeutic relevance score calculated specifically by this data source for this target." 
+                    />
+                  </div>
                   <div className="mt-1 font-medium text-neutral-100">{pct(row.score)}</div>
                 </div>
                 <div>
-                  <div className="text-neutral-500">Weight used</div>
+                  <div className="text-neutral-500 flex items-center">
+                    Weight score
+                    <Tooltip 
+                      title="Weight Score"
+                      content="The relative importance (0-100%) assigned to this source. Highly trusted sources are given higher weights in the final calculation." 
+                    />
+                  </div>
                   <div className="mt-1 font-medium text-neutral-100">{pct(row.weight)}</div>
                 </div>
                 <div>
-                  <div className="text-neutral-500">Weighted contribution</div>
+                  <div className="text-neutral-500 flex items-center">
+                    Weighted contribution
+                    <Tooltip 
+                      title="Weighted Contribution"
+                      content="The absolute amount this source contributed to the overall target score (Formula: Source Score × Weight)." 
+                    />
+                  </div>
                   <div className="mt-1 font-medium text-neutral-100">{pct(row.contribution)}</div>
                 </div>
               </div>
@@ -200,6 +260,38 @@ export function EvidenceContributionDashboard({
           </div>
         </div>
       ) : null}
+
+      <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-5">
+        <div className="flex items-center gap-2 text-sky-200 mb-4">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="text-sm font-bold uppercase tracking-wider">Scoring Glossary</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h4 className="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-1">Confidence Score</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Measures data reliability (High, Medium, Low). Based on the source type (e.g., PHAROS/DepMap are primary 
+              validated sources, while Literature is supportive).
+            </p>
+          </div>
+          <div>
+            <h4 className="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-1">Weight Score</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              The priority (0-100%) this source carries in the final score. Currently PHAROS and DepMap carry 
+              maximum weight due to clinical and functional validation.
+            </p>
+          </div>
+          <div>
+            <h4 className="text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-1">Conflict Signal</h4>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Triggers when sources disagree (e.g., PHAROS shows drugability but DepMap shows no dependency). 
+              Crucial for identifying lineage-specific therapeutic gaps.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

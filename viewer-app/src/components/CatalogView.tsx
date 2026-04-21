@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Carousel } from "@/components/Carousel";
 import type { SavedComparisonSummary, SavedRunSummary } from "@/lib/types";
 
 export function CatalogView({
@@ -12,6 +13,8 @@ export function CatalogView({
   savedComps: SavedComparisonSummary[];
 }) {
   const [activeTab, setActiveTab] = useState<"reports" | "comparisons">("reports");
+
+  const carouselItems = savedRuns.slice(0, 5);
 
   return (
     <div className="flex h-screen bg-neutral-950 text-neutral-100 flex-col overflow-auto">
@@ -28,6 +31,8 @@ export function CatalogView({
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full p-8">
+        <Carousel items={carouselItems} />
+        
         <h1 className="text-3xl font-bold mb-6">Database Catalog</h1>
 
         <div className="flex space-x-2 border-b border-white/10 mb-6">
