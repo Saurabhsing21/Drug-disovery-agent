@@ -20,6 +20,7 @@ from .schema import (
     SupervisorDecision,
     SourceStatus,
     VerificationReport,
+    ReportJudgeScore,
 )
 from .scoring_schemas import ScoredTarget
 
@@ -49,6 +50,8 @@ class CollectorState(TypedDict, total=False):
     graph_agent_report: AgentReport
     explanation: str
     summary_agent_report: AgentReport
+    judge_score: ReportJudgeScore
+    judge_agent_report: AgentReport
     supervisor_decision: SupervisorDecision
     review_brief: ReviewBrief
     review_iteration_count: int

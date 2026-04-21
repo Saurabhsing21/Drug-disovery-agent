@@ -3,6 +3,7 @@ import type {
   ReviewDecisionStatus,
   SavedComparisonDetail,
   SavedComparisonSummary,
+  JudgeScore,
   SavedRunDetail,
   SavedRunSummary,
   Snapshot,
@@ -83,6 +84,16 @@ export async function postFollowup(runId: string, input: { message: string; urls
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  return res.json();
+}
+
+export async function postRunJudge(runId: string, input?: { model_override?: string }): Promise<JudgeScore> {
+  const res = await fetch(`${API_BASE}/runs/${encodeURIComponent(runId)}/judge`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input ?? {}),
   });
   if (!res.ok) throw new Error(await readApiError(res));
   return res.json();

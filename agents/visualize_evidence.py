@@ -28,7 +28,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evidence Contribution Dashboard — Agent4Target</title>
+<title>Evidence Contribution Dashboard — Drug Discovery Agent</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -183,7 +183,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
   <div class="header">
     <h1>Evidence contribution dashboard</h1>
-    <p>Agent4Target &mdash; Normalization &amp; Scoring Agent output</p>
+    <p>Drug Discovery Agent &mdash; Normalization &amp; Scoring Agent output</p>
   </div>
 
   <div class="gene-tabs" id="tabs"></div>

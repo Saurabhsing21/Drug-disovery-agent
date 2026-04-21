@@ -344,6 +344,109 @@ class SummaryAgent:
 
         return cite_pattern.sub(_replace_citation, text)
 
+    @staticmethod
+    def _section_key_from_heading(line: str) -> str | None:
+        m = re.match(r"^\s*##\s+(?:\d+\.\s+)?(.+?)\s*$", line)
+        if not m:
+            return None
+        return m.group(1).strip().lower()
+
+    @staticmethod
+    def _normalize_source_name(source: str) -> str:
+        raw = source.strip().lower()
+        if raw in {"open targets", "opentargets"}:
+            return "opentargets"
+        if raw in {"depmap"}:
+            return "depmap"
+        if raw in {"pharos"}:
+            return "pharos"
+        if raw in {"literature"}:
+            return "literature"
+        return raw
+
+    def _item_url(self, item: EvidenceRecord) -> str | None:
+        support = item.support if isinstance(item.support, dict) else {}
+        raw_url = support.get("url")
+        if isinstance(raw_url, str) and raw_url.strip():
+            return raw_url.strip()
+        if item.evidence_type == "literature_article":
+            pmcid = support.get("pmcid") or support.get("PMCID")
+            if isinstance(pmcid, str) and pmcid.strip():
+                return f"https://europepmc.org/article/PMC/{pmcid.strip().replace('PMC', '')}"
+            pmid = support.get("pmid") or support.get("PMID")
+            if isinstance(pmid, (str, int)) and str(pmid).strip():
+                return f"https://europepmc.org/article/MED/{str(pmid).strip()}"
+        return None
+
+    def _url_for_citation(self, *, source: str, trace_text: str, items: list[EvidenceRecord]) -> str | None:
+        source_norm = self._normalize_source_name(source)
+        trace_norm = trace_text.lower()
+        source_matches: list[EvidenceRecord] = []
+        for item in items:
+            item_source = self._normalize_source_name(self._source_display_for_item(item))
+            if item_source == source_norm:
+                source_matches.append(item)
+        if not source_matches:
+            return None
+
+        # Prefer a record whose trace label appears in the citation trace text.
+        for item in source_matches:
+            label = self._trace_label_for_item(item).lower()
+            if label and label in trace_norm:
+                url = self._item_url(item)
+                if url:
+                    return url
+
+        # Fall back to first URL-bearing record from that source.
+        for item in source_matches:
+            url = self._item_url(item)
+            if url:
+                return url
+        return None
+
+    def _linkify_inline_traceability_key_sections(self, markdown: str, items: list[EvidenceRecord]) -> str:
+        # Apply hyperlink-style citations only in high-impact narrative sections.
+        allowed_sections = {
+            "executive summary",
+            "integrated interpretation",
+            "evidence strength assessment",
+            "final conclusion",
+        }
+        pattern = re.compile(r"\(Source:\s*(?P<source>[^;()]+);\s*trace:\s*(?P<trace>[^)]+)\)")
+        lines = markdown.splitlines()
+        out: list[str] = []
+        in_allowed = False
+        in_appendix = False
+
+        for line in lines:
+            if re.match(r"^\s*#\s+Appendix A\b", line):
+                in_appendix = True
+                in_allowed = False
+                out.append(line)
+                continue
+
+            heading_key = self._section_key_from_heading(line)
+            if heading_key is not None:
+                in_allowed = (heading_key in allowed_sections) and not in_appendix
+                out.append(line)
+                continue
+
+            if not in_allowed or in_appendix:
+                out.append(line)
+                continue
+
+            def _replace(match: re.Match[str]) -> str:
+                source = match.group("source").strip()
+                trace = match.group("trace").strip()
+                url = self._url_for_citation(source=source, trace_text=trace, items=items)
+                if not url:
+                    return match.group(0)
+                return f"([Source: {source}]({url}); trace: {trace})"
+
+            out.append(pattern.sub(_replace, line))
+
+        return "\n".join(out)
+
     def _strip_narrative_evidence_id_columns(self, markdown: str) -> str:
         if "# Appendix A" in markdown:
             narrative, appendix = markdown.split("# Appendix A", 1)
@@ -509,6 +612,7 @@ class SummaryAgent:
         text = self._normalize_list_tables(markdown)
         text = self._normalize_report_consistency(text, items)
         text = self._rewrite_inline_traceability(text, items)
+        text = self._linkify_inline_traceability_key_sections(text, items)
         text = self._strip_narrative_evidence_id_columns(text)
         return text
 

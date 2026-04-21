@@ -20,11 +20,12 @@ from agents.plan_interface import apply_plan_decision
 from agents.provider_select import current_provider_selection, select_provider_once
 from agents.run_state_store import RunStateStore
 from agents.review_interface import apply_review_decision
-from agents.schema import CollectorRequest, EvidenceDossier, EvidenceRecord, SourceName
+from agents.schema import CollectorRequest, EvidenceDossier, EvidenceRecord, ReportJudgeScore, SourceName
 from agents.query_interpretation_agent import QueryInterpretationAgent, QueryInterpretationContext
 from agents.followup_agent import FollowupAgent, FollowupContext
 from agents.url_resource_fetcher import UrlResourceFetcher, extract_urls as extract_urls_from_text
 from agents.compare_report_agent import CompareReportAgent
+from agents.report_judge_agent import ReportJudgeAgent
 from ui_api.event_bus import BUS
 from ui_api.db import init_db
 from ui_api.saved_runs import (
@@ -44,6 +45,8 @@ from ui_api.models import (
     CompareReportResponse,
     FollowupInput,
     FollowupResponse,
+    JudgeRunInput,
+    JudgeRunResponse,
     PlanDecisionBody,
     RenameSavedRunInput,
     SaveRunInput,
@@ -170,6 +173,7 @@ def _saved_run_payload(run_id: str) -> dict[str, Any] | None:
         "scored_target": values.get("scored_target") if isinstance(values.get("scored_target"), dict) else None,
         "final_dossier": final_dossier,
         "evidence_graph": values.get("evidence_graph") if isinstance(values.get("evidence_graph"), dict) else None,
+        "judge_score": values.get("judge_score") if isinstance(values.get("judge_score"), dict) else getattr(values.get("judge_score"), "model_dump", lambda mode: None)(mode="json") if hasattr(values.get("judge_score"), "model_dump") else values.get("judge_score"),
     }
 
 
@@ -541,6 +545,87 @@ def _evidence_index_from_records(records: list[EvidenceRecord], *, max_items: in
             }
         )
     return out
+
+
+def _judge_payload_from_run_state_or_dossier(run_id: str) -> tuple[CollectorRequest, str, list[EvidenceRecord]]:
+    persisted = RunStateStore.load_latest(run_id)
+    values = (persisted.values if persisted is not None else {}) or {}
+    query_raw = values.get("query") if isinstance(values.get("query"), dict) else None
+    report = values.get("explanation") if isinstance(values.get("explanation"), str) else None
+    items_raw = values.get("normalized_items") if isinstance(values.get("normalized_items"), list) else None
+
+    if query_raw and report and items_raw:
+        try:
+            request = CollectorRequest.model_validate(query_raw)
+            items = [EvidenceRecord.model_validate(item) for item in items_raw]
+            if items:
+                return request, report, items
+        except Exception:
+            pass
+
+    layout = artifact_layout(run_id)
+    dossier_path = layout["dossier"]
+    try:
+        with open(dossier_path, "r") as f:
+            dossier = EvidenceDossier.model_validate(json.load(f))
+    except FileNotFoundError as exc:
+        if persisted is not None:
+            raise HTTPException(
+                status_code=409,
+                detail="AI Judge is available after report generation with verified evidence. Please wait for the run to finish.",
+            ) from exc
+        raise HTTPException(status_code=404, detail=f"Run not found for run_id `{run_id}`") from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Failed to load dossier for run_id `{run_id}`: {exc}") from exc
+
+    report = (dossier.summary_markdown or "").strip()
+    items = list(dossier.verified_evidence or [])
+    if not report or not items:
+        raise HTTPException(
+            status_code=409,
+            detail="AI Judge is available after report generation with verified evidence. Please wait for the run to finish.",
+        )
+    return dossier.query, report, items
+
+
+def _persist_judge_score(run_id: str, judge_score: ReportJudgeScore) -> None:
+    persisted = RunStateStore.load_latest(run_id)
+    if persisted is None:
+        return
+    RunStateStore.write_latest(
+        run_id,
+        stage="judge_report_manual",
+        state=persisted.values,
+        update={"judge_score": judge_score.model_dump(mode="json")},
+        next_stages=persisted.next,
+        status=persisted.status,
+        error=persisted.error,
+    )
+
+
+@app.post("/api/runs/{run_id}/judge", response_model=JudgeRunResponse)
+async def rerun_ai_judge(run_id: str, body: JudgeRunInput) -> JudgeRunResponse:
+    BUS.ensure_run(run_id)
+    request, markdown_report, items = _judge_payload_from_run_state_or_dossier(run_id)
+    judge_agent = ReportJudgeAgent(model=body.model_override or request.model_override)
+
+    try:
+        score = await judge_agent.decide(
+            request=request,
+            markdown_report=markdown_report,
+            items=items,
+        )
+    except Exception as exc:  # noqa: BLE001
+        # Manual recheck should be non-fatal and return structured feedback.
+        score = judge_agent.error_result(error=str(exc))
+
+    _persist_judge_score(run_id, score)
+    BUS.publish(
+        run_id,
+        "run_judged",
+        {"run_id": run_id, "judge_score": score.model_dump(mode="json")},
+    )
+    return JudgeRunResponse.model_validate(score.model_dump(mode="json"))
 
 
 @app.post("/api/runs/{run_id}/followup", response_model=FollowupResponse)

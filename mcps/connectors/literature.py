@@ -210,6 +210,7 @@ class LiteratureConnector(CollectorConnector):
                         "gene_in_abstract": _has_gene_in_abstract(paper),
                         "original_rank_by_cited_sort": orig_rank,
                         "query": query_string,
+                        "url": f"https://europepmc.org/article/MED/{pmid}" if pmid else None,
                     },
                     summary=(
                         f"Europe PMC article rank {idx}/{limit} for {request.gene_symbol}: "

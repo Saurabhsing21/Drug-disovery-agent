@@ -26,6 +26,7 @@ class SavedRun(Base):
     scored_target: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     final_dossier: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     evidence_graph: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    judge_score: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import os
 import sys
+from pathlib import Path
 from typing import Iterable
 
 from rich.console import Console
@@ -13,6 +14,8 @@ from rich.table import Table
 from dotenv import load_dotenv
 
 from agents.graph import CollectionPaused
+from agents.artifact_store import artifact_layout, artifact_root
+from agents.provider_select import select_provider_once
 from agents.schema import ReviewDecisionStatus, SourceName
 from cli.run import resume_query, run_query, submit_review
 
@@ -54,7 +57,7 @@ def _parse_review_decision(raw_decision: str) -> ReviewDecisionStatus:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cli", description="Agent4Target CLI")
+    parser = argparse.ArgumentParser(prog="cli", description="Drug Discovery Agent CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     run_parser = subparsers.add_parser("run", help="Run a single query")
@@ -79,6 +82,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--objective", metavar="TEXT", default=None)
     run_parser.add_argument("--run-id", metavar="RUN_ID", default=None)
     run_parser.add_argument("--no-ui", action="store_true", help="Disable Rich live UI")
+    run_parser.add_argument("--no-llm", action="store_true", help="Disable live LLM calls (deterministic fallbacks)")
+    run_parser.add_argument("--print-artifacts", action="store_true", help="Print artifact paths at end")
 
     score_parser = subparsers.add_parser("score", help="Score only (no LLM summary)")
     score_parser.add_argument("--gene", "-g", required=True, metavar="SYMBOL")
@@ -87,6 +92,10 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("--no-ui", action="store_true", help="Disable Rich live UI")
 
     subparsers.add_parser("repl", help="Start interactive REPL loop")
+    subparsers.add_parser("doctor", help="Print runtime/provider configuration diagnostics")
+
+    artifacts_parser = subparsers.add_parser("artifacts", help="Print artifact paths for a run id")
+    artifacts_parser.add_argument("--run-id", required=True, metavar="RUN_ID")
 
     review_parser = subparsers.add_parser("review", help="Record a human review decision")
     review_parser.add_argument("--run-id", required=True, metavar="RUN_ID")
@@ -147,7 +156,39 @@ def main() -> None:
         asyncio.run(repl_loop())
         return
 
+    if args.command == "doctor":
+        try:
+            selection = asyncio.run(select_provider_once())
+        except Exception as exc:  # noqa: BLE001
+            print(f"[Error] doctor failed: {exc}")
+            sys.exit(1)
+        print("Provider selection:")
+        print(selection.as_dict())
+        print("Models:")
+        print(
+            {
+                "A4T_OPENAI_FAST_MODEL": os.getenv("A4T_OPENAI_FAST_MODEL"),
+                "A4T_OPENAI_REASONING_MODEL": os.getenv("A4T_OPENAI_REASONING_MODEL"),
+                "A4T_SYSTEM_FAST_MODEL": os.getenv("A4T_SYSTEM_FAST_MODEL"),
+                "A4T_SYSTEM_REASONING_MODEL": os.getenv("A4T_SYSTEM_REASONING_MODEL"),
+                "A4T_LLM_CALLS_ENABLED": os.getenv("A4T_LLM_CALLS_ENABLED"),
+            }
+        )
+        return
+
+    if args.command == "artifacts":
+        root = artifact_root().resolve()
+        layout = artifact_layout(args.run_id)
+        print(f"Artifact root: {root}")
+        for key, raw in layout.items():
+            p = Path(raw)
+            exists = p.exists()
+            print(f"{key}: {p} ({'exists' if exists else 'missing'})")
+        return
+
     if args.command == "run":
+        if args.no_llm:
+            os.environ["A4T_LLM_CALLS_ENABLED"] = "0"
         sources = _parse_sources(args.sources)
         try:
             asyncio.run(
@@ -163,6 +204,7 @@ def main() -> None:
                     run_id=args.run_id,
                     save_markdown=args.save_markdown,
                     no_ui=args.no_ui or args.output == "minimal",
+                    print_artifacts=args.print_artifacts,
                 )
             )
         except CollectionPaused:

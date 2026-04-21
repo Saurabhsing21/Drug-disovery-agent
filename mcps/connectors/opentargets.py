@@ -108,6 +108,7 @@ class OpenTargetsConnector(CollectorConnector):
                             "absence": True,
                             "evidence_count": association_count,
                             "requested_disease": request.disease_id,
+                            "url": f"https://platform.opentargets.org/target/{target.get('id') or ensembl_id}",
                         },
                         summary=(
                             f"Open Targets returned no disease associations for {request.gene_symbol}; "
@@ -168,6 +169,7 @@ class OpenTargetsConnector(CollectorConnector):
                         "evidence_count": association_count,
                         "disease_name": disease_name,
                         "requested_disease": request.disease_id,
+                        "url": f"https://platform.opentargets.org/evidence/{target.get('id') or ensembl_id}/{disease_id}" if disease_id else f"https://platform.opentargets.org/target/{target.get('id') or ensembl_id}",
                     },
                     summary=(
                         f"Open Targets association score for {request.gene_symbol}"

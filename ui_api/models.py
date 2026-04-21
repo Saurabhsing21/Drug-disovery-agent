@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from agents.schema import (
     CollectorRequest,
     PlanDecisionInput,
+    ReportJudgeScore,
     ReviewDecisionInput,
     SourceName,
 )
@@ -91,6 +92,16 @@ class FollowupResponse(BaseModel):
     target_switch_detected: bool = False
     extracted_gene_symbol: str | None = None
     used_urls: list[str] = Field(default_factory=list)
+
+
+class JudgeRunInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    model_override: str | None = None
+
+
+class JudgeRunResponse(ReportJudgeScore):
+    pass
 
 
 class RenameSavedRunInput(BaseModel):

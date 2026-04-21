@@ -114,6 +114,7 @@ async def run_query(
     run_id: str | None = None,
     save_markdown: bool = False,
     no_ui: bool = False,
+    print_artifacts: bool = False,
 ) -> None:
     request = build_collector_request(
         gene_symbol=gene,
@@ -135,6 +136,7 @@ async def run_query(
         runner=run_collection_graph,
         save_markdown=save_markdown,
         no_ui=no_ui,
+        print_artifacts=print_artifacts,
     )
 
 
@@ -143,6 +145,7 @@ async def resume_query(
     output: str = "table",
     save: str | None = None,
     no_ui: bool = False,
+    print_artifacts: bool = False,
 ) -> None:
     snapshot = await get_collection_state(run_id)
     state_values = snapshot.values
@@ -161,6 +164,7 @@ async def resume_query(
         runner=resume_collection_graph,
         save_markdown=False,
         no_ui=no_ui,
+        print_artifacts=print_artifacts,
     )
 
 
@@ -192,6 +196,7 @@ async def _execute_query(
     runner,
     save_markdown: bool,
     no_ui: bool,
+    print_artifacts: bool,
 ) -> None:
     if no_ui or output == "minimal":
         os.environ["A4T_NO_UI"] = "1"
@@ -315,10 +320,15 @@ async def _execute_query(
 
     display.stop()
 
+    if print_artifacts:
+        print(f"run_id={result.run_id}")
+        for key, path in layout.items():
+            print(f"artifact.{key}={path}")
+
     if output == "json":
         print(json.dumps(result_dict, indent=2))
     if output == "minimal":
-        print(f"Completed in {elapsed:.2f}s")
+        print(f"run_id={result.run_id} completed_in_s={elapsed:.2f}")
 
 
 def _print_failure(stage: str | None, error: str) -> None:

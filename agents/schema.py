@@ -420,6 +420,7 @@ class EvidenceDossier(BaseModel):
     graph_snapshot: EvidenceGraphSnapshot
     review_decision: ReviewDecision | None = None
     summary_markdown: str = ""
+    judge_score: ReportJudgeScore | None = None
     artifact_path: str | None = None
     artifacts: dict[str, str] = Field(default_factory=dict)
     handoff_payload: Phase2HandoffPayload
@@ -449,6 +450,17 @@ class RobustnessSummary(BaseModel):
     minimum_coverage_met: bool = False
     failed_or_skipped_sources: list[str] = Field(default_factory=list)
     verdict: str
+
+
+class ReportJudgeScore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    overall_score: int = Field(default=0, ge=0, le=100)
+    faithfulness_score: int = Field(default=0, ge=0, le=10, description="How well claims match the given evidence.")
+    formatting_score: int = Field(default=0, ge=0, le=10, description="How well the report adheres to formatting requirements.")
+    passed: bool = Field(default=False, description="Whether the report meets the minimum quality bar.")
+    feedback: list[str] = Field(default_factory=list, description="Specific critiques or hallucinations found.")
+    model_used: str | None = None
 
 
 class LLMSummary(BaseModel):

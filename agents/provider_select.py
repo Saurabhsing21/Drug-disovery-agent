@@ -22,6 +22,9 @@ def _system_provider_pref() -> str:
 def _openai_key_present() -> bool:
     return bool(os.getenv("OPENAI_API_KEY", "").strip())
 
+def _probe_disabled() -> bool:
+    return os.getenv("A4T_PROVIDER_PROBE_ENABLED", "1").strip().lower() in {"0", "false", "no"}
+
 
 async def _probe_openai(*, model: str) -> tuple[bool, str | None]:
     if not _openai_key_present():
@@ -90,11 +93,15 @@ async def select_provider_once() -> ProviderSelection:
             return _CACHED
 
         system_pref = _system_provider_pref()
-        
-        skip_openai = (system_pref == "openai" and _openai_key_present())
 
-        openai_model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
-        openai_ok, openai_err = (True, None) if skip_openai else await _probe_openai(model=openai_model)
+        # Default: probe even if an API key is present. This avoids the common failure mode
+        # where the key exists but the configured/default model is not accessible (403 model_not_found).
+        # Allow opt-out for environments where probing is undesirable.
+        openai_model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-5-mini").strip() or "gpt-5-mini"
+        if _probe_disabled():
+            openai_ok, openai_err = (True, None) if _openai_key_present() else (False, "OPENAI_API_KEY not set")
+        else:
+            openai_ok, openai_err = await _probe_openai(model=openai_model)
 
         selected: str | None = None
         if system_pref == "openai" and openai_ok:

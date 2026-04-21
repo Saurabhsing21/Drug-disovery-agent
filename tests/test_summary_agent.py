@@ -168,3 +168,56 @@ def test_summary_agent_postprocess_converts_list_tables_and_harmonizes_consisten
     assert "(Source: DepMap; trace: global dependency metrics, Appendix A3.1)" in processed
     assert "(Source: Open Targets; trace: non-small cell lung carcinoma association, Appendix A4)" in processed
     assert "(Source: DepMap; trace: detailed records in Appendix A3.2)" in processed
+
+
+def test_summary_agent_postprocess_linkifies_citations_only_in_key_sections() -> None:
+    agent = SummaryAgent()
+    ot_item = EvidenceRecord(
+        evidence_id="opentargets:ENSG:test:disease_association:abc123",
+        source=SourceName.OPENTARGETS,
+        target_id="ENSG",
+        target_symbol="EGFR",
+        disease_id="EFO_0000311",
+        evidence_type="disease_association",
+        raw_value=0.9,
+        normalized_score=0.9,
+        confidence=0.9,
+        summary="NSCLC association",
+        support={
+            "disease_name": "non-small cell lung carcinoma",
+            "url": "https://platform.opentargets.org/evidence/ENSG/EFO_0000311",
+        },
+        provenance=Provenance(provider="opentargets", endpoint="/test", query={"gene_symbol": "EGFR"}),
+    )
+    lit_item = EvidenceRecord(
+        evidence_id="literature:EGFR:PMID:12345:NA:literature_article:def456",
+        source=SourceName.LITERATURE,
+        target_id="EGFR:PMID:12345",
+        target_symbol="EGFR",
+        disease_id="EFO_0000311",
+        evidence_type="literature_article",
+        raw_value=0.8,
+        normalized_score=0.8,
+        confidence=0.8,
+        summary="Lead paper",
+        support={"pmid": "12345"},
+        provenance=Provenance(provider="literature", endpoint="/test", query={"gene_symbol": "EGFR"}),
+    )
+    raw = "\n".join(
+        [
+            "## 1. Executive Summary",
+            "Primary claim (Source: Open Targets; trace: non-small cell lung carcinoma association, Appendix A4).",
+            "## 5. Literature",
+            "Lead paper (Source: Literature; trace: PMID 12345, Appendix A5).",
+            "## 6. Integrated Interpretation",
+            "Cross-source synthesis (Source: Open Targets; trace: non-small cell lung carcinoma association, Appendix A4).",
+            "## 9. Final Conclusion",
+            "Conclusion anchor (Source: Open Targets; trace: non-small cell lung carcinoma association, Appendix A4).",
+            "Literature anchor (Source: Literature; trace: PMID 12345, Appendix A5).",
+        ]
+    )
+
+    processed = agent._postprocess_report_markdown(raw, [ot_item, lit_item])
+    assert "([Source: Open Targets](https://platform.opentargets.org/evidence/ENSG/EFO_0000311); trace: non-small cell lung carcinoma association, Appendix A4)" in processed
+    assert "([Source: Literature](https://europepmc.org/article/MED/12345); trace: PMID 12345, Appendix A5)" in processed
+    assert "Lead paper (Source: Literature; trace: PMID 12345, Appendix A5)." in processed

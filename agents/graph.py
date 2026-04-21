@@ -42,6 +42,7 @@ from agents.working_memory import persist_working_memory_snapshot
 from agents.run_state_store import RunStateStore
 from agents.scoring_agent import NormalizationScoringAgent
 from agents.scoring_schemas import SourceEvidence
+from agents.report_judge_agent import ReportJudgeAgent
 from agents.visualize_evidence import generate_evidence_html
 
 from .schema import (
@@ -76,6 +77,7 @@ COLLECTOR_NODE_SEQUENCE = [
     "assess_sufficiency",
     "build_evidence_graph",
     "generate_explanation",
+    "judge_report",
     "supervisor_decide",
     "prepare_review_brief",
     "human_review_gate",
@@ -94,7 +96,8 @@ STATIC_NEXT_STAGE = {
     "score_evidence": "assess_sufficiency",
     "assess_sufficiency": "build_evidence_graph",
     "build_evidence_graph": "generate_explanation",
-    "generate_explanation": "supervisor_decide",
+    "generate_explanation": "judge_report",
+    "judge_report": "supervisor_decide",
     "prepare_review_brief": "human_review_gate",
     "emit_dossier": "__end__",
 }
@@ -922,6 +925,52 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             llm_summary=llm_summary,
         ), "summary_agent_report": summary_report}
 
+    async def judge_report_node(state: CollectorState):
+        query = state["query"]
+        markdown_report = state.get("explanation", "")
+        items = state.get("normalized_items", [])
+
+        judge_agent = ReportJudgeAgent(model=query.model_override)
+        judge_error: str | None = None
+        try:
+            judge_score = await judge_agent.decide(
+                request=query,
+                markdown_report=markdown_report,
+                items=items,
+            )
+        except Exception as exc:  # noqa: BLE001
+            # Judge failures must not fail the entire run; keep report emission alive.
+            judge_error = str(exc)
+            judge_score = judge_agent.error_result(error=judge_error)
+
+        _notify_progress(
+            progress_cb,
+            "agent_report",
+            run_id=query.run_id,
+            stage_name="judge_report",
+            agent_name="report_judge_agent",
+            generation_mode="llm_judge",
+            model_used=judge_score.model_used,
+            summary=f"Report judge evaluation passed: {judge_score.passed} (Score: {judge_score.overall_score})",
+        )
+        
+        judge_report = AgentReport(
+            agent_name="report_judge_agent",
+            stage_name="judge_report",
+            summary=f"Report judge evaluation passed: {judge_score.passed} (Score: {judge_score.overall_score})",
+            decisions=[f"Faithfulness {judge_score.faithfulness_score}/10, Formatting {judge_score.formatting_score}/10"],
+            risks=judge_score.feedback + ([f"Judge error: {judge_error}"] if judge_error else []),
+            next_actions=["Forward evaluation to supervisor layer."],
+            structured_payload=judge_score.model_dump(mode="json"),
+            generation_mode="llm_judge",
+            model_used=judge_score.model_used,
+        )
+        
+        return {
+            "judge_score": judge_score,
+            "judge_agent_report": judge_report,
+        }
+
     async def supervisor_decide_node(state: CollectorState):
         query = state["query"]
         review_iteration_count = state.get("review_iteration_count", 0)
@@ -1003,6 +1052,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
                 *([state["conflict_agent_report"]] if state.get("conflict_agent_report") is not None else []),
                 *([state["graph_agent_report"]] if state.get("graph_agent_report") is not None else []),
                 *([state["summary_agent_report"]] if state.get("summary_agent_report") is not None else []),
+                *([state["judge_agent_report"]] if state.get("judge_agent_report") is not None else []),
             ],
         )
         _notify_progress(
@@ -1191,6 +1241,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             graph_snapshot=state["evidence_graph"],
             review_decision=state.get("review_decision"),
             summary_markdown=state.get("explanation", ""),
+            judge_score=state.get("judge_score"),
             artifacts={
                 "plan": state["plan"].artifact_path or "",
                 "graph": state["evidence_graph"].artifact_path or "",
@@ -1231,6 +1282,7 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
     graph_builder.add_node("assess_sufficiency", cast(Any, _wrap_stage("assess_sufficiency", assess_sufficiency_node, progress_cb=progress_cb)))
     graph_builder.add_node("build_evidence_graph", cast(Any, _wrap_stage("build_evidence_graph", build_evidence_graph_node, progress_cb=progress_cb)))
     graph_builder.add_node("generate_explanation", cast(Any, _wrap_stage("generate_explanation", generate_explanation_node, progress_cb=progress_cb)))
+    graph_builder.add_node("judge_report", cast(Any, _wrap_stage("judge_report", judge_report_node, progress_cb=progress_cb)))
     graph_builder.add_node("supervisor_decide", cast(Any, _wrap_stage("supervisor_decide", supervisor_decide_node, progress_cb=progress_cb)))
     graph_builder.add_node("prepare_review_brief", cast(Any, _wrap_stage("prepare_review_brief", prepare_review_brief_node, progress_cb=progress_cb)))
     graph_builder.add_node("human_review_gate", cast(Any, _wrap_stage("human_review_gate", human_review_gate_node, progress_cb=progress_cb)))
@@ -1275,7 +1327,6 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
             "build_evidence_graph": "build_evidence_graph",
         },
     )
-    graph_builder.add_edge("build_evidence_graph", "generate_explanation")
     
     def route_after_supervisor(state: CollectorState) -> str:
         supervisor_decision = state.get("supervisor_decision")
@@ -1360,7 +1411,9 @@ def build_collector_graph(progress_cb: Callable[[str, dict[str, Any]], None] | N
         )
         return "prepare_review_brief"
 
-    graph_builder.add_edge("generate_explanation", "supervisor_decide")
+    graph_builder.add_edge("build_evidence_graph", "generate_explanation")
+    graph_builder.add_edge("generate_explanation", "judge_report")
+    graph_builder.add_edge("judge_report", "supervisor_decide")
     graph_builder.add_conditional_edges(
         "supervisor_decide",
         route_after_supervisor,

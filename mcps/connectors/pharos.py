@@ -129,6 +129,7 @@ class PharosConnector(CollectorConnector):
                         "novelty": novelty,
                         "ligand_total": ligand_total,
                         "associated_disease": d_name,
+                        "url": f"https://pharos.nih.gov/targets/{target_symbol}",
                     },
                     summary=(
                         f"PHAROS annotations for {target_symbol} relating to {d_name or 'target'}"

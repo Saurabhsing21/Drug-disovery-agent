@@ -49,6 +49,8 @@ function stageLabel(stage: string): string {
       return "Building evidence graph";
     case "generate_explanation":
       return "Writing answer";
+    case "judge_report":
+      return "Running AI judge";
     case "human_review_gate":
       return "Waiting for final review";
     case "emit_dossier":
@@ -70,6 +72,7 @@ function deriveStages(log: Array<{ event: string; data: Record<string, unknown> 
     "assess_sufficiency",
     "build_evidence_graph",
     "generate_explanation",
+    "judge_report",
     "supervisor_decide",
     "prepare_review_brief",
     "human_review_gate",

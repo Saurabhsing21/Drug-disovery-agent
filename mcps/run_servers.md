@@ -1,6 +1,6 @@
 # Source-specific MCP servers
 
-Agent4Target uses a hybrid MCP setup:
+Drug Discovery Agent uses a hybrid MCP setup:
 
 - Internal source MCP servers (stdio):
 

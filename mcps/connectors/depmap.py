@@ -122,6 +122,7 @@ class DepMapConnector(CollectorConnector):
                     "column_name": col_name,
                     "screen_type": "CRISPRGeneEffect",
                     "data_release": "DepMap 25Q3",
+                    "url": f"https://depmap.org/portal/gene/{request.gene_symbol}",
                 },
                 summary=(
                     f"DepMap CRISPR gene effect for {request.gene_symbol}: "
@@ -163,6 +164,7 @@ class DepMapConnector(CollectorConnector):
                                 "column_name": col_name,
                                 "screen_type": "CRISPRGeneEffect",
                                 "data_release": "DepMap 25Q3",
+                                "url": f"https://depmap.org/portal/gene/{request.gene_symbol}",
                             },
                             summary=(
                                 f"Cell-line dependency for {request.gene_symbol} in {cell_line_id}: "

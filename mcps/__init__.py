@@ -1,1 +1,1 @@
-"""MCP server modules for Agent4Target evidence collection."""
+"""MCP server modules for Drug Discovery Agent evidence collection."""

@@ -54,12 +54,13 @@ def get_system_prompt() -> str:
         "RULE 1: INLINE TRACEABILITY (MANDATORY)\n"
         "----------------------------------\n\n"
         "EVERY important claim MUST include an inline citation.\n"
-        "Narrative citations MUST be human-readable.\n"
-        "Format: (Source: <source>; trace: <record description>, Appendix <section>)\n\n"
+        "Narrative citations MUST be human-readable and use Markdown links if a URL is provided in the evidence support data.\n"
+        "Format: ([Source: <source>](<url>); trace: <record description>, Appendix <section>)\n"
+        "If no URL is provided, format as: (Source: <source>; trace: <record description>, Appendix <section>)\n\n"
         "Raw canonical evidence_id values belong in Appendix A tables, not in the narrative prose.\n\n"
         "CORRECT:\n"
         "  'KRAS shows strong association with non-small cell lung carcinoma "
-        "(Source: Open Targets; trace: non-small cell lung carcinoma association, Appendix A4).'\n\n"
+        "([Source: Open Targets](https://platform.opentargets.org/evidence/...); trace: non-small cell lung carcinoma association, Appendix A4).'\n\n"
         "WRONG (FORBIDDEN):\n"
         "  'KRAS shows strong disease associations.' — NO source traceability, INVALID.\n\n"
         "Every key quantitative or categorical claim MUST point to a readable source citation.\n"
@@ -510,4 +511,42 @@ def get_user_prompt_compare(title_a: str, title_b: str, report_a: str, report_b:
         "Report B:\n"
         f"{report_b}\n\n"
         "Use the required output format exactly."
+    )
+
+
+def get_system_prompt_judge() -> str:
+    return (
+        "You are an AI Judge specializing in evaluating biomedical evidence reports.\n\n"
+        "Your task is to review a generated 'Therapeutic Target Evidence Summary Report' against the "
+        "raw JSON evidence items that were used to generate it.\n\n"
+        "### SCORING CRITERIA\n\n"
+        "1. **Faithfulness (0-10):** Does the report hallucinate or speculate? "
+        "Every biological claim MUST be traceable back to the provided JSON. "
+        "A score of <5 means major hallucinations. True faithfulness is strict.\n"
+        "2. **Formatting (0-10):** Does the report strictly follow the required 9 sections? "
+        "Are all inline citations formatted as markdown hyperlinks (e.g. `([Source: Name](url); trace...)`) when a URL is available in the evidence JSON?\n"
+        "3. **Overall Score (0-100):** Combining both the nuance of the evidence and formatting.\n\n"
+        "### RULES\n"
+        "- Respond ONLY with a valid JSON document.\n"
+        "- JSON schema must strictly match:\n"
+        "  {\n"
+        "    \"overall_score\": <int>,\n"
+        "    \"faithfulness_score\": <int>,\n"
+        "    \"formatting_score\": <int>,\n"
+        "    \"passed\": <bool>,\n"
+        "    \"feedback\": [ \"<string>\", ... ]\n"
+        "  }\n"
+        "- Set `passed` to true ONLY if `faithfulness_score` >= 8 AND `formatting_score` >= 8.\n"
+        "- If you detect a hallucinated claim or a hallucinated inline trace, add a clear critique to `feedback`.\n"
+    )
+
+def get_user_prompt_judge(markdown_report: str, evidence_items_json: str) -> str:
+    return (
+        "### RAW EVIDENCE INPUT (Ground Truth)\n"
+        f"{evidence_items_json}\n\n"
+        "---\n\n"
+        "### GENERATED REPORT TO EVALUATE\n"
+        f"{markdown_report}\n\n"
+        "---\n\n"
+        "Provide your evaluation strictly as the requested JSON object."
     )

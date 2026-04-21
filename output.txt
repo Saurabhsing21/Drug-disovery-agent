@@ -1,0 +1,115 @@
+[10:25:24] · Initializing pipeline...
+[10:25:24] ⟶ Stage start: Validate Input
+[10:25:24] · input_validation_agent report
+[10:25:24] ✓ Stage complete: Validate Input
+[10:25:24] ⟶ Validate Input -> Plan Collection
+[10:25:24] ⟶ Stage start: Plan Collection
+[10:25:24] · planning_agent report
+[10:25:24] ✓ Stage complete: Plan Collection
+[10:25:24] ⟶ Plan Collection -> Plan Review Gate
+[10:25:24] ⟶ Stage start: Plan Review Gate
+[10:25:24] ✓ Stage complete: Plan Review Gate
+[10:25:24] ⟶ Plan Review Gate -> Collect Sources Parallel
+[10:25:24] ⟶ Stage start: Collect Sources Parallel
+[10:25:24] → Connecting to depmap MCP...
+[10:25:24] → Connecting to pharos MCP...
+[10:25:24] → Connecting to open_targets MCP...
+[10:25:24] → Connecting to literature MCP...
+[04/20/26 10:25:25] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/20/26 10:25:25] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/20/26 10:25:25] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/20/26 10:25:25] INFO     Processing request of type            server.py:727
+                             CallToolRequest                                    
+[04/20/26 10:25:26] INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+[DepMap] Loading CRISPRGeneEffect.csv into memory… (one-time per session)
+                    INFO     HTTP Request: POST                  _client.py:1740
+                             https://api.platform.opentargets.or                
+                             g/api/v4/graphql "HTTP/1.1 200 OK"                 
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[04/20/26 10:25:26] INFO     HTTP Request: POST                  _client.py:1740
+                             https://pharos-api.ncats.io/graphql                
+                             "HTTP/1.1 200 OK"                                  
+                    INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[10:25:26] ✓ open_targets complete
+[10:25:26] ✓ pharos complete
+[04/20/26 10:25:26] INFO     HTTP Request: GET                   _client.py:1740
+                             https://www.ebi.ac.uk/europepmc/web                
+                             services/rest/search?query=%22EGFR%                
+                             22+AND+%22LUNG+CARCINOMA%22&format=                
+                             json&pageSize=75&resultType=core&so                
+                             rt=CITED+desc "HTTP/1.1 200 OK"                    
+[04/20/26 10:25:28] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[10:25:28] ✓ literature complete
+[DepMap] Loaded 1169 cell lines × 18435 genes into memory ✅
+[04/20/26 10:25:43] INFO     Processing request of type            server.py:727
+                             ListToolsRequest                                   
+[10:25:43] ✓ depmap complete
+[10:25:43] ✓ Stage complete: Collect Sources Parallel
+[10:25:43] ⟶ Collect Sources Parallel -> Normalize Evidence
+[10:25:43] ⟶ Stage start: Normalize Evidence
+[10:25:43] · normalization_agent report
+[10:25:43] ✓ Stage complete: Normalize Evidence
+[10:25:43] ⟶ Normalize Evidence -> Verify Evidence
+[10:25:43] ⟶ Stage start: Verify Evidence
+[10:25:43] ✓ Stage complete: Verify Evidence
+[10:25:43] ⟶ Verify Evidence -> Analyze Conflicts
+[10:25:43] ⟶ Stage start: Analyze Conflicts
+[10:25:43] ✓ Stage complete: Analyze Conflicts
+[10:25:43] ⟶ Analyze Conflicts -> Score Evidence
+[10:25:43] ⟶ Stage start: Score Evidence
+[10:25:43] ✓ Stage complete: Score Evidence
+[10:25:43] ⟶ Score Evidence -> Assess Sufficiency
+[10:25:43] ⟶ Stage start: Assess Sufficiency
+[10:25:43] ✓ Stage complete: Assess Sufficiency
+[10:25:43] ⟶ Assess Sufficiency -> Build Evidence Graph
+[10:25:43] ⟶ Assess Sufficiency -> Build Evidence Graph
+[10:25:43] ⟶ Stage start: Build Evidence Graph
+[10:25:43] ✓ Stage complete: Build Evidence Graph
+[10:25:43] ⟶ Build Evidence Graph -> Generate Explanation
+[10:25:43] ⟶ Stage start: Generate Explanation
+[10:25:43] · summary_agent report
+[10:25:43] ✓ Stage complete: Generate Explanation
+[10:25:43] ⟶ Generate Explanation -> Judge Report
+[10:25:43] ⟶ Stage start: Judge Report
+[10:25:47] ✗ Stage error: Judge Report
+[10:25:47] ✗ report_judge_agent failed: All LLM candidates (OpenAI) failed. 
+provider=openai role=reasoning timeout_s=300.0 gpt-4o-mini: 
+PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project 
+`proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4o-mini`', 
+'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | 
+gpt-4o: PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project 
+`proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4o`', 'type':
+'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | 
+gpt-4-turbo: PermissionDeniedError: Error code: 403 - {'error': {'message': 
+'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model 
+`gpt-4-turbo`', 'type': 'invalid_request_error', 'param': None, 'code': 
+'model_not_found'}} | gpt-4: PermissionDeniedError: Error code: 403 - {'error': 
+{'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to 
+model `gpt-4`', 'type': 'invalid_request_error', 'param': None, 'code': 
+'model_not_found'}}
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ Pipeline failed at unknown: report_judge_agent failed: All LLM candidates    │
+│ (OpenAI) failed. provider=openai role=reasoning timeout_s=300.0 gpt-4o-mini: │
+│ PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project      │
+│ `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model                │
+│ `gpt-4o-mini`', 'type': 'invalid_request_error', 'param': None, 'code':      │
+│ 'model_not_found'}} | gpt-4o: PermissionDeniedError: Error code: 403 -       │
+│ {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have │
+│ access to model `gpt-4o`', 'type': 'invalid_request_error', 'param': None,   │
+│ 'code': 'model_not_found'}} | gpt-4-turbo: PermissionDeniedError: Error      │
+│ code: 403 - {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU`   │
+│ does not have access to model `gpt-4-turbo`', 'type':                        │
+│ 'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | gpt-4: │
+│ PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project      │
+│ `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4`',      │
+│ 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+[Error] report_judge_agent failed: All LLM candidates (OpenAI) failed. provider=openai role=reasoning timeout_s=300.0 gpt-4o-mini: PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4o-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | gpt-4o: PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4o`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | gpt-4-turbo: PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4-turbo`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}} | gpt-4: PermissionDeniedError: Error code: 403 - {'error': {'message': 'Project `proj_L6dGNiHpteDQzuPCR2Ol3bEU` does not have access to model `gpt-4`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}

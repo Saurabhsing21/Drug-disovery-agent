@@ -74,7 +74,7 @@ def _build_request(params: BundleCollectInput, force_source: SourceName | None =
 
 def _as_markdown(result_dict: dict[str, Any]) -> str:
     lines = [
-        f"# Agent4Target evidence bundle for {result_dict['query']['gene_symbol']}",
+        f"# Drug Discovery Agent evidence bundle for {result_dict['query']['gene_symbol']}",
         f"- run_id: {result_dict['run_id']}",
         f"- disease_id: {result_dict['query'].get('disease_id') or 'none'}",
         f"- items: {len(result_dict.get('items', []))}",

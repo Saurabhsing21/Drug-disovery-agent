@@ -68,11 +68,12 @@ def forced_provider() -> str | None:
 
 
 def default_reasoning_model() -> str:
-    return os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-4o")
+    # Prefer GPT-5 family by default (2026+); override in env if your project only has older models.
+    return os.getenv("A4T_OPENAI_REASONING_MODEL", "gpt-5")
 
 
 def default_fast_model() -> str:
-    return os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
+    return os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-5-mini")
 
 
 def _csv_env(name: str) -> list[str]:
@@ -83,12 +84,28 @@ def _csv_env(name: str) -> list[str]:
 def fallback_models(provider: str, *, role: str) -> list[str]:
     """Return fallback model candidates for a provider/role."""
     # OpenAI-only fallbacks
+    if role == "judge":
+        models = _csv_env("A4T_OPENAI_JUDGE_FALLBACK_MODELS")
+        if models:
+            return models
+        return ["gpt-5-mini"]
     models = _csv_env("A4T_OPENAI_FALLBACK_MODELS")
     if models:
         return models
     if role == "reasoning":
-        return ["gpt-4o", "gpt-4-turbo", "gpt-4"]
-    return ["gpt-4o-mini", "gpt-4o"]
+        return ["gpt-5", "gpt-4o", "gpt-4-turbo", "gpt-4"]
+    return ["gpt-5-mini", "gpt-4o-mini", "gpt-4o"]
+
+
+def _maybe_model_access_hint(errors: list[str]) -> str:
+    joined = " ".join(errors).lower()
+    if "does not have access to model" in joined or "model_not_found" in joined:
+        return (
+            " Hint: your OpenAI project may not have access to the default models. "
+            "Set A4T_OPENAI_FAST_MODEL / A4T_OPENAI_REASONING_MODEL (or A4T_SYSTEM_FAST_MODEL / "
+            "A4T_SYSTEM_REASONING_MODEL) in .env."
+        )
+    return ""
 
 
 def ensure_llm_available(agent_name: str) -> None:
@@ -116,7 +133,7 @@ def get_llm(model: str, temperature: float = 0.0, **kwargs: Any) -> ChatOpenAI:
     # Map any non-OpenAI or unknown model name to the default OpenAI fast model.
     m_lower = model.lower()
     if "gpt-" not in m_lower and not m_lower.startswith("o"):
-        model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-4o-mini")
+        model = os.getenv("A4T_OPENAI_FAST_MODEL", "gpt-5-mini")
     return ChatOpenAI(
         model=model,
         temperature=temperature,
@@ -390,6 +407,7 @@ async def ainvoke_with_fallbacks(
         "All LLM candidates (OpenAI) failed. "
         + f"provider={provider} role={role} timeout_s={_timeout_s()} "
         + " | ".join(errors[:5])
+        + _maybe_model_access_hint(errors[:5])
     )
 
 
@@ -460,4 +478,5 @@ async def structured_ainvoke_with_fallbacks(
         "All LLM candidates (OpenAI) failed. "
         + f"provider={provider} role={role} timeout_s={_timeout_s()} "
         + " | ".join(errors[:5])
+        + _maybe_model_access_hint(errors[:5])
     )

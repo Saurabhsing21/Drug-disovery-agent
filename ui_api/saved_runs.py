@@ -56,6 +56,7 @@ def get_saved_run(saved_id: str) -> dict[str, Any] | None:
             "scored_target": row.scored_target,
             "final_dossier": row.final_dossier,
             "evidence_graph": row.evidence_graph,
+            "judge_score": row.judge_score,
             "created_at": row.created_at.isoformat(),
             "updated_at": row.updated_at.isoformat(),
         }

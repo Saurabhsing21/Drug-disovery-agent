@@ -48,7 +48,17 @@ export type SavedRunDetail = SavedRunSummary & {
   scored_target?: Record<string, unknown> | null;
   final_dossier?: Record<string, unknown> | null;
   evidence_graph?: Record<string, unknown> | null;
+  judge_score?: JudgeScore | null;
   updated_at?: string;
+};
+
+export type JudgeScore = {
+  overall_score: number;
+  faithfulness_score: number;
+  formatting_score: number;
+  passed: boolean;
+  feedback: string[];
+  model_used?: string | null;
 };
 
 export type SavedComparisonSummary = {

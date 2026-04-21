@@ -90,6 +90,15 @@ export function useRunEvents(runId: string | null) {
       }
       onAny("run_completed")(evt);
     });
+    es.addEventListener("run_judged", async (evt) => {
+      try {
+        const snap = await getState(runId);
+        setSnapshot(snap);
+      } catch {
+        // ignore
+      }
+      onAny("run_judged")(evt);
+    });
     es.addEventListener("run_failed", (evt) => {
       setPaused(null);
       try {

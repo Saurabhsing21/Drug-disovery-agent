@@ -8,6 +8,7 @@ import { CompareReportPanel } from "@/components/CompareReportPanel";
 import { MarkdownReport } from "@/components/MarkdownReport";
 import { EvidenceDashboardFrame } from "@/components/EvidenceDashboardFrame";
 import { SourcesGrid } from "@/components/SourcesGrid";
+import { JudgeScorecardPanel } from "@/components/JudgeScorecardPanel";
 import { PlanApprovalPanel } from "@/components/PlanApprovalPanel";
 import { ReviewDecisionPanel } from "@/components/ReviewDecisionPanel";
 import { useRunEvents } from "@/hooks/useRunEvents";
@@ -21,11 +22,12 @@ import {
   getSavedRun,
   listSavedComparisons,
   listSavedRuns,
+  postRunJudge,
   postFollowup,
   renameSavedRun,
   saveRun,
 } from "@/lib/api";
-import type { SavedComparisonDetail, SavedComparisonSummary, SavedRunDetail, SavedRunSummary, SourceName } from "@/lib/types";
+import type { JudgeScore, SavedComparisonDetail, SavedComparisonSummary, SavedRunDetail, SavedRunSummary, SourceName } from "@/lib/types";
 import { Github } from "lucide-react";
 
 const ALL_SOURCES: { key: SourceName; label: string }[] = [
@@ -1030,6 +1032,9 @@ function RunView({
   const [followups, setFollowups] = useState<Array<{ q: string; a: string }>>([]);
   const [compareLinkCopied, setCompareLinkCopied] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [judgeBusy, setJudgeBusy] = useState(false);
+  const [judgeError, setJudgeError] = useState<string | null>(null);
+  const [judgeResult, setJudgeResult] = useState<JudgeScore | null>(null);
   const answer = useMemo(() => answerFromSnapshot(snapshot), [snapshot]);
   const reportHasDashboard = typeof answer === "string" && answer.includes("[[EVIDENCE_DASHBOARD]]");
   const followupEnabled = Boolean(answer && answer.trim().length > 0);
@@ -1067,6 +1072,11 @@ function RunView({
   }, [isSaved, runId]);
 
   const saveDisabled = !runId || runState !== "completed" || !answer;
+
+  useEffect(() => {
+    const fromState = (snapshot?.values?.judge_score as JudgeScore | null | undefined) ?? null;
+    setJudgeResult(fromState);
+  }, [snapshot?.values]);
 
   const onSaveReport = async () => {
     if (!runId || saveDisabled) return;
@@ -1153,6 +1163,36 @@ function RunView({
                 onTightenObjective={onTightenObjective}
                 onCancelRun={onCancelRun}
               />
+
+              {answer ? (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="text-xs font-semibold text-neutral-300">Report quality check</div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setJudgeBusy(true);
+                        setJudgeError(null);
+                        try {
+                          const score = await postRunJudge(runId);
+                          setJudgeResult(score);
+                        } catch (err) {
+                          setJudgeError(err instanceof Error ? err.message : "Failed to run AI Judge");
+                        } finally {
+                          setJudgeBusy(false);
+                        }
+                      }}
+                      disabled={judgeBusy}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-neutral-200 hover:bg-white/10 disabled:opacity-60"
+                    >
+                      {judgeBusy ? "Running AI Judge..." : "Run AI Judge again"}
+                    </button>
+                  </div>
+                  {judgeError ? <div className="mb-3 text-xs text-red-300">{judgeError}</div> : null}
+                  <JudgeScorecardPanel score={judgeResult} />
+                  {!judgeResult ? <div className="text-xs text-neutral-400">AI Judge result will appear here after the run or after recheck.</div> : null}
+                </div>
+              ) : null}
 
               {followups.length ? (
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-neutral-100">
