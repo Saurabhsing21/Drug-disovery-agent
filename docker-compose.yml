@@ -24,6 +24,8 @@ services:
       A4T_SOURCE_DISPATCH_MODE: ${A4T_SOURCE_DISPATCH_MODE:-sequential}
       A4T_MCP_PYTHON_BIN: python3
     volumes:
+      - ./agents:/app/agents
+      - ./ui_api:/app/ui_api
       - artifacts-data:/data/artifacts
     restart: unless-stopped
 
